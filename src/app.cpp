@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <memory>
 
@@ -35,19 +36,21 @@ class Application {
   void run() {
     Logger::log("Running application...");
 
+    auto last_time = std::chrono::high_resolution_clock::now();
+
     while (!m_Window.shouldClose()) {
       m_Window.pollEvents();
+
+      auto current_time = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<float> delta_time = current_time - last_time;
+      last_time = current_time;
 
       // Start ImGui frame
       m_ImGuiLayer.beginFrame();
 
-      m_SceneManager.onUpdate(0.0f);
+      m_SceneManager.onUpdate(delta_time.count());
       m_SceneManager.onRender();
       m_SceneManager.onImGuiRender();
-
-      // m_CurrentScene->onUpdate(0.0f);
-      // m_CurrentScene->onRender();
-      // m_CurrentScene->onImGuiRender();  // why seperate from onRender?
 
       // Render ImGui
       m_ImGuiLayer.endFrame();
