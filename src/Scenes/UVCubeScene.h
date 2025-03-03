@@ -17,8 +17,8 @@
 class UVCubeScene : public SceneBase {
  public:
   UVCubeScene() : SceneBase("UV Cube Scene"), m_CameraController(getDefaultCameraProps()) {}
-  void onAttach(int width, int height) override {
-    m_CameraController.getProps().aspect = (float)width / (float)height;
+  void onAttach() override {
+    // m_CameraController.getProps().aspect = (float)width / (float)height;
 
     m_Shader.init(getFilePath("/shaders/simple_uv.vert"), getFilePath("/shaders/simple_uv.frag"));
 
@@ -168,19 +168,7 @@ class UVCubeScene : public SceneBase {
     }
 
     // TODO: put this in camera controller
-    ImGui::Text("Camera Manip :: ");
-    ImGui::SameLine();
-    if (ImGui::RadioButton("None", m_CameraController.m_Mode == CAMERA_MODE_NONE)) {
-      m_CameraController.m_Mode = CAMERA_MODE_NONE;
-    }
-    ImGui::SameLine();
-    if (ImGui::RadioButton("Fly Mode", m_CameraController.m_Mode == CAMERA_MODE_FREE)) {
-      m_CameraController.m_Mode = CAMERA_MODE_FREE;
-    }
-    ImGui::SameLine();
-    if (ImGui::RadioButton("Orbit Mode", m_CameraController.m_Mode == CAMERA_MODE_ORBIT)) {
-      m_CameraController.m_Mode = CAMERA_MODE_ORBIT;
-    }
+    m_CameraController.onImGuiRender();
 
     ImGui::End();
   };

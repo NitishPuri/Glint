@@ -15,7 +15,7 @@
 class QuadScene : public SceneBase {
  public:
   QuadScene() : SceneBase("Quad Scene") {}
-  void onAttach(int width, int height) override {
+  void onAttach() override {
     glDisable(GL_DEPTH_TEST);
     m_Shader.init(getFilePath("/shaders/quad.vert"), getFilePath("/shaders/quad.frag"));
 

@@ -9,7 +9,7 @@
 
 class SceneManager {
  public:
-  SceneManager(int width, int height) : m_Width(width), m_Height(height) {}
+  SceneManager() {}
   ~SceneManager() {}
 
   void registerScene(const std::string& name, std::function<std::shared_ptr<SceneBase>()> scene) {
@@ -28,7 +28,7 @@ class SceneManager {
     if (it != m_Scenes.end()) {
       // create scene
       m_CurrentScene = it->second();
-      m_CurrentScene->onAttach(m_Width, m_Height);
+      m_CurrentScene->onAttach();
     }
   }
 
@@ -76,15 +76,12 @@ class SceneManager {
   }
 
   void onWindowResize(int width, int height) {
-    m_Width = width;
-    m_Height = height;
     if (m_CurrentScene) {
       m_CurrentScene->onWindowResize(width, height);
     }
   }
 
  private:
-  int m_Width, m_Height;
   std::unordered_map<std::string, std::function<std::shared_ptr<SceneBase>()>> m_Scenes;
   std::shared_ptr<SceneBase> m_CurrentScene;
 };

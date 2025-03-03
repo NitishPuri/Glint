@@ -4,37 +4,30 @@
 
 #include "Renderer.h"
 
+//
+#define ARCBALL_CAMERA_IMPLEMENTATION
+#include "arcball_camera/arcball_camera.h"
+
 void CameraController::update(float deltaTime) {
-  processInputs();
+  processInputs(deltaTime);
   m_ViewProjection = getViewProjectionMatrix(m_Props);
 }
 
-void CameraController::processInputs() {
+void CameraController::processInputs(float dt) {
   ImGuiIO& io = ImGui::GetIO();
+
+  // update aspect ratio
+  m_Props.aspect = io.DisplaySize.x / io.DisplaySize.y;
 
   ImVec2 mouse_drag = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right, 0.01f);
   ImGui::ResetMouseDragDelta(ImGuiMouseButton_Right);
 
-  static int cntr = 0;
-  cntr++;
-
-  //   if (cntr % 100 == 0) {
-  //     Logger::log("Cam position: ", m_Props.position);
-  //     Logger::log("Cam  target: ", m_Props.target);
-
-  //     glm::vec3 direction = m_Props.position - m_Props.target;
-  //     auto radius = glm::length(direction);
-  //     auto theta = atan2(direction.z, direction.x);
-  //     auto phi = acos(direction.y / radius);
-
-  //     Logger::log("Cam  direction: ", direction);
-  //     Logger::log("Cam  radius: ", radius);
-  //     Logger::log("Cam  theta: ", theta, " phi : ", phi);
-  //   }
-
-  if (mouse_drag.x == 0 && mouse_drag.y == 0) {
+  if (!(io.MouseDown[1] || io.MouseDown[2] || (fabs(io.MouseWheel) > 0.01f))) {
     return;
   }
+
+  static int cntr = 0;
+  cntr++;
 
   auto speed = 0.1f;
   auto dx = mouse_drag.x * speed;
@@ -54,14 +47,7 @@ void CameraController::processInputs() {
     auto theta = atan2(direction.z, direction.x);
     auto phi = acos(direction.y / radius);
 
-    // TODO: Better camera conmtrols needed
-    //  if (cntr % 10 == 0) {
-    //    Logger::log("Orbit mode position: ", m_Props.position);
-    //    Logger::log("Orbit mode target: ", m_Props.target);
-    //    Logger::log("Orbit mode direction: ", direction);
-    //    Logger::log("Orbit mode radius: ", radius);
-    //    Logger::log("Orbit mode theta: ", theta, " phi : ", phi);
-    //  }
+    // TODO: arcball_camera_update is great, make better use of it with keyboard, remove other two modes
 
     theta += dx;
     phi = std::clamp(phi + dy, 0.1f, 3.13f);
@@ -69,16 +55,47 @@ void CameraController::processInputs() {
     direction[0] = radius * sin(phi) * cos(theta);
     direction[1] = radius * cos(phi);
     direction[2] = radius * sin(phi) * sin(theta);
-
     m_Props.position = m_Props.target + direction;
 
-    // if (cntr % 10 == 0) {
-    //   Logger::log("Orbit mode dx: ", dx, " dy: ", dy);
-    //   Logger::log("Orbit mode theta: ", theta, " phi : ", phi);
-    //   Logger::log("Orbit mode direction: ", direction);
-    //   Logger::log("Orbit mode position: ", m_Props.position);
-    //   Logger::log("Orbit mode target: ", m_Props.target);
-    //   Logger::log("DONE");
-    // }
+  } else if (m_Mode == CAMERA_MODE_ARCBALL) {
+    float eye[3] = {m_Props.position.x, m_Props.position.y, m_Props.position.z};
+    float target[3] = {m_Props.target.x, m_Props.target.y, m_Props.target.z};
+    float up[3] = {m_Props.up.x, m_Props.up.y, m_Props.up.z};
+
+    // float view[16];  // TODO: Can just use this, instead of recalculating view matrix.
+
+    auto speed = 0.1f;
+    arcball_camera_update(eye, target, up, nullptr,                                            //
+                          dt, 0.1f, 0.1f, 1.0f,                                                //
+                          io.DisplaySize.x, io.DisplaySize.y,                                  //
+                          io.MousePosPrev.x, io.MousePos.x, io.MousePosPrev.y, io.MousePos.y,  //
+                          io.MouseDown[2], io.MouseDown[1], int(io.MouseWheel), 0);
+    m_Props.position = glm::vec3(eye[0], eye[1], eye[2]);
+    m_Props.target = glm::vec3(target[0], target[1], target[2]);
+    m_Props.up = glm::vec3(up[0], up[1], up[2]);
   }
+}
+
+void CameraController::onImGuiRender() {
+  ImGui::Begin("Camera Control Panel");
+
+  ImGui::Text("Camera Manip :: ");
+  ImGui::SameLine();
+  if (ImGui::RadioButton("None", m_Mode == CAMERA_MODE_NONE)) {
+    m_Mode = CAMERA_MODE_NONE;
+  }
+  ImGui::SameLine();
+  if (ImGui::RadioButton("Free Mode", m_Mode == CAMERA_MODE_FREE)) {
+    m_Mode = CAMERA_MODE_FREE;
+  }
+  ImGui::SameLine();
+  if (ImGui::RadioButton("Orbit Mode", m_Mode == CAMERA_MODE_ORBIT)) {
+    m_Mode = CAMERA_MODE_ORBIT;
+  }
+  ImGui::SameLine();
+  if (ImGui::RadioButton("Arcball Mode", m_Mode == CAMERA_MODE_ARCBALL)) {
+    m_Mode = CAMERA_MODE_ARCBALL;
+  }
+
+  ImGui::End();
 }

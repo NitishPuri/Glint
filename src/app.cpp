@@ -18,10 +18,7 @@ const int WINDOW_HEIGHT = 600;
 
 class Application {
  public:
-  Application()
-      : m_Window(WINDOW_WIDTH, WINDOW_HEIGHT, "Glint"),
-        m_ImGuiLayer(m_Window),
-        m_SceneManager(WINDOW_WIDTH, WINDOW_HEIGHT) {}
+  Application() : m_Window(WINDOW_WIDTH, WINDOW_HEIGHT, "Glint"), m_ImGuiLayer(m_Window) {}
   ~Application() {}
 
   void init() {

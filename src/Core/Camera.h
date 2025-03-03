@@ -31,6 +31,7 @@ enum CameraMode {
   CAMERA_MODE_NONE,
   CAMERA_MODE_FREE,
   CAMERA_MODE_ORBIT,
+  CAMERA_MODE_ARCBALL,
 };
 
 class CameraController {
@@ -43,9 +44,11 @@ class CameraController {
 
   CameraProps& getProps() { return m_Props; }
   CameraMode m_Mode = CAMERA_MODE_NONE;
-  
+
+  void onImGuiRender();
+
  private:
-  void processInputs();
+  void processInputs(float dt);
 
   CameraProps m_Props;
   glm::mat4 m_ViewProjection;
