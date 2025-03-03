@@ -39,19 +39,14 @@ class CameraController {
 
   void update(float deltaTime);
 
-  void onMouseMove(float dx, float dy);
-  //   void onMouseButton(int button, bool pressed);
-  //   void onKey(int key, bool pressed);
-
   glm::mat4 getViewProjection() const { return m_ViewProjection; }
 
+  CameraProps& getProps() { return m_Props; }
+  CameraMode m_Mode = CAMERA_MODE_NONE;
+  
+ private:
   void processInputs();
 
-  CameraMode m_Mode = CAMERA_MODE_NONE;
-
-  CameraProps& getProps() { return m_Props; }
-
- private:
   CameraProps m_Props;
   glm::mat4 m_ViewProjection;
 

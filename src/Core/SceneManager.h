@@ -5,7 +5,6 @@
 #include <unordered_map>
 
 #include "Renderer.h"
-
 #include "SceneBase.h"
 
 class SceneManager {
@@ -77,6 +76,8 @@ class SceneManager {
   }
 
   void onWindowResize(int width, int height) {
+    m_Width = width;
+    m_Height = height;
     if (m_CurrentScene) {
       m_CurrentScene->onWindowResize(width, height);
     }

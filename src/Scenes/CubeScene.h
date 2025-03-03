@@ -17,6 +17,7 @@ class CubeScene : public SceneBase {
   CubeScene() : SceneBase("Cube Scene") {}
   void onAttach(int width, int height) override {
     m_aspect = (float)width / (float)height;
+    Logger::log("Aspect ratio: ", m_aspect);
 
     m_Shader.init(getFilePath("/shaders/simple.vert"), getFilePath("/shaders/simple.frag"));
 
@@ -132,7 +133,10 @@ class CubeScene : public SceneBase {
     ImGui::End();
   };
 
-  void onWindowResize(int width, int height) override { m_aspect = (float)width / (float)height; }
+  void onWindowResize(int width, int height) override {
+    m_aspect = (float)width / (float)height;
+    Logger::log("Aspect ratio: onWindowResize ", m_aspect);
+  }
 
  private:
   float m_ClearColor[4] = {0.1f, 0.1f, 0.1f, 1.0f};
