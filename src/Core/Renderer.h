@@ -8,6 +8,10 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#ifndef ROOT
+#define ROOT ""
+#endif
+
 #ifdef _DEBUG
 #define ASSERT(x) \
   if (!(x)) __debugbreak();
