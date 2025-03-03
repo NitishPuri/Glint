@@ -11,6 +11,10 @@
 #include <sstream>
 #include <string>
 
+
+//
+#include <glm/glm.hpp>
+
 #define CONSOLE_LOG 1
 
 class Logger {
@@ -82,3 +86,28 @@ class Logger {
 
 // std::ofstream Logger::log_file_;
 // std::mutex Logger::mutex_;
+
+// Overload the << operator for glm::vec3
+inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
+  os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
+  return os;
+}
+
+// Overload the << operator for glm::vec4
+inline std::ostream& operator<<(std::ostream& os, const glm::vec4& vec) {
+  os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << ")";
+  return os;
+}
+
+// Overload the << operator for glm::mat4
+inline std::ostream& operator<<(std::ostream& os, const glm::mat4& mat) {
+  os << "\n";
+  for (int i = 0; i < 4; ++i) {
+    os << "| ";
+    for (int j = 0; j < 4; ++j) {
+      os << mat[i][j] << " ";
+    }
+    os << "|\n";
+  }
+  return os;
+}

@@ -132,8 +132,6 @@ class UVCubeScene : public SceneBase {
 
     // 2nd attribute buffer : UV
     glEnableVertexAttribArray(1);
-    // glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-    // m_ColorBuffer->bind();
     m_UVBuffer->bind();
     glVertexAttribPointer(1,         // attribute. No particular reason for 1, but must match the layout in the shader.
                           2,         // size
