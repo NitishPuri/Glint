@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "Logger.h"
 #include "Renderer.h"
 #include "glm/gtc/type_ptr.hpp"
 
@@ -21,7 +22,7 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
     VertexShaderCode = sstr.str();
     VertexShaderStream.close();
   } else {
-    std::cout << "Cant open vertex shader source, " << vertex_file_path << std::endl;
+    Logger::error("Cant open vertex shader source, ", vertex_file_path);
     getchar();
     return 0;
   }
@@ -40,7 +41,7 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
   int InfoLogLength;
 
   // Compile Vertex Shader
-  printf("Compiling shader : %s\n", vertex_file_path);
+  Logger::log("Compiling shader : ", vertex_file_path);
   char const* VertexSourcePointer = VertexShaderCode.c_str();
   glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
   glCompileShader(VertexShaderID);
@@ -55,7 +56,7 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
   }
 
   // Compile Fragment Shader
-  printf("Compiling shader : %s\n", fragment_file_path);
+  Logger::log("Compiling shader : ", fragment_file_path);
   char const* FragmentSourcePointer = FragmentShaderCode.c_str();
   glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
   glCompileShader(FragmentShaderID);
@@ -70,7 +71,7 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
   }
 
   // Link the program
-  printf("Linking program\n");
+  Logger::log("Linking program");
   GLuint ProgramID = glCreateProgram();
   glAttachShader(ProgramID, VertexShaderID);
   glAttachShader(ProgramID, FragmentShaderID);
@@ -104,11 +105,9 @@ void Shader::init(const std::string& vertexPath, const std::string& fragmentPath
 
 Shader::~Shader() { glDeleteProgram(m_ID); }
 
-void Shader::bind() const { GLCall(glUseProgram(m_ID));
-}
+void Shader::bind() const { GLCall(glUseProgram(m_ID)); }
 
-void Shader::unbind() const { GLCall(glUseProgram(0));
-}
+void Shader::unbind() const { GLCall(glUseProgram(0)); }
 
 void Shader::setUniform1i(const std::string& name, int value) { glUniform1i(getUniformLocation(name), value); }
 
@@ -122,7 +121,7 @@ int Shader::getUniformLocation(const std::string& name) {
   if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) return m_UniformLocationCache[name];
 
   int location = glGetUniformLocation(m_ID, name.c_str());
-  if (location == -1) printf("Warning: uniform '%s' doesn't exist!\n", name.c_str());
+  if (location == -1) Logger::log("Warning: uniform '", name, "' doesn't exist!");
 
   m_UniformLocationCache[name] = location;
   return location;

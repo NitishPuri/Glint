@@ -46,23 +46,11 @@ class CubeScene : public SceneBase {
         0.302f, 0.455f, 0.848f, 0.225f, 0.587f, 0.040f, 0.517f, 0.713f, 0.338f, 0.053f, 0.959f, 0.120f, 0.393f, 0.621f,
         0.362f, 0.673f, 0.211f, 0.457f, 0.820f, 0.883f, 0.371f, 0.982f, 0.099f, 0.879f};
 
-    // unsigned int indices[] = {0, 1, 2, 2, 3, 0};
-
     // order matters here
     m_VertexArray = std::make_unique<VertexArray>();
 
     m_VertexBuffer = std::make_unique<VertexBuffer>(vertex_buffer_data, sizeof(vertex_buffer_data));
     m_ColorBuffer = std::make_unique<VertexBuffer>(color_buffer_data, sizeof(color_buffer_data));
-
-    // m_IndexBuffer = std::make_unique<IndexBuffer>(indices, 6);
-
-    // Position attribute
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0));
-    GLCall(glEnableVertexAttribArray(0));
-
-    // Color attribute
-    GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(2 * sizeof(float))));
-    GLCall(glEnableVertexAttribArray(1));
   }
 
   void onDetach() override {
@@ -128,7 +116,6 @@ class CubeScene : public SceneBase {
                           (void *)0  // array buffer offset
     );
 
-    // GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
     GLCall(glDrawArrays(GL_TRIANGLES, 0, 12 * 3));
 
     glDisableVertexAttribArray(0);
