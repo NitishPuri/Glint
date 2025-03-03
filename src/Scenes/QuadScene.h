@@ -16,7 +16,7 @@ class QuadScene : public SceneBase {
  public:
   QuadScene() : SceneBase("Quad Scene") {}
   void onAttach() override {
-    m_Shader.init(getFilePath("/src/shaders/quad.vert"), getFilePath("/src/shaders/quad.frag"));
+    m_Shader.init(getFilePath("/shaders/quad.vert"), getFilePath("/shaders/quad.frag"));
 
     // Quad Data
     // x, y, r, g, b

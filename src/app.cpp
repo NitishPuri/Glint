@@ -9,6 +9,7 @@
 #include "Core/Window.h"
 
 //
+#include "Scenes/CubeScene.h"
 #include "Scenes/QuadScene.h"
 
 class Application {
@@ -31,6 +32,7 @@ class Application {
     // TODO: This should be done at the place of scene definition somehow,
     // a singleton registry or something for scenes?
     m_SceneManager.registerScene("Quad", []() { return std::make_shared<QuadScene>(); });
+    m_SceneManager.registerScene("Cube", []() { return std::make_shared<CubeScene>(); });
   }
 
   void run() {
