@@ -9,7 +9,7 @@ struct CameraProps {
   glm::vec3 position, target, up;
 };
 
-CameraProps getDefaultCameraProps() {
+inline CameraProps getDefaultCameraProps() {
   CameraProps props;
   props.fov = 45.0f;
   props.aspect = 4.0f / 3.0f;
@@ -27,15 +27,31 @@ inline glm::mat4 getViewProjectionMatrix(const CameraProps& props) {
   return Projection * View;
 }
 
+enum CameraMode {
+  CAMERA_MODE_NONE,
+  CAMERA_MODE_FREE,
+  CAMERA_MODE_ORBIT,
+};
+
 class CameraController {
  public:
   CameraController(const CameraProps& props) : m_Props(props) { m_ViewProjection = getViewProjectionMatrix(m_Props); }
 
-  void update(float deltaTime) { m_ViewProjection = getViewProjectionMatrix(m_Props); }
+  void update(float deltaTime);
+
+  void onMouseMove(float dx, float dy);
+  //   void onMouseButton(int button, bool pressed);
+  //   void onKey(int key, bool pressed);
 
   glm::mat4 getViewProjection() const { return m_ViewProjection; }
+
+  void processInputs();
+
+  CameraMode m_Mode = CAMERA_MODE_NONE;
 
  private:
   CameraProps m_Props;
   glm::mat4 m_ViewProjection;
+
+  //   bool m_FirstMouse = true;
 };

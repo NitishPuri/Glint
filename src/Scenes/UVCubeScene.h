@@ -166,6 +166,22 @@ class UVCubeScene : public SceneBase {
       }
       ImGui::EndCombo();
     }
+
+    // TODO: put this in camera controller
+    ImGui::Text("Camera Manip :: ");
+    ImGui::SameLine();
+    if (ImGui::RadioButton("None", m_CameraController.m_Mode == CAMERA_MODE_NONE)) {
+      m_CameraController.m_Mode = CAMERA_MODE_NONE;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Fly Mode", m_CameraController.m_Mode == CAMERA_MODE_FREE)) {
+      m_CameraController.m_Mode = CAMERA_MODE_FREE;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Orbit Mode", m_CameraController.m_Mode == CAMERA_MODE_ORBIT)) {
+      m_CameraController.m_Mode = CAMERA_MODE_ORBIT;
+    }
+
     ImGui::End();
   };
 
