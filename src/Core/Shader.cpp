@@ -7,9 +7,9 @@
 #include "glad/glad.h"
 //
 #include "GLFW/glfw3.h"
+#include "glm/gtc/type_ptr.hpp"
 
-GLuint LoadShaders(const char* vertex_file_path,
-                   const char* fragment_file_path) {
+GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path) {
   // Create the shaders
   GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
   GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -23,8 +23,7 @@ GLuint LoadShaders(const char* vertex_file_path,
     VertexShaderCode = sstr.str();
     VertexShaderStream.close();
   } else {
-    std::cout << "Cant open vertex shader source, " << vertex_file_path
-              << std::endl;
+    std::cout << "Cant open vertex shader source, " << vertex_file_path << std::endl;
     getchar();
     return 0;
   }
@@ -53,8 +52,7 @@ GLuint LoadShaders(const char* vertex_file_path,
   glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
   if (InfoLogLength > 0) {
     std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
-    glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL,
-                       &VertexShaderErrorMessage[0]);
+    glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
     printf("%s\n", &VertexShaderErrorMessage[0]);
   }
 
@@ -69,8 +67,7 @@ GLuint LoadShaders(const char* vertex_file_path,
   glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
   if (InfoLogLength > 0) {
     std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
-    glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL,
-                       &FragmentShaderErrorMessage[0]);
+    glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
     printf("%s\n", &FragmentShaderErrorMessage[0]);
   }
 
@@ -86,8 +83,7 @@ GLuint LoadShaders(const char* vertex_file_path,
   glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
   if (InfoLogLength > 0) {
     std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
-    glGetProgramInfoLog(ProgramID, InfoLogLength, NULL,
-                        &ProgramErrorMessage[0]);
+    glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
     printf("%s\n", &ProgramErrorMessage[0]);
   }
 
@@ -100,13 +96,11 @@ GLuint LoadShaders(const char* vertex_file_path,
   return ProgramID;
 }
 
-Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
-    : m_ID(0) {
+Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) : m_ID(0) {
   m_ID = LoadShaders(vertexPath.c_str(), fragmentPath.c_str());
 }
 
-void Shader::init(const std::string& vertexPath,
-                  const std::string& fragmentPath) {
+void Shader::init(const std::string& vertexPath, const std::string& fragmentPath) {
   m_ID = LoadShaders(vertexPath.c_str(), fragmentPath.c_str());
 }
 
@@ -116,21 +110,19 @@ void Shader::bind() const { glUseProgram(m_ID); }
 
 void Shader::unbind() const { glUseProgram(0); }
 
-void Shader::setUniform1i(const std::string& name, int value) {
-  glUniform1i(getUniformLocation(name), value);
-}
+void Shader::setUniform1i(const std::string& name, int value) { glUniform1i(getUniformLocation(name), value); }
 
-void Shader::setUniform1f(const std::string& name, float value) {
-  glUniform1f(getUniformLocation(name), value);
+void Shader::setUniform1f(const std::string& name, float value) { glUniform1f(getUniformLocation(name), value); }
+
+void Shader::setUniformMat4(const std::string& name, const glm::mat4& matrix) {
+  glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
 int Shader::getUniformLocation(const std::string& name) {
-  if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
-    return m_UniformLocationCache[name];
+  if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) return m_UniformLocationCache[name];
 
   int location = glGetUniformLocation(m_ID, name.c_str());
-  if (location == -1)
-    printf("Warning: uniform '%s' doesn't exist!\n", name.c_str());
+  if (location == -1) printf("Warning: uniform '%s' doesn't exist!\n", name.c_str());
 
   m_UniformLocationCache[name] = location;
   return location;

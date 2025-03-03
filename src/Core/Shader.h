@@ -3,6 +3,9 @@
 #include <string>
 #include <unordered_map>
 
+#include "Renderer.h"
+#include "glm/glm.hpp"
+
 class Shader {
  public:
   Shader() {}
@@ -16,13 +19,15 @@ class Shader {
 
   void setUniform1i(const std::string& name, int value);
   void setUniform1f(const std::string& name, float value);
-  void setUniform3f(const std::string& name, float x, float y, float z);
-  void setUniform4f(const std::string& name, float x, float y, float z,
-                    float w);
-  //   void setUniformMat4(const std::string& name, const glm::mat4& matrix);
+
+  // void setUniform3f(const std::string& name, float x, float y, float z) {}
+  // void setUniform4f(const std::string& name, float x, float y, float z, float w) {}
+  void setUniformMat4(const std::string& name, const glm::mat4& matrix);
+
+  GLuint getID() const { return m_ID; }
 
  private:
-  unsigned int m_ID;
+  GLuint m_ID;
   std::unordered_map<std::string, int> m_UniformLocationCache;
   int getUniformLocation(const std::string& name);
 };

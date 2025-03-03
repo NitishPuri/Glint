@@ -1,6 +1,12 @@
+// core
 #include "Core/SceneBase.h"
 #include "Core/Shader.h"
 #include "Core/VertexBuffer.h"
+
+// glm
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 class QuadScene : public SceneBase {
  public:
@@ -48,7 +54,7 @@ class QuadScene : public SceneBase {
 
   void onUpdate(float deltaTime) override {
     // Rotate Quad
-    m_Rotation += 0.05f * deltaTime;
+    m_Rotation += m_RotationSpeed * deltaTime;
     if (m_Rotation > 360.0f) m_Rotation -= 360.0f;
   };
 
@@ -57,25 +63,28 @@ class QuadScene : public SceneBase {
     glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // glm::mat4 transform = glm::mat4(1.0f);
-    // transform = glm::rotate(transform, glm::radians(m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::rotate(transform, glm::radians(m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 
     // Render Quad
-    // glUseProgram(shaderProgram);
     m_Shader.bind();
-    // glUniformMatrix4fv(glGetUniformLocation(m_Shader.m_ID, "transform")) glBindVertexArray(VAO);
+    m_Shader.setUniformMat4("transform", transform);
+
+    glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   };
 
   void onImGuiRender() override {
     ImGui::Begin("Quad Control Panel");
     ImGui::ColorEdit3("Quad Color", m_ClearColor);
+    ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, -10.0f, 10.0f);
     ImGui::Text("Press ESC to exit.");
     ImGui::End();
   };
 
  private:
   float m_ClearColor[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+  float m_RotationSpeed = 1.f;
   float m_Rotation = 0.0f;
 
   Shader m_Shader;

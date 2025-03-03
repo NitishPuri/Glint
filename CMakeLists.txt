@@ -6,6 +6,7 @@ set(NAME Glint)
 set(CMAKE_CXX_STANDARD 17)
 project(${NAME} VERSION 0.0.1)
 
+################## Dependencies ##################
 # GLFW
 set(GLFW_PATH ${PROJECT_SOURCE_DIR}/ext/glfw-3.4.bin.WIN64)
 set(GLFW_INCLUDE ${GLFW_PATH}/include)
@@ -20,6 +21,16 @@ file(GLOB_RECURSE IMGUI_SOURCES ${IMGUI_PATH}/*.cpp)
 set(GLAD_PATH ${PROJECT_SOURCE_DIR}/ext/glad)
 set(GLAD_INCLUDE ${GLAD_PATH}/include)
 file(GLOB_RECURSE GLAD_SOURCES ${GLAD_PATH}/src/*.c)
+
+# GLM
+set(GLM_PATH ${PROJECT_SOURCE_DIR}/ext/glm)
+set(GLM_INCLUDE ${GLM_PATH})
+################## Dependencies ##################
+
+
+
+################## Core ##################
+
 
 # Core
 # file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
@@ -47,4 +58,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${PROJECT_SOURCE_DIR}/ext
     ${GLAD_INCLUDE}
     ${GLFW_INCLUDE}
+    ${GLM_INCLUDE}
 )
+
+################## Core ##################

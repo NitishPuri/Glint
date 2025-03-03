@@ -30,7 +30,7 @@ class SceneManager {
   }
 
   void onUpdate(float deltaTime) {
-    Logger::log("SceneManager::onUpdate : ", deltaTime);
+    // Logger::log("SceneManager::onUpdate : ", deltaTime);
     if (m_CurrentScene) {
       m_CurrentScene->onUpdate(deltaTime);
     }

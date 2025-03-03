@@ -9,7 +9,7 @@
 #include "Core/Window.h"
 
 //
-#include "Scenes/BaseScene.h"
+#include "Scenes/QuadScene.h"
 
 class Application {
  public:
