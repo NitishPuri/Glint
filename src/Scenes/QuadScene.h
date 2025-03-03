@@ -16,7 +16,7 @@ class QuadScene : public SceneBase {
  public:
   QuadScene() : SceneBase("Quad Scene") {}
   void onAttach() override {
-    m_Shader.init("./src/shaders/quad.vert", "./src/shaders/quad.frag");
+    m_Shader.init(getFilePath("/src/shaders/quad.vert"), getFilePath("/src/shaders/quad.frag"));
 
     // Quad Data
     // x, y, r, g, b
@@ -29,15 +29,21 @@ class QuadScene : public SceneBase {
 
     unsigned int indices[] = {0, 1, 2, 2, 3, 0};
 
-    // glGenVertexArrays(1, &VAO);
-    // glGenBuffers(1, &VBO);
-    // glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
-    // glBindVertexArray(VAO);
+    glBindVertexArray(VAO);
 
-    m_VertexBuffer = std::make_unique<VertexBuffer>(vertices, sizeof(vertices));
-    m_IndexBuffer = std::make_unique<IndexBuffer>(indices, 6);
-    m_VertexArray = std::make_unique<VertexArray>();
+    // m_VertexBuffer = std::make_unique<VertexBuffer>(vertices, sizeof(vertices));
+    // m_IndexBuffer = std::make_unique<IndexBuffer>(indices, 6);
+    // m_VertexArray = std::make_unique<VertexArray>();
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Position attribute
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0));
@@ -49,9 +55,13 @@ class QuadScene : public SceneBase {
   }
 
   void onDetach() override {
-    m_VertexBuffer.reset();
-    m_IndexBuffer.reset();
-    m_VertexArray.reset();
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+
+    // m_VertexBuffer.reset();
+    // m_IndexBuffer.reset();
+    // m_VertexArray.reset();
   };
 
   void onUpdate(float deltaTime) override {
@@ -72,9 +82,9 @@ class QuadScene : public SceneBase {
     m_Shader.bind();
     m_Shader.setUniformMat4("transform", transform);
 
-    m_VertexArray->bind();
-    // glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // m_VertexArray->bind();
+    glBindVertexArray(VAO);
+    GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
   };
 
   void onImGuiRender() override {
@@ -92,9 +102,9 @@ class QuadScene : public SceneBase {
 
   Shader m_Shader;
 
-  std::unique_ptr<VertexBuffer> m_VertexBuffer;
-  std::unique_ptr<IndexBuffer> m_IndexBuffer;
-  std::unique_ptr<VertexArray> m_VertexArray;
+  // std::unique_ptr<VertexBuffer> m_VertexBuffer;
+  // std::unique_ptr<IndexBuffer> m_IndexBuffer;
+  // std::unique_ptr<VertexArray> m_VertexArray;
 
-  // GLuint VAO;
+  GLuint VBO, VAO, EBO;
 };

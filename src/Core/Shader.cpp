@@ -4,9 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "glad/glad.h"
-//
-#include "GLFW/glfw3.h"
+#include "Renderer.h"
 #include "glm/gtc/type_ptr.hpp"
 
 GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path) {
@@ -106,9 +104,11 @@ void Shader::init(const std::string& vertexPath, const std::string& fragmentPath
 
 Shader::~Shader() { glDeleteProgram(m_ID); }
 
-void Shader::bind() const { glUseProgram(m_ID); }
+void Shader::bind() const { GLCall(glUseProgram(m_ID));
+}
 
-void Shader::unbind() const { glUseProgram(0); }
+void Shader::unbind() const { GLCall(glUseProgram(0));
+}
 
 void Shader::setUniform1i(const std::string& name, int value) { glUniform1i(getUniformLocation(name), value); }
 
