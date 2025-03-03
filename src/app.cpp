@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 #include "Core/GuiLayer.h"
 #include "Core/Shader.h"
@@ -14,12 +15,14 @@ class Application {
     }
 
     m_ImGuiLayer.init();
+
+    m_CurrentScene = std::make_shared<QuadScene>();
   }
   ~Application() {}
 
   void run() {
-    Scene1 scene;
-    scene.onAttach();
+    // QuadScene scene;
+    m_CurrentScene->onAttach();
 
     while (!m_Window.shouldClose()) {
       m_Window.pollEvents();
@@ -28,16 +31,15 @@ class Application {
       m_ImGuiLayer.beginFrame();
 
       // ImGui UI -> mainUI -> demo specifiic ui
-      ImGui::Begin("Control Panel");
+      ImGui::Begin("Scene Control Panel");
       static float color[3] = {1.0f, 1.0f, 1.0f};
       ImGui::ColorEdit3("Quad Color", color);
       ImGui::Text("Press ESC to exit.");
       ImGui::End();
 
-      scene.onUpdate(0.0f);
-      scene.onRender();
-
-      scene.onImGuiRender();  // why seperate from onRender?
+      m_CurrentScene->onUpdate(0.0f);
+      m_CurrentScene->onRender();
+      m_CurrentScene->onImGuiRender();  // why seperate from onRender?
 
       // Render ImGui
       m_ImGuiLayer.endFrame();
@@ -49,6 +51,7 @@ class Application {
  private:
   Window m_Window;
   ImGuiLayer m_ImGuiLayer;
+  std::shared_ptr<SceneBase> m_CurrentScene;
 };
 
 int main() {

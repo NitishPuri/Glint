@@ -1,10 +1,12 @@
 #include "Core/SceneBase.h"
+#include "Core/VertexBuffer.h"
 
-class Scene1 : public SceneBase {
+class QuadScene : public SceneBase {
  public:
-  Scene1() : SceneBase("Scene1") {}
+  QuadScene() : SceneBase("Quad Scene") {}
   void onAttach() override {
     m_Shader.init("./src/shaders/quad.vert", "./src/shaders/quad.frag");
+
     // Quad Data
     float vertices[] = {
         -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  // Bottom-left (red)
@@ -26,15 +28,12 @@ class Scene1 : public SceneBase {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                          (void *)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                          (void *)(2 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     // Shader shader("./src/shaders/quad.vert", "./src/shaders/quad.frag");
@@ -52,7 +51,12 @@ class Scene1 : public SceneBase {
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   };
-  void onImGuiRender() override {};
+  void onImGuiRender() override {
+    ImGui::Begin("Quad Control Panel");
+    ImGui::ColorEdit3("Quad Color", m_ClearColor);
+    ImGui::Text("Press ESC to exit.");
+    ImGui::End();
+  };
 
  private:
   float m_ClearColor[4] = {0.1f, 0.1f, 0.1f, 1.0f};
