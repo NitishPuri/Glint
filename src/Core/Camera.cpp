@@ -65,10 +65,11 @@ void CameraController::processInputs(float dt) {
     // float view[16];  // TODO: Can just use this, instead of recalculating view matrix.
 
     auto speed = 0.1f;
-    arcball_camera_update(eye, target, up, nullptr,                                            //
-                          dt, 0.1f, 0.1f, 1.0f,                                                //
-                          io.DisplaySize.x, io.DisplaySize.y,                                  //
-                          io.MousePosPrev.x, io.MousePos.x, io.MousePosPrev.y, io.MousePos.y,  //
+    arcball_camera_update(eye, target, up, nullptr,                      //
+                          dt, 0.1f, 0.1f, 1.0f,                          //
+                          int(io.DisplaySize.x), int(io.DisplaySize.y),  //
+                          int(io.MousePosPrev.x), int(io.MousePos.x),    //
+                          int(io.MousePosPrev.y), int(io.MousePos.y),    //
                           io.MouseDown[2], io.MouseDown[1], int(io.MouseWheel), 0);
     m_Props.position = glm::vec3(eye[0], eye[1], eye[2]);
     m_Props.target = glm::vec3(target[0], target[1], target[2]);

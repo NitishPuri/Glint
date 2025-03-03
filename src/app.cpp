@@ -9,6 +9,7 @@
 #include "Core/Window.h"
 
 //
+#include "Scenes/BasicShading.h"
 #include "Scenes/CubeScene.h"
 #include "Scenes/QuadScene.h"
 #include "Scenes/UVCubeScene.h"
@@ -40,13 +41,14 @@ class Application {
     m_SceneManager.registerScene("1_quad", []() { return std::make_shared<QuadScene>(); });
     m_SceneManager.registerScene("2_cube", []() { return std::make_shared<CubeScene>(); });
     m_SceneManager.registerScene("3_cube_uv", []() { return std::make_shared<UVCubeScene>(); });
+    m_SceneManager.registerScene("4_basic_shading", []() { return std::make_shared<BasicShading>(); });
   }
 
   void run() {
     Logger::log("Running application...");
 
     // Load initial scene
-    m_SceneManager.loadScene("3_cube_uv");
+    m_SceneManager.loadScene("4_basic_shading");
 
     auto last_time = std::chrono::high_resolution_clock::now();
 
