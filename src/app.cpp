@@ -11,6 +11,7 @@
 //
 #include "Scenes/CubeScene.h"
 #include "Scenes/QuadScene.h"
+#include "Scenes/UVCubeScene.h"
 
 class Application {
  public:
@@ -31,12 +32,16 @@ class Application {
     // register scenes
     // TODO: This should be done at the place of scene definition somehow,
     // a singleton registry or something for scenes?
-    m_SceneManager.registerScene("Quad", []() { return std::make_shared<QuadScene>(); });
-    m_SceneManager.registerScene("Cube", []() { return std::make_shared<CubeScene>(); });
+    m_SceneManager.registerScene("1_quad", []() { return std::make_shared<QuadScene>(); });
+    m_SceneManager.registerScene("2_cube", []() { return std::make_shared<CubeScene>(); });
+    m_SceneManager.registerScene("3_cube_uv", []() { return std::make_shared<UVCubeScene>(); });
   }
 
   void run() {
     Logger::log("Running application...");
+
+    // Load initial scene
+    m_SceneManager.loadScene("3_cube_uv");
 
     auto last_time = std::chrono::high_resolution_clock::now();
 
