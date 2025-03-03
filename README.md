@@ -7,4 +7,3 @@ Illumination and Creativity.
 
 https://github.com/NitishPuri/win_gl/tree/master
 
-ru

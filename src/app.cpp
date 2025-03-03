@@ -16,7 +16,7 @@ class Application {
   ~Application() {}
 
   void init() {
-    Logger::log("Initializing application");
+    Logger::log("Initializing application...");
     // m_CurrentScene = std::make_shared<QuadScene>();
     if (m_Window.init() == -1) {
       Logger::error("Failed to initialize window");
@@ -25,6 +25,7 @@ class Application {
 
     m_ImGuiLayer.init();
 
+    Logger::log("Registering scenes...");
     // register scenes
     // TODO: This should be done at the place of scene definition somehow,
     // a singleton registry or something for scenes?
@@ -32,21 +33,13 @@ class Application {
   }
 
   void run() {
-    // QuadScene scene;
-    // m_CurrentScene->onAttach();
+    Logger::log("Running application...");
 
     while (!m_Window.shouldClose()) {
       m_Window.pollEvents();
 
       // Start ImGui frame
       m_ImGuiLayer.beginFrame();
-
-      // ImGui UI -> mainUI -> demo specifiic ui
-      ImGui::Begin("Scene Control Panel");
-      static float color[3] = {1.0f, 1.0f, 1.0f};
-      ImGui::ColorEdit3("Quad Color", color);
-      ImGui::Text("Press ESC to exit.");
-      ImGui::End();
 
       m_SceneManager.onUpdate(0.0f);
       m_SceneManager.onRender();
@@ -67,8 +60,6 @@ class Application {
   Window m_Window;
   ImGuiLayer m_ImGuiLayer;
   SceneManager m_SceneManager;
-  // const Logger& m_Logger;
-  // std::shared_ptr<SceneBase> m_CurrentScene;
 };
 
 int main() {
@@ -76,10 +67,8 @@ int main() {
   Logger::log("Starting application");
   Application app;
   app.init();
-  // if (app.init() == -1) {
-  //   logger.log("Failed to initialize application");
-  //   return -1;
-  // }
+
   app.run();
+
   return 0;
 }
