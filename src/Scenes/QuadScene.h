@@ -1,6 +1,10 @@
+#include <memory>
+
 // core
+#include "Core/IndexBuffer.h"
 #include "Core/SceneBase.h"
 #include "Core/Shader.h"
+#include "Core/VertexArray.h"
 #include "Core/VertexBuffer.h"
 
 // glm
@@ -25,31 +29,29 @@ class QuadScene : public SceneBase {
 
     unsigned int indices[] = {0, 1, 2, 2, 3, 0};
 
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    // glGenVertexArrays(1, &VAO);
+    // glGenBuffers(1, &VBO);
+    // glGenBuffers(1, &EBO);
 
-    glBindVertexArray(VAO);
+    // glBindVertexArray(VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    m_VertexBuffer = std::make_unique<VertexBuffer>(vertices, sizeof(vertices));
+    m_IndexBuffer = std::make_unique<IndexBuffer>(indices, 6);
+    m_VertexArray = std::make_unique<VertexArray>();
 
     // Position attribute
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0));
+    GLCall(glEnableVertexAttribArray(0));
 
     // Color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(2 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(2 * sizeof(float))));
+    GLCall(glEnableVertexAttribArray(1));
   }
 
   void onDetach() override {
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    m_VertexBuffer.reset();
+    m_IndexBuffer.reset();
+    m_VertexArray.reset();
   };
 
   void onUpdate(float deltaTime) override {
@@ -60,8 +62,8 @@ class QuadScene : public SceneBase {
 
   void onRender() override {
     // Clear screen
-    glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    GLCall(glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f));
+    GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
     glm::mat4 transform = glm::mat4(1.0f);
     transform = glm::rotate(transform, glm::radians(m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -70,7 +72,8 @@ class QuadScene : public SceneBase {
     m_Shader.bind();
     m_Shader.setUniformMat4("transform", transform);
 
-    glBindVertexArray(VAO);
+    m_VertexArray->bind();
+    // glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   };
 
@@ -89,5 +92,9 @@ class QuadScene : public SceneBase {
 
   Shader m_Shader;
 
-  GLuint VBO, VAO, EBO;
+  std::unique_ptr<VertexBuffer> m_VertexBuffer;
+  std::unique_ptr<IndexBuffer> m_IndexBuffer;
+  std::unique_ptr<VertexArray> m_VertexArray;
+
+  // GLuint VAO;
 };

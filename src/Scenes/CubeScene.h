@@ -1,0 +1,155 @@
+// core
+#include "Core/SceneBase.h"
+#include "Core/Shader.h"
+#include "Core/VertexBuffer.h"
+
+// glm
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+class CubeScene : public SceneBase {
+ public:
+  CubeScene() : SceneBase("Cube Scene") {}
+  void onAttach() override {
+    m_Shader.init("./src/shaders/quad.vert", "./src/shaders/quad.frag");
+
+    // Quad Data
+    // x, y, r, g, b
+    float vertices[] = {
+        -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  // Bottom-left (red)
+        0.5f,  -0.5f, 0.0f, 1.0f, 0.0f,  // Bottom-right (green)
+        0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  // Top-right (blue)
+        -0.5f, 0.5f,  1.0f, 1.0f, 0.0f   // Top-left (yellow)
+    };
+
+    unsigned int indices[] = {0, 1, 2, 2, 3, 0};
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+  }
+
+  void onDetach() override {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+  };
+
+  void onUpdate(float deltaTime) override {
+    // Rotate Quad
+    m_Rotation += m_RotationSpeed * deltaTime;
+    if (m_Rotation > 360.0f) m_Rotation -= 360.0f;
+  };
+
+  void onRender() override {
+    // Clear screen
+    glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::rotate(transform, glm::radians(m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    // Render Quad
+    m_Shader.bind();
+    m_Shader.setUniformMat4("transform", transform);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  };
+
+  void onImGuiRender() override {
+    ImGui::Begin("Quad Control Panel");
+    ImGui::ColorEdit3("Quad Color", m_ClearColor);
+    ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, -10.0f, 10.0f);
+    ImGui::Text("Press ESC to exit.");
+    ImGui::End();
+  };
+
+ private:
+  float m_ClearColor[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+  float m_RotationSpeed = 1.f;
+  float m_Rotation = 0.0f;
+
+  Shader m_Shader;
+
+  GLuint VBO, VAO, EBO;
+};
+#include "Core/SceneBase.h"
+#include "Core/VertexBuffer.h"
+
+class Scene2 : public SceneBase {
+ public:
+  Scene2() : SceneBase("Scene") {}
+  void onAttach() override {
+    m_Shader.init("./src/shaders/simple.vert", "./src/shaders/simple.frag");
+    // Quad Data
+    float vertices[] = {
+        -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  // Bottom-left (red)
+        0.5f,  -0.5f, 0.0f, 1.0f, 0.0f,  // Bottom-right (green)
+        0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  // Top-right (blue)
+        -0.5f, 0.5f,  1.0f, 1.0f, 0.0f   // Top-left (yellow)
+    };
+
+    unsigned int indices[] = {0, 1, 2, 2, 3, 0};
+
+    // GLuint VBO, VAO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // Shader shader("./src/shaders/quad.vert", "./src/shaders/quad.frag");
+  }
+  void onDetach() override {};
+  void onUpdate(float deltaTime) override {};
+  void onRender() override {
+    // Clear screen
+    glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Render Quad
+    // glUseProgram(shaderProgram);
+    m_Shader.bind();
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  };
+  void onImGuiRender() override {};
+
+ private:
+  float m_ClearColor[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+  float m_Rotation = 0.0f;
+
+  Shader m_Shader;
+
+  GLuint VBO, VAO, EBO;
+};

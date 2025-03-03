@@ -80,5 +80,5 @@ class Logger {
   }
 };
 
-std::ofstream Logger::log_file_;
-std::mutex Logger::mutex_;
+// std::ofstream Logger::log_file_;
+// std::mutex Logger::mutex_;
