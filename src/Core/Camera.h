@@ -4,15 +4,38 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-inline glm::mat4 getViewProjectionMatrix(float fov, float aspect, float near, float far, glm::vec3 position,
-                                         glm::vec3 target, glm::vec3 up) {
-  glm::mat4 Projection = glm::perspective(glm::radians(fov), aspect, near, far);
+struct CameraProps {
+  float fov, aspect, near, far;
+  glm::vec3 position, target, up;
+};
 
-  // Camera matrix
-  glm::mat4 View = glm::lookAt(position,           // Camera is at (4,3,-3), in World Space
-                               target,             // and looks at the origin
-                               glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
-  );
+CameraProps getDefaultCameraProps() {
+  CameraProps props;
+  props.fov = 45.0f;
+  props.aspect = 4.0f / 3.0f;
+  props.near = 0.1f;
+  props.far = 100.0f;
+  props.position = glm::vec3(4, 3, -3);
+  props.target = glm::vec3(0, 0, 0);
+  props.up = glm::vec3(0, 1, 0);
+  return props;
+}
 
+inline glm::mat4 getViewProjectionMatrix(const CameraProps& props) {
+  glm::mat4 Projection = glm::perspective(glm::radians(props.fov), props.aspect, props.near, props.far);
+  glm::mat4 View = glm::lookAt(props.position, props.target, props.up);
   return Projection * View;
 }
+
+class CameraController {
+ public:
+  CameraController(const CameraProps& props) : m_Props(props) { m_ViewProjection = getViewProjectionMatrix(m_Props); }
+
+  void update(float deltaTime) { m_ViewProjection = getViewProjectionMatrix(m_Props); }
+
+  glm::mat4 getViewProjection() const { return m_ViewProjection; }
+
+ private:
+  CameraProps m_Props;
+  glm::mat4 m_ViewProjection;
+};
