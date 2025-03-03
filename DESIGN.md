@@ -1,6 +1,7 @@
 
-
-
+Moth/Fireflies
+Seeking Light/Emiting Light
+Illumination.
 
 ```
 /Glint
