@@ -2,27 +2,39 @@
 #include <memory>
 
 #include "Core/GuiLayer.h"
+#include "Core/Logger.h"
+#include "Core/SceneManager.h"
 #include "Core/Shader.h"
 #include "Core/Window.h"
+
+//
 #include "Scenes/BaseScene.h"
 
 class Application {
  public:
-  Application() : m_Window(800, 600, "OpenGL Window"), m_ImGuiLayer(m_Window) {
+  Application(const Logger& logger) : m_Window(800, 600, "OpenGL Window"), m_ImGuiLayer(m_Window), m_Logger(logger) {}
+  ~Application() {}
+
+  void init() {
+    m_Logger.log("Initializing application");
+    // m_CurrentScene = std::make_shared<QuadScene>();
     if (m_Window.init() == -1) {
       std::cerr << "Failed to initialize window\n";
+      m_Logger.log("Failed to initialize window");
       exit(EXIT_FAILURE);
     }
 
     m_ImGuiLayer.init();
 
-    m_CurrentScene = std::make_shared<QuadScene>();
+    // register scenes
+    // TODO: This should be done at the place of scene definition somehow,
+    // a singleton registry or something for scenes?
+    m_SceneManager.registerScene("Quad", []() { return std::make_shared<QuadScene>(); });
   }
-  ~Application() {}
 
   void run() {
     // QuadScene scene;
-    m_CurrentScene->onAttach();
+    // m_CurrentScene->onAttach();
 
     while (!m_Window.shouldClose()) {
       m_Window.pollEvents();
@@ -37,9 +49,13 @@ class Application {
       ImGui::Text("Press ESC to exit.");
       ImGui::End();
 
-      m_CurrentScene->onUpdate(0.0f);
-      m_CurrentScene->onRender();
-      m_CurrentScene->onImGuiRender();  // why seperate from onRender?
+      m_SceneManager.onUpdate(0.0f);
+      m_SceneManager.onRender();
+      m_SceneManager.onImGuiRender();
+
+      // m_CurrentScene->onUpdate(0.0f);
+      // m_CurrentScene->onRender();
+      // m_CurrentScene->onImGuiRender();  // why seperate from onRender?
 
       // Render ImGui
       m_ImGuiLayer.endFrame();
@@ -51,11 +67,20 @@ class Application {
  private:
   Window m_Window;
   ImGuiLayer m_ImGuiLayer;
-  std::shared_ptr<SceneBase> m_CurrentScene;
+  SceneManager m_SceneManager;
+  const Logger& m_Logger;
+  // std::shared_ptr<SceneBase> m_CurrentScene;
 };
 
 int main() {
-  Application app;
+  Logger logger("./log.txt");
+  logger.log("Application started");
+  Application app(logger);
+  app.init();
+  // if (app.init() == -1) {
+  //   logger.log("Failed to initialize application");
+  //   return -1;
+  // }
   app.run();
   return 0;
 }

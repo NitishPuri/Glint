@@ -4,3 +4,4 @@ out/
 log.txt
 .vscode/settings.json
 results/
+imgui.ini

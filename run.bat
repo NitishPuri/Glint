@@ -1,2 +1,3 @@
-build\Release\GLWindow.exe %1
+call build.bat
+build\Release\Glint.exe %1
 

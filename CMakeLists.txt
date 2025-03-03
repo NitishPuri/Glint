@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(NAME GLWindow)
+set(NAME Glint)
 
 
 set(CMAKE_CXX_STANDARD 17)
@@ -20,6 +20,9 @@ file(GLOB_RECURSE IMGUI_SOURCES ${IMGUI_PATH}/*.cpp)
 set(GLAD_PATH ${PROJECT_SOURCE_DIR}/ext/glad)
 set(GLAD_INCLUDE ${GLAD_PATH}/include)
 file(GLOB_RECURSE GLAD_SOURCES ${GLAD_PATH}/src/*.c)
+
+# Core
+# file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 # Source files
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
