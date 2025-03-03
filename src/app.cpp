@@ -12,15 +12,14 @@
 
 class Application {
  public:
-  Application(const Logger& logger) : m_Window(800, 600, "OpenGL Window"), m_ImGuiLayer(m_Window), m_Logger(logger) {}
+  Application() : m_Window(800, 600, "OpenGL Window"), m_ImGuiLayer(m_Window) {}
   ~Application() {}
 
   void init() {
-    m_Logger.log("Initializing application");
+    Logger::log("Initializing application");
     // m_CurrentScene = std::make_shared<QuadScene>();
     if (m_Window.init() == -1) {
-      std::cerr << "Failed to initialize window\n";
-      m_Logger.log("Failed to initialize window");
+      Logger::error("Failed to initialize window");
       exit(EXIT_FAILURE);
     }
 
@@ -68,14 +67,14 @@ class Application {
   Window m_Window;
   ImGuiLayer m_ImGuiLayer;
   SceneManager m_SceneManager;
-  const Logger& m_Logger;
+  // const Logger& m_Logger;
   // std::shared_ptr<SceneBase> m_CurrentScene;
 };
 
 int main() {
-  Logger logger("./log.txt");
-  logger.log("Application started");
-  Application app(logger);
+  Logger::init("./log.txt");
+  Logger::log("Starting application");
+  Application app;
   app.init();
   // if (app.init() == -1) {
   //   logger.log("Failed to initialize application");

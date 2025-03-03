@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 #include <sstream>
 #include <string>
 
@@ -14,60 +15,41 @@
 
 class Logger {
  public:
-  Logger(const std::string &log_file_path) : log_file_path(log_file_path) {
-    log_file.open(log_file_path, std::ios_base::app);  // Open in append mode
-    if (!log_file.is_open()) {
+  static void init(const std::string& log_file_path) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (log_file_.is_open()) {
+      error("Logger already initialized");
+      return;
+    }
+    log_file_.open(log_file_path, std::ios_base::app);  // Open in append mode
+    if (!log_file_.is_open()) {
       std::cerr << "Unable to open log file: " << log_file_path << std::endl;
     }
   }
 
-  ~Logger() {
-    if (log_file.is_open()) {
-      log_file.close();
+  static void shutdown() {
+    // Close the log file
+    if (log_file_.is_open()) {
+      log_file_.close();
     }
   }
 
   template <typename... Args>
-  void error(Args... args) const {
-    std::ostringstream oss;
-    oss << get_current_timestamp() << " [ERROR]: ";
-    (oss << ... << args);  // Fold expression to handle variadic arguments
-
-    std::string timestamped_message = oss.str();
-#if CONSOLE_LOG
-    // Log to console
-    std::cerr << timestamped_message << std::endl;
-#endif
-
-    // Log to file
-    if (log_file.is_open()) {
-      log_file << timestamped_message << std::endl;
-    }
+  static void error(Args... args) {
+    log_message("ERROR", std::cerr, args...);
   }
 
   template <typename... Args>
-  void log(Args... args) const {
-    std::ostringstream oss;
-    oss << get_current_timestamp() << ":[LOG] ";
-    (oss << ... << args);  // Fold expression to handle variadic arguments
-
-    std::string timestamped_message = oss.str();
-#if CONSOLE_LOG
-    // Log to console
-    std::clog << timestamped_message << std::endl;
-#endif
-
-    // Log to file
-    if (log_file.is_open()) {
-      log_file << timestamped_message << std::endl;
-    }
+  static void log(Args... args) {
+    log_message("LOG", std::clog, args...);
   }
 
  private:
-  std::string log_file_path;
-  mutable std::ofstream log_file;
+  //   static std::string log_file_path_;
+  static std::ofstream log_file_;
+  static std::mutex mutex_;
 
-  std::string get_current_timestamp() const {
+  static std::string get_current_timestamp() {
     auto now = std::chrono::system_clock::now();
     auto in_time_t = std::chrono::system_clock::to_time_t(now);
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
@@ -77,4 +59,26 @@ class Logger {
        << ms.count();
     return ss.str();
   }
+
+  template <typename... Args>
+  static void log_message(const std::string& level, std::ostream& console_stream, Args... args) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    std::ostringstream oss;
+    oss << get_current_timestamp() << " [" << level << "]: ";
+    (oss << ... << args);  // Fold expression to handle variadic arguments
+
+    std::string timestamped_message = oss.str();
+#if CONSOLE_LOG
+    // Log to console
+    console_stream << timestamped_message << std::endl;
+#endif
+
+    // Log to file
+    if (log_file_.is_open()) {
+      log_file_ << timestamped_message << std::endl;
+    }
+  }
 };
+
+std::ofstream Logger::log_file_;
+std::mutex Logger::mutex_;
