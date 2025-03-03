@@ -17,7 +17,9 @@
 class UVCubeScene : public SceneBase {
  public:
   UVCubeScene() : SceneBase("UV Cube Scene"), m_CameraController(getDefaultCameraProps()) {}
-  void onAttach() override {
+  void onAttach(int width, int height) override {
+    m_CameraController.getProps().aspect = (float)width / (float)height;
+
     m_Shader.init(getFilePath("/shaders/simple_uv.vert"), getFilePath("/shaders/simple_uv.frag"));
 
     // Enable depth test
@@ -184,6 +186,11 @@ class UVCubeScene : public SceneBase {
 
     ImGui::End();
   };
+
+  void onWindowResize(int width, int height) override {
+    m_CameraController.getProps().aspect = (float)width / (float)height;
+    // m_CameraController.recalculate()
+  }
 
  private:
   float m_ClearColor[4] = {0.1f, 0.1f, 0.1f, 1.0f};

@@ -15,7 +15,9 @@
 class CubeScene : public SceneBase {
  public:
   CubeScene() : SceneBase("Cube Scene") {}
-  void onAttach() override {
+  void onAttach(int width, int height) override {
+    m_aspect = (float)width / (float)height;
+
     m_Shader.init(getFilePath("/shaders/simple.vert"), getFilePath("/shaders/simple.frag"));
 
     // Enable depth test
@@ -67,7 +69,7 @@ class CubeScene : public SceneBase {
 
   glm::mat4 getViewMatrix() {
     // Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), m_aspect, 0.1f, 100.0f);
     // Camera matrix
     glm::mat4 View = glm::lookAt(glm::vec3(4, 3, -3),  // Camera is at (4,3,-3), in World Space
                                  glm::vec3(0, 0, 0),   // and looks at the origin
@@ -130,10 +132,14 @@ class CubeScene : public SceneBase {
     ImGui::End();
   };
 
+  void onWindowResize(int width, int height) override { m_aspect = (float)width / (float)height; }
+
  private:
   float m_ClearColor[4] = {0.1f, 0.1f, 0.1f, 1.0f};
   float m_RotationSpeed = 1.f;
   float m_Rotation = 0.0f;
+
+  float m_aspect = 4.0f / 3.0f;
 
   Shader m_Shader;
 

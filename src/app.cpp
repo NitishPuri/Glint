@@ -13,9 +13,15 @@
 #include "Scenes/QuadScene.h"
 #include "Scenes/UVCubeScene.h"
 
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 600;
+
 class Application {
  public:
-  Application() : m_Window(800, 600, "OpenGL Window"), m_ImGuiLayer(m_Window) {}
+  Application()
+      : m_Window(WINDOW_WIDTH, WINDOW_HEIGHT, "Glint"),
+        m_ImGuiLayer(m_Window),
+        m_SceneManager(WINDOW_WIDTH, WINDOW_HEIGHT) {}
   ~Application() {}
 
   void init() {
@@ -25,6 +31,8 @@ class Application {
       Logger::error("Failed to initialize window");
       exit(EXIT_FAILURE);
     }
+
+    m_Window.setSceneManager(&m_SceneManager);
 
     m_ImGuiLayer.init();
 

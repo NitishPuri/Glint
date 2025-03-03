@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#include "Core/SceneManager.h"
+
 class Window {
  public:
   Window(int width, int height, const std::string& title)
@@ -16,6 +18,8 @@ class Window {
   }
   GLFWwindow* getGLFWWindow() const { return m_Window; }
 
+  void setSceneManager(SceneManager* sceneManager) { m_SceneManager = sceneManager; }
+
   int init() {
     if (!glfwInit()) {
       std::cerr << "Failed to initialize GLFW\n";
@@ -23,8 +27,7 @@ class Window {
       return -1;
     }
 
-    m_Window =
-        glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
+    m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
     if (!m_Window) {
       std::cerr << "Failed to create GLFW window\n";
       glfwTerminate();
@@ -39,6 +42,10 @@ class Window {
     glfwSwapInterval(1);  // Enable vsync
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
+    // framebuffer size callback
+    glfwSetWindowUserPointer(m_Window, this);
+    glfwSetFramebufferSizeCallback(m_Window, size_changed_callback);
+
     return 0;
   }
 
@@ -51,8 +58,24 @@ class Window {
   bool shouldClose() const { return glfwWindowShouldClose(m_Window); }
   void swapBuffers() { glfwSwapBuffers(m_Window); }
 
+  static void size_changed_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+    Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->m_Width = width;
+    win->m_Height = height;
+    win->onWindowResize(width, height);
+  }
+
+  void onWindowResize(int width, int height) {
+    if (m_SceneManager) {
+      m_SceneManager->onWindowResize(width, height);
+    }
+  }
+
  private:
-  GLFWwindow* m_Window;
+  GLFWwindow* m_Window = nullptr;
   int m_Width, m_Height;
   std::string m_Title;
+
+  SceneManager* m_SceneManager = nullptr;
 };

@@ -49,6 +49,8 @@ class CameraController {
 
   CameraMode m_Mode = CAMERA_MODE_NONE;
 
+  CameraProps& getProps() { return m_Props; }
+
  private:
   CameraProps m_Props;
   glm::mat4 m_ViewProjection;
