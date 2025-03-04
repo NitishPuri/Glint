@@ -85,28 +85,48 @@ void Mesh::loadMesh(const std::string& filename) {
   }
 }
 
-void Mesh::index(bool computeTBN) {
-  std::vector<glm::vec3> out_vertices;
-  std::vector<glm::vec2> out_uvs;
-  std::vector<glm::vec3> out_normals;
-  std::vector<unsigned int> out_indices;
+void Mesh::index() {
+  std::vector<glm::vec3> indexed_vertices;
+  std::vector<glm::vec2> indexed_texCoords;
+  std::vector<glm::vec3> indexed_Normals;
+  std::vector<index_t> updated_indices;
 
-  if (computeTBN) {
-    ScopedTimer _("Indexing TBN...");
-    computeTangentBasis();
-    indexVBO_TBN(vertices, texCoords, normals, tangents, bitangents, out_indices, out_vertices, out_uvs, out_normals,
-                 tangents, bitangents);
-  } else {
+  {
     ScopedTimer _("Indexing...");
-    indexVBO(vertices, texCoords, normals, out_indices, out_vertices, out_uvs, out_normals);
+    indexVBO(vertices, texCoords, normals, updated_indices, indexed_vertices, indexed_texCoords, indexed_Normals);
   }
 
-  Logger::log("V_In[", vertices.size(), "] V_Out[", out_vertices.size(), "]");
+  Logger::log("V_In[", vertices.size(), "] V_Out[", indexed_vertices.size(), "]");
 
-  vertices = out_vertices;
-  texCoords = out_uvs;
-  normals = out_normals;
-  indices = out_indices;
+  vertices = indexed_vertices;
+  texCoords = indexed_texCoords;
+  normals = indexed_Normals;
+  indices = updated_indices;
+}
+
+void Mesh::indexWithTangentBasis() {
+  std::vector<glm::vec3> indexed_vertices;
+  std::vector<glm::vec2> indexed_texCoords;
+  std::vector<glm::vec3> indexed_normals;
+  std::vector<glm::vec3> indexed_tangets;
+  std::vector<glm::vec3> indexed_bitanget;
+  std::vector<index_t> updated_indices;
+
+  {
+    ScopedTimer _("Indexing TBN...");
+    computeTangentBasis();
+    indexVBO_TBN(vertices, texCoords, normals, tangents, bitangents, updated_indices, indexed_vertices,
+                 indexed_texCoords, indexed_normals, indexed_tangets, indexed_bitanget);
+  }
+
+  Logger::log("V_In[", vertices.size(), "] V_Out[", indexed_vertices.size(), "]");
+
+  vertices = indexed_vertices;
+  texCoords = indexed_texCoords;
+  normals = indexed_normals;
+  indices = updated_indices;
+  tangents = indexed_tangets;
+  bitangents = indexed_bitanget;
 }
 
 // https://terathon.com/blog/tangent-space.html

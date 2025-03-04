@@ -18,6 +18,12 @@ void CameraController::update(float deltaTime) {
   m_ViewProjection = getViewProjectionMatrix(m_Props);
 }
 
+glm::mat4 CameraController::getProjectionMatrix() const {
+  return glm::perspective(glm::radians(m_Props.fov), m_Props.aspect, m_Props.near, m_Props.far);
+}
+
+glm::mat4 CameraController::getViewMatrix() const { return glm::lookAt(m_Props.position, m_Props.target, m_Props.up); }
+
 void CameraController::processInputs(float dt) {
   ImGuiIO& io = ImGui::GetIO();
 

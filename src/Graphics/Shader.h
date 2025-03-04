@@ -22,6 +22,7 @@ class Shader {
 
   void setUniform3f(const std::string& name, float x, float y, float z);
   // void setUniform4f(const std::string& name, float x, float y, float z, float w) {}
+  void setUniformMat3(const std::string& name, const glm::mat3& matrix);
   void setUniformMat4(const std::string& name, const glm::mat4& matrix);
 
   GLuint getID() const { return m_ID; }

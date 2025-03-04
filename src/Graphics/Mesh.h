@@ -14,10 +14,13 @@ class Mesh {
   const std::vector<glm::vec3>& getNormals() const { return normals; }
   const std::vector<glm::vec2>& getTexCoords() const { return texCoords; }
   const std::vector<unsigned int>& getIndices() const { return indices; }
+  const std::vector<glm::vec3>& getTangents() const { return tangents; }
+  const std::vector<glm::vec3>& getBitangents() const { return bitangents; }
 
   const int getTriangleCount() const { return int(indices.size() / 3); }
 
-  void index(bool computeTBN = false);
+  void index();
+  void indexWithTangentBasis();
 
   void computeTangentBasis();
 

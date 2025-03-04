@@ -66,7 +66,7 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
   if (InfoLogLength > 0) {
     std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
     glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-    printf("%s\n", &FragmentShaderErrorMessage[0]);
+    Logger::log("%s\n", &FragmentShaderErrorMessage[0]);
   }
 
   // Link the program
@@ -82,7 +82,7 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
   if (InfoLogLength > 0) {
     std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
     glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-    printf("%s\n", &ProgramErrorMessage[0]);
+    Logger::log("%s\n", &ProgramErrorMessage[0]);
   }
 
   glDetachShader(ProgramID, VertexShaderID);
@@ -116,6 +116,10 @@ void Shader::setUniform3f(const std::string& name, float x, float y, float z) {
   GLCall(glUniform3f(getUniformLocation(name), x, y, z));
 }
 
+void Shader::setUniformMat3(const std::string& name, const glm::mat3& matrix) {
+  glUniformMatrix3fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
 void Shader::setUniformMat4(const std::string& name, const glm::mat4& matrix) {
   glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 }
@@ -124,7 +128,7 @@ int Shader::getUniformLocation(const std::string& name) {
   if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) return m_UniformLocationCache[name];
 
   int location = glGetUniformLocation(m_ID, name.c_str());
-  if (location == -1) Logger::log("Warning: uniform '", name, "' doesn't exist!");
+  if (location == -1) Logger::error("Warning: uniform '", name, "' doesn't exist!");
 
   m_UniformLocationCache[name] = location;
   return location;

@@ -36,6 +36,8 @@ class CameraController {
   void update(float deltaTime);
 
   glm::mat4 getViewProjection() const { return m_ViewProjection; }
+  glm::mat4 getProjectionMatrix() const;
+  glm::mat4 getViewMatrix() const;
 
   CameraProps& getProps() { return m_Props; }
   CameraMode m_Mode = CAMERA_MODE_ARCBALL;

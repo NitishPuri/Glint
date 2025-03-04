@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 // core
 #include "Core/SceneBase.h"
 #include "Core/ScopedTimer.h"
@@ -23,7 +25,11 @@ class NormalMapping : public SceneBase {
     m_CameraController.getProps().position = glm::vec3(0, 0, 5);
   }
   void onAttach() override {
-    m_Shader.init(getFilePath("/shaders/normal_mapping.vert"), getFilePath("/shaders/normal_mapping.frag"));
+    if (RendererConfig::m_Blend) {
+      m_Shader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading_alpha.frag"));
+    } else {
+      m_Shader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading.frag"));
+    }
 
     // TODO: Move to something like Renderer::setup3D() ?
     //  Enable depth test
@@ -31,7 +37,8 @@ class NormalMapping : public SceneBase {
     // Accept fragment if it is closer to the camera than the former one
     glDepthFunc(GL_LESS);
 
-    m_Mesh = std::make_unique<Mesh>(getFilePath("/res/cylinder/cylinder.obj"));
+    m_Mesh = std::make_unique<Mesh>(getFilePath("/res/suzanne.obj"));
+    m_Mesh->index();
 
     // order matters here
     m_VertexArray = std::make_unique<VertexArray>();
@@ -41,28 +48,10 @@ class NormalMapping : public SceneBase {
     const auto &tex_coords = m_Mesh->getTexCoords();
     const auto &normals = m_Mesh->getNormals();
 
-    Logger::log("Vertices: ", vertices.size());
-    Logger::log("Indices: ", indices.size());
-    Logger::log("Tex Coords: ", tex_coords.size());
-    Logger::log("Normals: ", normals.size());
-    Logger::log("Triangles: ", vertices.size() / 3);
-
-    {
-      ScopedTimer _("Indexing");
-      indexVBO(vertices, tex_coords, normals, m_Indices, m_Vertices, m_UVs, m_Normals);
-    }
-
-    Logger::log("Indexing done in: ");
-    Logger::log("Vertices: ", m_Vertices.size());
-    Logger::log("Indices: ", m_Indices.size());
-    Logger::log("Tex Coords: ", m_UVs.size());
-    Logger::log("Normals: ", m_Normals.size());
-    Logger::log("Triangles: ", m_Indices.size() / 3);
-
-    m_VertexBuffer = std::make_unique<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(glm::vec3));
-    m_IndexBuffer = std::make_unique<IndexBuffer>(m_Indices.data(), uint(m_Indices.size()));
-    m_NormalBuffer = std::make_unique<VertexBuffer>(m_Normals.data(), m_Normals.size() * sizeof(glm::vec3));
-    m_UVBuffer = std::make_unique<VertexBuffer>(m_UVs.data(), m_UVs.size() * sizeof(glm::vec2));
+    m_VertexBuffer = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(glm::vec3));
+    m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), uint(indices.size()));
+    m_NormalBuffer = std::make_unique<VertexBuffer>(normals.data(), normals.size() * sizeof(glm::vec3));
+    m_UVBuffer = std::make_unique<VertexBuffer>(tex_coords.data(), tex_coords.size() * sizeof(glm::vec2));
 
     m_Texture = std::make_unique<Texture>(getFilePath("/res/suzanne.jpg"));
   }
@@ -78,23 +67,13 @@ class NormalMapping : public SceneBase {
     m_CameraController.update(deltaTime);
   };
 
-  glm::mat4 getViewMatrix() {
-    auto ViewProjection = m_CameraController.getViewProjection();
-
-    // Model matrix : an identity matrix (model will be at the origin)
-    glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
-
-    glm::mat4 MVP = ViewProjection * Model;  // Remember, matrix multiplication is the other way around
-    return MVP;
-  }
-
   void onRender() override {
     // Logger::log("VBOIndexing::onRender");
     // Clear screen
     GLCall(glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f));
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    auto &props = m_CameraController.getProps();
+    // auto &props = m_CameraController.getProps();
 
     glm::mat4 View = m_CameraController.getViewProjection();
     glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
@@ -139,9 +118,11 @@ class NormalMapping : public SceneBase {
     // index buffer
     m_IndexBuffer->bind();
 
-    GLCall(glDrawElements(GL_TRIANGLES, int(m_Indices.size()), GL_UNSIGNED_INT, nullptr));
+    auto index_count = m_Mesh->getIndices().size();
 
-    glDisableVertexAttribArray(0);
+    GLCall(glDrawElements(GL_TRIANGLES, int(index_count), GL_UNSIGNED_INT, nullptr));
+
+        glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(2);
   };
@@ -184,15 +165,9 @@ class NormalMapping : public SceneBase {
   CameraController m_CameraController;
 
   std::unique_ptr<Mesh> m_Mesh;
-
-  std::vector<glm::vec3> m_Vertices, m_Normals;
-  std::vector<glm::vec2> m_UVs;
-  std::vector<unsigned int> m_Indices;
+  std::unique_ptr<Texture> m_Texture;
 
   std::unique_ptr<VertexArray> m_VertexArray;
-  std::unique_ptr<VertexBuffer> m_VertexBuffer;
-  std::unique_ptr<VertexBuffer> m_NormalBuffer;
-  std::unique_ptr<VertexBuffer> m_UVBuffer;
+  std::unique_ptr<VertexBuffer> m_VertexBuffer, m_NormalBuffer, m_UVBuffer;
   std::unique_ptr<IndexBuffer> m_IndexBuffer;
-  std::unique_ptr<Texture> m_Texture;
 };
