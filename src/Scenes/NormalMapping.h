@@ -25,20 +25,15 @@ class NormalMapping : public SceneBase {
     m_CameraController.getProps().position = glm::vec3(0, 0, 5);
   }
   void onAttach() override {
-    if (RendererConfig::m_Blend) {
-      m_Shader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading_alpha.frag"));
-    } else {
-      m_Shader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading.frag"));
-    }
+    // m_Shader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading.frag"));
+    m_Shader.init(getFilePath("/shaders/normal_mapping.vert"), getFilePath("/shaders/normal_mapping.frag"));
 
     // TODO: Move to something like Renderer::setup3D() ?
-    //  Enable depth test
     glEnable(GL_DEPTH_TEST);
-    // Accept fragment if it is closer to the camera than the former one
     glDepthFunc(GL_LESS);
 
-    m_Mesh = std::make_unique<Mesh>(getFilePath("/res/suzanne.obj"));
-    m_Mesh->index();
+    m_Mesh = std::make_unique<Mesh>(getFilePath("/res/cylinder/cylinder.obj"));
+    m_Mesh->indexWithTangentBasis();
 
     // order matters here
     m_VertexArray = std::make_unique<VertexArray>();
@@ -47,13 +42,19 @@ class NormalMapping : public SceneBase {
     const auto &indices = m_Mesh->getIndices();
     const auto &tex_coords = m_Mesh->getTexCoords();
     const auto &normals = m_Mesh->getNormals();
+    const auto &tangents = m_Mesh->getTangents();
+    const auto &bitangents = m_Mesh->getBitangents();
 
     m_VertexBuffer = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(glm::vec3));
     m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), uint(indices.size()));
     m_NormalBuffer = std::make_unique<VertexBuffer>(normals.data(), normals.size() * sizeof(glm::vec3));
     m_UVBuffer = std::make_unique<VertexBuffer>(tex_coords.data(), tex_coords.size() * sizeof(glm::vec2));
+    m_TangentBuffer = std::make_unique<VertexBuffer>(tangents.data(), tangents.size() * sizeof(glm::vec3));
+    m_BitangentBuffer = std::make_unique<VertexBuffer>(bitangents.data(), bitangents.size() * sizeof(glm::vec3));
 
-    m_Texture = std::make_unique<Texture>(getFilePath("/res/suzanne.jpg"));
+    m_DiffuseTexture = std::make_unique<Texture>(getFilePath("/res/cylinder/diffuse.jpg"));
+    m_NormalTexture = make_unique<Texture>(getFilePath("/res/cylinder/normal.jpg"));
+    m_SpecularTexture = make_unique<Texture>(getFilePath("/res/cylinder/specular.jpg"));
   }
 
   void onDetach() override {};
@@ -68,24 +69,25 @@ class NormalMapping : public SceneBase {
   };
 
   void onRender() override {
-    // Logger::log("VBOIndexing::onRender");
-    // Clear screen
     GLCall(glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f));
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    // auto &props = m_CameraController.getProps();
-
-    glm::mat4 View = m_CameraController.getViewProjection();
-    glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
-    glm::mat4 MVP = View * Model;
+    glm::mat4 ProjectionMatrix = m_CameraController.getProjectionMatrix();
+    glm::mat4 ViewMatrix = m_CameraController.getViewProjection();
+    glm::mat4 ViewProjection = m_CameraController.getViewProjection();
+    glm::mat4 ModelMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
+    glm::mat4 ModelViewMatrix = ViewMatrix * ModelMatrix;
+    glm::mat3 ModelView3x3Matrix = glm::mat3(ModelViewMatrix);
+    glm::mat4 MVP = ViewProjection * ModelMatrix;
 
     // Uniforms
     m_Shader.bind();
     {
       // Camera
       m_Shader.setUniformMat4("MVP", MVP);
-      m_Shader.setUniformMat4("V", View);
-      m_Shader.setUniformMat4("M", Model);
+      m_Shader.setUniformMat4("V", ViewProjection);
+      m_Shader.setUniformMat4("M", ModelMatrix);
+      m_Shader.setUniformMat3("MV3x3", ModelView3x3Matrix);
 
       // Lights
       m_Shader.setUniform3f("LightPosition_worldspace", m_LightPos.x, m_LightPos.y, m_LightPos.z);
@@ -97,7 +99,13 @@ class NormalMapping : public SceneBase {
       m_Shader.setUniform1f("MaterialSpecular", m_SpecularStrength);
     }
 
-    m_Texture->bind();
+    m_DiffuseTexture->bind(0);
+    m_Shader.setUniform1i("DiffuseTextureSampler", 0);
+    m_NormalTexture->bind(1);
+    m_Shader.setUniform1i("NormalTextureSampler", 1);
+    m_SpecularTexture->bind(2);
+    m_Shader.setUniform1i("SpecularTextureSampler", 2);
+
     m_VertexArray->bind();
 
     // vertices
@@ -115,6 +123,16 @@ class NormalMapping : public SceneBase {
     m_NormalBuffer->bind();
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
+    // tangents
+    glEnableVertexAttribArray(3);
+    m_TangentBuffer->bind();
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+    // bitangents
+    glEnableVertexAttribArray(4);
+    m_BitangentBuffer->bind();
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
     // index buffer
     m_IndexBuffer->bind();
 
@@ -122,9 +140,11 @@ class NormalMapping : public SceneBase {
 
     GLCall(glDrawElements(GL_TRIANGLES, int(index_count), GL_UNSIGNED_INT, nullptr));
 
-        glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(2);
+    glDisableVertexAttribArray(3);
+    glDisableVertexAttribArray(4);
   };
 
   void onImGuiRender() override {
@@ -165,9 +185,11 @@ class NormalMapping : public SceneBase {
   CameraController m_CameraController;
 
   std::unique_ptr<Mesh> m_Mesh;
-  std::unique_ptr<Texture> m_Texture;
+  std::unique_ptr<Texture> m_DiffuseTexture;
+  std::unique_ptr<Texture> m_NormalTexture, m_SpecularTexture;
 
   std::unique_ptr<VertexArray> m_VertexArray;
   std::unique_ptr<VertexBuffer> m_VertexBuffer, m_NormalBuffer, m_UVBuffer;
+  std::unique_ptr<VertexBuffer> m_TangentBuffer, m_BitangentBuffer;
   std::unique_ptr<IndexBuffer> m_IndexBuffer;
 };
