@@ -9,6 +9,16 @@
 #include "Core/SceneManager.h"
 
 void printSysinfo();
+void listExtensions();
+
+#ifdef _DEBUG
+#define ENABLE_GL_DEBUG
+#endif
+
+#ifdef ENABLE_GL_DEBUG
+void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                            const GLchar* message, const void* userParam);
+#endif
 
 class Window {
  public:
@@ -29,6 +39,11 @@ class Window {
       return -1;
     }
 
+#ifdef ENABLE_GL_DEBUG
+    // Enable OpenGL debug context
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+
     // TODO: Figure out what should we support here.
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -48,6 +63,13 @@ class Window {
     glfwMakeContextCurrent(m_Window);
     glfwSwapInterval(1);  // Enable vsync
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+#ifdef ENABLE_GL_DEBUG
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(glDebugOutput, nullptr);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+#endif
 
     // framebuffer size callback
     glfwSetWindowUserPointer(m_Window, this);
