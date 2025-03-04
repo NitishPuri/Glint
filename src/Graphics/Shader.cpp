@@ -123,7 +123,7 @@ void Shader::setUniformMat4(const std::string& name, const glm::mat4& matrix) {
 int Shader::getUniformLocation(const std::string& name) {
   if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) return m_UniformLocationCache[name];
 
-  int location = GLCall(glGetUniformLocation(m_ID, name.c_str()));
+  int location = glGetUniformLocation(m_ID, name.c_str());
   if (location == -1) Logger::log("Warning: uniform '", name, "' doesn't exist!");
 
   m_UniformLocationCache[name] = location;

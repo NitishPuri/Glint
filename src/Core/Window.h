@@ -8,6 +8,8 @@
 
 #include "Core/SceneManager.h"
 
+void printSysinfo();
+
 class Window {
  public:
   Window(int width, int height, const std::string& title)
@@ -27,6 +29,11 @@ class Window {
       return -1;
     }
 
+    // TODO: Figure out what should we support here.
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
     if (!m_Window) {
       std::cerr << "Failed to create GLFW window\n";
@@ -45,6 +52,9 @@ class Window {
     // framebuffer size callback
     glfwSetWindowUserPointer(m_Window, this);
     glfwSetFramebufferSizeCallback(m_Window, size_changed_callback);
+
+    // GL info
+    printSysinfo();
 
     return 0;
   }
