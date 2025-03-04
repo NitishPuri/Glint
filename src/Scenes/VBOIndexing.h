@@ -2,6 +2,7 @@
 
 // core
 #include "Core/SceneBase.h"
+#include "Core/ScopedTimer.h"
 #include "Core/VBOIndex.h"
 #include "Graphics/Camera.h"
 #include "Graphics/IndexBuffer.h"
@@ -46,7 +47,10 @@ class VBOIndexing : public SceneBase {
     Logger::log("Normals: ", normals.size());
     Logger::log("Triangles: ", vertices.size() / 3);
 
-    indexVBO(vertices, tex_coords, normals, m_Indices, m_Vertices, m_UVs, m_Normals);
+    {
+      ScopedTimer _("Indexing");
+      indexVBO(vertices, tex_coords, normals, m_Indices, m_Vertices, m_UVs, m_Normals);
+    }
 
     Logger::log("Indexing done in: ");
     Logger::log("Vertices: ", m_Vertices.size());
