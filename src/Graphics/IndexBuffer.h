@@ -12,8 +12,8 @@ class IndexBuffer {
   }
   ~IndexBuffer() { GLCall(glDeleteBuffers(1, &m_RendererID)); }
 
-  void Bind() const { GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID)); }
-  void Unbind() const { GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)); }
+  void bind() const { GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID)); }
+  void unbind() const { GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)); }
 
   inline unsigned int GetCount() const { return m_Count; }
 

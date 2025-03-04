@@ -2,6 +2,7 @@
 
 // core
 #include "Core/SceneBase.h"
+#include "Core/VBOIndex.h"
 #include "Graphics/Camera.h"
 #include "Graphics/IndexBuffer.h"
 #include "Graphics/Mesh.h"
@@ -43,11 +44,21 @@ class VBOIndexing : public SceneBase {
     Logger::log("Indices: ", indices.size());
     Logger::log("Tex Coords: ", tex_coords.size());
     Logger::log("Normals: ", normals.size());
+    Logger::log("Triangles: ", vertices.size() / 3);
 
-    m_VertexBuffer = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
-    m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), uint(indices.size()));
-    m_NormalBuffer = std::make_unique<VertexBuffer>(normals.data(), normals.size() * sizeof(float));
-    m_UVBuffer = std::make_unique<VertexBuffer>(tex_coords.data(), tex_coords.size() * sizeof(float));
+    indexVBO(vertices, tex_coords, normals, m_Indices, m_Vertices, m_UVs, m_Normals);
+
+    Logger::log("Indexing done in: ");
+    Logger::log("Vertices: ", m_Vertices.size());
+    Logger::log("Indices: ", m_Indices.size());
+    Logger::log("Tex Coords: ", m_UVs.size());
+    Logger::log("Normals: ", m_Normals.size());
+    Logger::log("Triangles: ", m_Indices.size() / 3);
+
+    m_VertexBuffer = std::make_unique<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(glm::vec3));
+    m_IndexBuffer = std::make_unique<IndexBuffer>(m_Indices.data(), uint(m_Indices.size()));
+    m_NormalBuffer = std::make_unique<VertexBuffer>(m_Normals.data(), m_Normals.size() * sizeof(glm::vec3));
+    m_UVBuffer = std::make_unique<VertexBuffer>(tex_coords.data(), tex_coords.size() * sizeof(glm::vec2));
 
     m_Texture = std::make_unique<Texture>(getFilePath("/res/suzanne.jpg"));
   }
@@ -104,24 +115,28 @@ class VBOIndexing : public SceneBase {
       m_Shader.setUniform1f("MaterialSpecular", m_SpecularStrength);
     }
 
+    m_Texture->bind();
     m_VertexArray->bind();
 
-    // 1rst attribute buffer : vertices
+    // vertices
     glEnableVertexAttribArray(0);
     m_VertexBuffer->bind();
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
-    // 2nd attribute buffer : UV
+    //  UV
     glEnableVertexAttribArray(1);
     m_UVBuffer->bind();
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
-    // 3rd attribute buffer : normals
+    // normals
     glEnableVertexAttribArray(2);
     m_NormalBuffer->bind();
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
-    GLCall(glDrawArrays(GL_TRIANGLES, 0, int(m_Mesh->getVertices().size() / 3)));
+    // index buffer
+    m_IndexBuffer->bind();
+
+    GLCall(glDrawElements(GL_TRIANGLES, int(m_Indices.size()), GL_UNSIGNED_INT, nullptr));
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
@@ -166,6 +181,10 @@ class VBOIndexing : public SceneBase {
   CameraController m_CameraController;
 
   std::unique_ptr<Mesh> m_Mesh;
+
+  std::vector<glm::vec3> m_Vertices, m_Normals;
+  std::vector<glm::vec2> m_UVs;
+  std::vector<unsigned int> m_Indices;
 
   std::unique_ptr<VertexArray> m_VertexArray;
   std::unique_ptr<VertexBuffer> m_VertexBuffer;

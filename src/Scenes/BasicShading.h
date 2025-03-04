@@ -3,7 +3,6 @@
 // core
 #include "Core/SceneBase.h"
 #include "Graphics/Camera.h"
-#include "Graphics/IndexBuffer.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Texture.h"
@@ -121,7 +120,7 @@ class BasicShading : public SceneBase {
     m_NormalBuffer->bind();
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
-    GLCall(glDrawArrays(GL_TRIANGLES, 0, m_Mesh->getVertices().size()));
+    GLCall(glDrawArrays(GL_TRIANGLES, 0, int(m_Mesh->getVertices().size())));
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
