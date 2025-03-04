@@ -68,12 +68,12 @@ class SceneManager {
       ImGui::EndCombo();
     }
 
-    if (ImGui::Checkbox("Wireframe", &m_Wireframe)) {
-      glPolygonMode(GL_FRONT_AND_BACK, m_Wireframe ? GL_LINE : GL_FILL);
+    if (ImGui::Checkbox("Wireframe", &RendererConfig::m_Wireframe)) {
+      glPolygonMode(GL_FRONT_AND_BACK, RendererConfig::m_Wireframe ? GL_LINE : GL_FILL);
     }
 
-    if (ImGui::Checkbox("Depth Test", &m_DepthTest)) {
-      if (m_DepthTest) {
+    if (ImGui::Checkbox("Depth Test", &RendererConfig::m_DepthTest)) {
+      if (RendererConfig::m_DepthTest) {
         glEnable(GL_DEPTH_TEST);
       } else {
         glDisable(GL_DEPTH_TEST);
@@ -88,16 +88,17 @@ class SceneManager {
     //   }
     // }
 
-    // if (ImGui::Checkbox("Blend", &m_Blend)) {
-    //   if (m_Blend) {
-    //     glEnable(GL_BLEND);
-    //   } else {
-    //     glDisable(GL_BLEND);
-    //   }
-    // }
+    if (ImGui::Checkbox("Blend", &RendererConfig::m_Blend)) {
+      if (RendererConfig::m_Blend) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      } else {
+        glDisable(GL_BLEND);
+      }
+    }
 
-    ImGui::Checkbox("Show Stats", &m_ShowStats);
-    if (m_ShowStats) {
+    ImGui::Checkbox("Show Stats", &RendererConfig::m_ShowStats);
+    if (RendererConfig::m_ShowStats) {
       ImGuiIO& io = ImGui::GetIO();
       ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
       ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices, io.MetricsRenderIndices,
@@ -118,13 +119,6 @@ class SceneManager {
   }
 
  private:
-  // Renderer config, move there
-  bool m_Wireframe = false;
-  bool m_ShowStats = false;
-  bool m_DepthTest = true;
-  bool m_CullFace = true;
-  bool m_Blend = false;
-
   std::unordered_map<std::string, std::function<std::shared_ptr<SceneBase>()>> m_Scenes;
   std::shared_ptr<SceneBase> m_CurrentScene;
 };

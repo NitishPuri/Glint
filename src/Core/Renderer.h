@@ -38,3 +38,12 @@ using uchar = unsigned char;
 using std::make_unique;
 using std::shared_ptr;
 using std::unique_ptr;
+
+class RendererConfig {
+ public:
+  static bool m_Wireframe;
+  static bool m_ShowStats;
+  static bool m_DepthTest;
+  static bool m_CullFace;
+  static bool m_Blend;
+};

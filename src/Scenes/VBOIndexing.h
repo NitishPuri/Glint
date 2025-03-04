@@ -23,7 +23,11 @@ class VBOIndexing : public SceneBase {
     m_CameraController.getProps().position = glm::vec3(0, 0, 5);
   }
   void onAttach() override {
-    m_Shader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading.frag"));
+    if (RendererConfig::m_Blend) {
+      m_Shader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading_alpha.frag"));
+    } else {
+      m_Shader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading.frag"));
+    }
 
     // TODO: Move to something like Renderer::setup3D() ?
     //  Enable depth test
@@ -100,8 +104,6 @@ class VBOIndexing : public SceneBase {
     glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
     glm::mat4 MVP = View * Model;
 
-    Logger::log("Drawing monkey ", Model);
-
     // Uniforms
     m_Shader.bind();
     {
@@ -149,8 +151,6 @@ class VBOIndexing : public SceneBase {
       glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
       Model = glm::translate(Model, glm::vec3(1.0f, 0.0f, 0.0f));
       glm::mat4 MVP = ViewProjection * Model;
-
-      Logger::log("Drawing monkey again", Model);
 
       // Camera
       m_Shader.setUniformMat4("MVP", MVP);

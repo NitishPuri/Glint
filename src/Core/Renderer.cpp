@@ -8,3 +8,9 @@ bool GLLogCall(const char* function, const char* file, int line) {
   }
   return true;
 }
+
+bool RendererConfig::m_Wireframe = false;
+bool RendererConfig::m_ShowStats = false;
+bool RendererConfig::m_DepthTest = true;
+bool RendererConfig::m_CullFace = true;
+bool RendererConfig::m_Blend = false;
