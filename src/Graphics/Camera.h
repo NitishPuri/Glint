@@ -38,7 +38,7 @@ class CameraController {
   glm::mat4 getViewProjection() const { return m_ViewProjection; }
 
   CameraProps& getProps() { return m_Props; }
-  CameraMode m_Mode = CAMERA_MODE_NONE;
+  CameraMode m_Mode = CAMERA_MODE_ARCBALL;
 
   void onImGuiRender();
 

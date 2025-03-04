@@ -11,12 +11,13 @@
 //
 #include "Scenes/BasicShading.h"
 #include "Scenes/CubeScene.h"
+#include "Scenes/NormalMapping.h"
 #include "Scenes/QuadScene.h"
 #include "Scenes/UVCubeScene.h"
 #include "Scenes/VBOIndexing.h"
 
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
+const int WINDOW_WIDTH = 1800;
+const int WINDOW_HEIGHT = 1600;
 
 class Application {
  public:
@@ -44,13 +45,14 @@ class Application {
     m_SceneManager.registerScene("3_cube_uv", []() { return std::make_shared<UVCubeScene>(); });
     m_SceneManager.registerScene("4_basic_shading", []() { return std::make_shared<BasicShading>(); });
     m_SceneManager.registerScene("5_vbo_indexing", []() { return std::make_shared<VBOIndexing>(); });
+    m_SceneManager.registerScene("6_normal_mapping", []() { return std::make_shared<NormalMapping>(); });
   }
 
   void run() {
     Logger::log("Running application...");
 
     // Load initial scene
-    m_SceneManager.loadScene("5_vbo_indexing");
+    m_SceneManager.loadScene("6_normal_mapping");
 
     auto last_time = std::chrono::high_resolution_clock::now();
 

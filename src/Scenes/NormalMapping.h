@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 // core
 #include "Core/SceneBase.h"
 #include "Core/ScopedTimer.h"
@@ -19,17 +17,13 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-class VBOIndexing : public SceneBase {
+class NormalMapping : public SceneBase {
  public:
-  VBOIndexing() : SceneBase("VBO Indexing with Basic Shading"), m_CameraController(getDefaultCameraProps()) {
+  NormalMapping() : SceneBase("Normal Mapping"), m_CameraController(getDefaultCameraProps()) {
     m_CameraController.getProps().position = glm::vec3(0, 0, 5);
   }
   void onAttach() override {
-    if (RendererConfig::m_Blend) {
-      m_Shader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading_alpha.frag"));
-    } else {
-      m_Shader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading.frag"));
-    }
+    m_Shader.init(getFilePath("/shaders/normal_mapping.vert"), getFilePath("/shaders/normal_mapping.frag"));
 
     // TODO: Move to something like Renderer::setup3D() ?
     //  Enable depth test
@@ -37,7 +31,7 @@ class VBOIndexing : public SceneBase {
     // Accept fragment if it is closer to the camera than the former one
     glDepthFunc(GL_LESS);
 
-    m_Mesh = std::make_unique<Mesh>(getFilePath("/res/suzanne.obj"));
+    m_Mesh = std::make_unique<Mesh>(getFilePath("/res/cylinder/cylinder.obj"));
 
     // order matters here
     m_VertexArray = std::make_unique<VertexArray>();
@@ -146,46 +140,6 @@ class VBOIndexing : public SceneBase {
     m_IndexBuffer->bind();
 
     GLCall(glDrawElements(GL_TRIANGLES, int(m_Indices.size()), GL_UNSIGNED_INT, nullptr));
-
-    // Draw the monkey again, translated.
-    {
-      auto ViewProjection = m_CameraController.getViewProjection();
-      glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
-      Model = glm::translate(Model, glm::vec3(1.0f, 0.0f, 0.0f));
-      glm::mat4 MVP = ViewProjection * Model;
-
-      // Camera
-      m_Shader.setUniformMat4("MVP", MVP);
-      // m_Shader.setUniformMat4("V", View);
-      m_Shader.setUniformMat4("M", Model);
-
-      // Material
-      m_Shader.setUniform1f("MaterialAmbient", m_AmbientStrength / 2);
-      m_Shader.setUniform1f("MaterialSpecular", m_SpecularStrength / 2);
-
-      m_Texture->bind();
-      m_VertexArray->bind();
-
-      // vertices
-      glEnableVertexAttribArray(0);
-      m_VertexBuffer->bind();
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-      //  UV
-      glEnableVertexAttribArray(1);
-      m_UVBuffer->bind();
-      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-      // normals
-      glEnableVertexAttribArray(2);
-      m_NormalBuffer->bind();
-      glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-      // index buffer
-      m_IndexBuffer->bind();
-
-      GLCall(glDrawElements(GL_TRIANGLES, int(m_Indices.size()), GL_UNSIGNED_INT, nullptr));
-    }
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
