@@ -17,6 +17,8 @@ class Mesh {
 
   const int getTriangleCount() const { return int(indices.size() / 3); }
 
+  void index();
+
  private:
   void loadMesh(const std::string& filename);
 

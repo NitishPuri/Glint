@@ -1,6 +1,8 @@
 #include "Mesh.h"
 
 #include "Core/Logger.h"
+#include "Core/ScopedTimer.h"
+#include "Core/VBOIndex.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tinyobjloader/tiny_obj_loader.h"
@@ -81,4 +83,23 @@ void Mesh::loadMesh(const std::string& filename) {
       //   shapes[s].mesh.material_ids[f];
     }
   }
+}
+
+void Mesh::index() {
+  std::vector<glm::vec3> out_vertices;
+  std::vector<glm::vec2> out_uvs;
+  std::vector<glm::vec3> out_normals;
+  std::vector<unsigned int> out_indices;
+
+  {
+    ScopedTimer _("Indexing...");
+    indexVBO(vertices, texCoords, normals, out_indices, out_vertices, out_uvs, out_normals);
+  }
+
+  Logger::log("V_In[", vertices.size(), "] V_Out[", out_vertices.size(), "]");
+
+  vertices = out_vertices;
+  texCoords = out_uvs;
+  normals = out_normals;
+  indices = out_indices;
 }
