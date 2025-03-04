@@ -39,10 +39,15 @@ class BasicShading : public SceneBase {
     const auto &tex_coords = m_Mesh->getTexCoords();
     const auto &normals = m_Mesh->getNormals();
 
-    m_VertexBuffer = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
-    m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), uint(indices.size()));
-    m_NormalBuffer = std::make_unique<VertexBuffer>(normals.data(), normals.size() * sizeof(float));
-    m_UVBuffer = std::make_unique<VertexBuffer>(tex_coords.data(), tex_coords.size() * sizeof(float));
+    Logger::log("Vertices: ", vertices.size());
+    Logger::log("Indices: ", indices.size());
+    Logger::log("Tex Coords: ", tex_coords.size());
+    Logger::log("Normals: ", normals.size());
+    Logger::log("Triangles: ", vertices.size() / 3);
+
+    m_VertexBuffer = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(glm::vec3));
+    m_NormalBuffer = std::make_unique<VertexBuffer>(normals.data(), normals.size() * sizeof(glm::vec3));
+    m_UVBuffer = std::make_unique<VertexBuffer>(tex_coords.data(), tex_coords.size() * sizeof(glm::vec2));
 
     m_Texture = std::make_unique<Texture>(getFilePath("/res/suzanne.jpg"));
   }
@@ -116,7 +121,7 @@ class BasicShading : public SceneBase {
     m_NormalBuffer->bind();
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
-    GLCall(glDrawArrays(GL_TRIANGLES, 0, int(m_Mesh->getVertices().size() / 3)));
+    GLCall(glDrawArrays(GL_TRIANGLES, 0, m_Mesh->getVertices().size()));
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
@@ -166,6 +171,5 @@ class BasicShading : public SceneBase {
   std::unique_ptr<VertexBuffer> m_VertexBuffer;
   std::unique_ptr<VertexBuffer> m_NormalBuffer;
   std::unique_ptr<VertexBuffer> m_UVBuffer;
-  std::unique_ptr<IndexBuffer> m_IndexBuffer;
   std::unique_ptr<Texture> m_Texture;
 };
