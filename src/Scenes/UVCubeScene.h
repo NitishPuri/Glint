@@ -1,13 +1,13 @@
-#include <memory>
+#pragma once
 
 // core
-#include "Core/Camera.h"
-#include "Core/IndexBuffer.h"
 #include "Core/SceneBase.h"
-#include "Core/Shader.h"
-#include "Core/Texture.h"
-#include "Core/VertexArray.h"
-#include "Core/VertexBuffer.h"
+#include "Graphics/Camera.h"
+#include "Graphics/IndexBuffer.h"
+#include "Graphics/Shader.h"
+#include "Graphics/Texture.h"
+#include "Graphics/VertexArray.h"
+#include "Graphics/VertexBuffer.h"
 
 // glm
 #include "glm/glm.hpp"

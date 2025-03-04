@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Renderer.h"
+#include "Core/Renderer.h"
 #include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 
 struct CameraProps {
   float fov, aspect, near, far;
@@ -21,11 +20,7 @@ inline CameraProps getDefaultCameraProps() {
   return props;
 }
 
-inline glm::mat4 getViewProjectionMatrix(const CameraProps& props) {
-  glm::mat4 Projection = glm::perspective(glm::radians(props.fov), props.aspect, props.near, props.far);
-  glm::mat4 View = glm::lookAt(props.position, props.target, props.up);
-  return Projection * View;
-}
+glm::mat4 getViewProjectionMatrix(const CameraProps& props);
 
 enum CameraMode {
   CAMERA_MODE_NONE,
@@ -52,6 +47,4 @@ class CameraController {
 
   CameraProps m_Props;
   glm::mat4 m_ViewProjection;
-
-  //   bool m_FirstMouse = true;
 };

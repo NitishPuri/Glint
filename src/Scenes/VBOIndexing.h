@@ -1,4 +1,4 @@
-#pragma once
+#include <memory>
 
 // core
 #include "Core/SceneBase.h"
@@ -15,9 +15,9 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-class BasicShading : public SceneBase {
+class VBOIndexing : public SceneBase {
  public:
-  BasicShading() : SceneBase("Basic Shading and Model Loading"), m_CameraController(getDefaultCameraProps()) {
+  VBOIndexing() : SceneBase("VBO Indexing with Basic Shading"), m_CameraController(getDefaultCameraProps()) {
     m_CameraController.getProps().position = glm::vec3(0, 0, 5);
   }
   void onAttach() override {
@@ -38,6 +38,11 @@ class BasicShading : public SceneBase {
     const auto &indices = m_Mesh->getIndices();
     const auto &tex_coords = m_Mesh->getTexCoords();
     const auto &normals = m_Mesh->getNormals();
+
+    Logger::log("Vertices: ", vertices.size());
+    Logger::log("Indices: ", indices.size());
+    Logger::log("Tex Coords: ", tex_coords.size());
+    Logger::log("Normals: ", normals.size());
 
     m_VertexBuffer = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(float));
     m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), uint(indices.size()));
@@ -69,7 +74,7 @@ class BasicShading : public SceneBase {
   }
 
   void onRender() override {
-    // Logger::log("BasicShading::onRender");
+    // Logger::log("VBOIndexing::onRender");
     // Clear screen
     GLCall(glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f));
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));

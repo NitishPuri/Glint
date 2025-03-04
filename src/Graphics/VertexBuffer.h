@@ -1,7 +1,7 @@
 // VertexBuffer.h
 #pragma once
 
-#include "Renderer.h"
+#include "Core/Renderer.h"
 
 class VertexBuffer {
  public:

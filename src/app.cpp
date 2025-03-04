@@ -5,14 +5,15 @@
 #include "Core/GuiLayer.h"
 #include "Core/Logger.h"
 #include "Core/SceneManager.h"
-#include "Core/Shader.h"
 #include "Core/Window.h"
+#include "Graphics/Shader.h"
 
 //
 #include "Scenes/BasicShading.h"
 #include "Scenes/CubeScene.h"
 #include "Scenes/QuadScene.h"
 #include "Scenes/UVCubeScene.h"
+#include "Scenes/VBOIndexing.h"
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
@@ -42,13 +43,14 @@ class Application {
     m_SceneManager.registerScene("2_cube", []() { return std::make_shared<CubeScene>(); });
     m_SceneManager.registerScene("3_cube_uv", []() { return std::make_shared<UVCubeScene>(); });
     m_SceneManager.registerScene("4_basic_shading", []() { return std::make_shared<BasicShading>(); });
+    m_SceneManager.registerScene("5_vbo_indexing", []() { return std::make_shared<VBOIndexing>(); });
   }
 
   void run() {
     Logger::log("Running application...");
 
     // Load initial scene
-    m_SceneManager.loadScene("4_basic_shading");
+    m_SceneManager.loadScene("5_vbo_indexing");
 
     auto last_time = std::chrono::high_resolution_clock::now();
 

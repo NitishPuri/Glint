@@ -24,6 +24,11 @@ Illumination.
 
 #### Dependencies
 
-- Use spdlog for logging
-- Use glm for math. dont write yourself!
+- [STB](https://github.com/nothings/stb)
+- [GLFW](https://github.com/glfw/glfw)
+- [GLM](https://github.com/g-truc/glm)
+- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader)
+- [imgui](https://github.com/ocornut/imgui)
 
+
+## TODO

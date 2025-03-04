@@ -1,6 +1,6 @@
 // VertexArray.h
 #pragma once
-#include "Renderer.h"
+#include "Core/Renderer.h"
 
 class VertexArray {
  public:

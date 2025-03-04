@@ -2,11 +2,16 @@
 
 #include <algorithm>
 
-#include "Renderer.h"
+#include "glm/gtc/matrix_transform.hpp"
 
-//
 #define ARCBALL_CAMERA_IMPLEMENTATION
 #include "arcball_camera/arcball_camera.h"
+
+glm::mat4 getViewProjectionMatrix(const CameraProps& props) {
+  glm::mat4 Projection = glm::perspective(glm::radians(props.fov), props.aspect, props.near, props.far);
+  glm::mat4 View = glm::lookAt(props.position, props.target, props.up);
+  return Projection * View;
+}
 
 void CameraController::update(float deltaTime) {
   processInputs(deltaTime);
