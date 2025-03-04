@@ -79,17 +79,16 @@ class BasicShading : public SceneBase {
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     auto &props = m_CameraController.getProps();
-    glm::mat4 transform = getViewMatrix();
 
-    // glm::mat4 Projection = glm::perspective(glm::radians(props.fov), props.aspect, props.near, props.far);
-    glm::mat4 View = glm::lookAt(props.position, props.target, props.up);
+    glm::mat4 View = m_CameraController.getViewProjection();
     glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
+    glm::mat4 MVP = View * Model;
 
     // Uniforms
     m_Shader.bind();
     {
       // Camera
-      m_Shader.setUniformMat4("MVP", transform);
+      m_Shader.setUniformMat4("MVP", MVP);
       m_Shader.setUniformMat4("V", View);
       m_Shader.setUniformMat4("M", Model);
 

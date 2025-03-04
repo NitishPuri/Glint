@@ -95,17 +95,18 @@ class VBOIndexing : public SceneBase {
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     auto &props = m_CameraController.getProps();
-    glm::mat4 transform = getViewMatrix();
 
-    // glm::mat4 Projection = glm::perspective(glm::radians(props.fov), props.aspect, props.near, props.far);
-    glm::mat4 View = glm::lookAt(props.position, props.target, props.up);
+    glm::mat4 View = m_CameraController.getViewProjection();
     glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
+    glm::mat4 MVP = View * Model;
+
+    Logger::log("Drawing monkey ", Model);
 
     // Uniforms
     m_Shader.bind();
     {
       // Camera
-      m_Shader.setUniformMat4("MVP", transform);
+      m_Shader.setUniformMat4("MVP", MVP);
       m_Shader.setUniformMat4("V", View);
       m_Shader.setUniformMat4("M", Model);
 
@@ -141,6 +142,48 @@ class VBOIndexing : public SceneBase {
     m_IndexBuffer->bind();
 
     GLCall(glDrawElements(GL_TRIANGLES, int(m_Indices.size()), GL_UNSIGNED_INT, nullptr));
+
+    // Draw the monkey again, translated.
+    {
+      auto ViewProjection = m_CameraController.getViewProjection();
+      glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
+      Model = glm::translate(Model, glm::vec3(1.0f, 0.0f, 0.0f));
+      glm::mat4 MVP = ViewProjection * Model;
+
+      Logger::log("Drawing monkey again", Model);
+
+      // Camera
+      m_Shader.setUniformMat4("MVP", MVP);
+      // m_Shader.setUniformMat4("V", View);
+      m_Shader.setUniformMat4("M", Model);
+
+      // Material
+      m_Shader.setUniform1f("MaterialAmbient", m_AmbientStrength / 2);
+      m_Shader.setUniform1f("MaterialSpecular", m_SpecularStrength / 2);
+
+      m_Texture->bind();
+      m_VertexArray->bind();
+
+      // vertices
+      glEnableVertexAttribArray(0);
+      m_VertexBuffer->bind();
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+      //  UV
+      glEnableVertexAttribArray(1);
+      m_UVBuffer->bind();
+      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+      // normals
+      glEnableVertexAttribArray(2);
+      m_NormalBuffer->bind();
+      glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+      // index buffer
+      m_IndexBuffer->bind();
+
+      GLCall(glDrawElements(GL_TRIANGLES, int(m_Indices.size()), GL_UNSIGNED_INT, nullptr));
+    }
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
