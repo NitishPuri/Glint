@@ -68,6 +68,42 @@ class SceneManager {
       ImGui::EndCombo();
     }
 
+    if (ImGui::Checkbox("Wireframe", &m_Wireframe)) {
+      glPolygonMode(GL_FRONT_AND_BACK, m_Wireframe ? GL_LINE : GL_FILL);
+    }
+
+    if (ImGui::Checkbox("Depth Test", &m_DepthTest)) {
+      if (m_DepthTest) {
+        glEnable(GL_DEPTH_TEST);
+      } else {
+        glDisable(GL_DEPTH_TEST);
+      }
+    }
+
+    // if (ImGui::Checkbox("Cull Face", &m_CullFace)) {
+    //   if (m_CullFace) {
+    //     glEnable(GL_CULL_FACE);
+    //   } else {
+    //     glDisable(GL_CULL_FACE);
+    //   }
+    // }
+
+    // if (ImGui::Checkbox("Blend", &m_Blend)) {
+    //   if (m_Blend) {
+    //     glEnable(GL_BLEND);
+    //   } else {
+    //     glDisable(GL_BLEND);
+    //   }
+    // }
+
+    ImGui::Checkbox("Show Stats", &m_ShowStats);
+    if (m_ShowStats) {
+      ImGuiIO& io = ImGui::GetIO();
+      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+      ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices, io.MetricsRenderIndices,
+                  io.MetricsRenderIndices / 3);
+    }
+
     ImGui::End();
 
     if (m_CurrentScene) {
@@ -82,6 +118,13 @@ class SceneManager {
   }
 
  private:
+  // Renderer config, move there
+  bool m_Wireframe = false;
+  bool m_ShowStats = false;
+  bool m_DepthTest = true;
+  bool m_CullFace = true;
+  bool m_Blend = false;
+
   std::unordered_map<std::string, std::function<std::shared_ptr<SceneBase>()>> m_Scenes;
   std::shared_ptr<SceneBase> m_CurrentScene;
 };
