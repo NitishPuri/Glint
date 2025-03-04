@@ -49,9 +49,7 @@ void Mesh::loadMesh(const std::string& filename) {
         tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
         tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
 
-        vertices.push_back(vx);
-        vertices.push_back(vy);
-        vertices.push_back(vz);
+        vertices.emplace_back(vx, vy, vz);
 
         // Check if `normal_index` is zero or positive. negative = no normal data
         if (idx.normal_index >= 0) {
@@ -59,9 +57,7 @@ void Mesh::loadMesh(const std::string& filename) {
           tinyobj::real_t ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
           tinyobj::real_t nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
 
-          normals.push_back(nx);
-          normals.push_back(ny);
-          normals.push_back(nz);
+          normals.emplace_back(nx, ny, nz);
         }
 
         // Check if `texcoord_index` is zero or positive. negative = no texcoord data
@@ -69,8 +65,7 @@ void Mesh::loadMesh(const std::string& filename) {
           tinyobj::real_t tx = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
           tinyobj::real_t ty = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
 
-          texCoords.push_back(tx);
-          texCoords.push_back(ty);
+          texCoords.emplace_back(tx, ty);
         }
 
         indices.push_back(int(indices.size()));
