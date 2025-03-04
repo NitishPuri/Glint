@@ -81,16 +81,23 @@ class BasicShading : public SceneBase {
     glm::mat4 View = glm::lookAt(props.position, props.target, props.up);
     glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
 
-    // Camera
+    // Uniforms
     m_Shader.bind();
-    m_Shader.setUniformMat4("MVP", transform);
-    m_Shader.setUniformMat4("V", View);
-    m_Shader.setUniformMat4("M", Model);
+    {
+      // Camera
+      m_Shader.setUniformMat4("MVP", transform);
+      m_Shader.setUniformMat4("V", View);
+      m_Shader.setUniformMat4("M", Model);
 
-    // Lights
-    m_Shader.setUniform3f("LightPosition_worldspace", m_LightPos.x, m_LightPos.y, m_LightPos.z);
-    m_Shader.setUniform3f("LightColor", m_LightColor.x, m_LightColor.y, m_LightColor.z);
-    m_Shader.setUniform1f("LightPower", m_LightPower);
+      // Lights
+      m_Shader.setUniform3f("LightPosition_worldspace", m_LightPos.x, m_LightPos.y, m_LightPos.z);
+      m_Shader.setUniform3f("LightColor", m_LightColor.x, m_LightColor.y, m_LightColor.z);
+      m_Shader.setUniform1f("LightPower", m_LightPower);
+
+      // Material
+      m_Shader.setUniform1f("MaterialAmbient", m_AmbientStrength);
+      m_Shader.setUniform1f("MaterialSpecular", m_SpecularStrength);
+    }
 
     m_VertexArray->bind();
 
@@ -123,6 +130,10 @@ class BasicShading : public SceneBase {
     ImGui::ColorEdit3("Light Color", glm::value_ptr(m_LightColor));
     ImGui::SliderFloat("Light Power", &m_LightPower, 0.0f, 100.0f);
 
+    ImGui::Separator();
+    ImGui::SliderFloat("Material Ambient", &m_AmbientStrength, 0.0f, 1.0f);
+    ImGui::SliderFloat("Material Specular", &m_SpecularStrength, 0.0f, 10.0f);
+
     // TODO: put this in camera controller
     m_CameraController.onImGuiRender();
 
@@ -142,6 +153,9 @@ class BasicShading : public SceneBase {
   glm::vec3 m_LightPos = glm::vec3(4, 4, 4);
   glm::vec3 m_LightColor = glm::vec3(1, 1, 1);
   float m_LightPower = 50.f;
+
+  float m_AmbientStrength = 0.1f;
+  float m_SpecularStrength = 0.3f;
 
   Shader m_Shader;
   CameraController m_CameraController;
