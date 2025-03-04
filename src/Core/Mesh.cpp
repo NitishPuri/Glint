@@ -10,7 +10,7 @@ Mesh::Mesh(const std::string& filename) { loadMesh(filename); }
 Mesh::~Mesh() {}
 
 void Mesh::loadMesh(const std::string& filename) {
-    tinyobj::ObjReaderConfig reader_config;
+  tinyobj::ObjReaderConfig reader_config;
   reader_config.mtl_search_path = "./";  // Path to material files
 
   tinyobj::ObjReader reader;
@@ -73,7 +73,7 @@ void Mesh::loadMesh(const std::string& filename) {
           texCoords.push_back(ty);
         }
 
-        indices.push_back(indices.size());
+        indices.push_back(int(indices.size()));
 
         // Optional: vertex colors
         // tinyobj::real_t red   = attrib.colors[3*size_t(idx.vertex_index)+0];
@@ -83,7 +83,7 @@ void Mesh::loadMesh(const std::string& filename) {
       index_offset += fv;
 
       // per-face material
-      shapes[s].mesh.material_ids[f];
+      //   shapes[s].mesh.material_ids[f];
     }
   }
 }
