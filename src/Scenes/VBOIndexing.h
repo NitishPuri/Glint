@@ -62,7 +62,7 @@ class VBOIndexing : public SceneBase {
     m_VertexBuffer = std::make_unique<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(glm::vec3));
     m_IndexBuffer = std::make_unique<IndexBuffer>(m_Indices.data(), uint(m_Indices.size()));
     m_NormalBuffer = std::make_unique<VertexBuffer>(m_Normals.data(), m_Normals.size() * sizeof(glm::vec3));
-    m_UVBuffer = std::make_unique<VertexBuffer>(tex_coords.data(), tex_coords.size() * sizeof(glm::vec2));
+    m_UVBuffer = std::make_unique<VertexBuffer>(m_UVs.data(), m_UVs.size() * sizeof(glm::vec2));
 
     m_Texture = std::make_unique<Texture>(getFilePath("/res/suzanne.jpg"));
   }
