@@ -22,9 +22,9 @@ void CameraController::processInputs(float dt) {
   ImVec2 mouse_drag = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right, 0.01f);
   ImGui::ResetMouseDragDelta(ImGuiMouseButton_Right);
 
-  if (!(io.MouseDown[1] || io.MouseDown[2] || (fabs(io.MouseWheel) > 0.01f))) {
-    return;
-  }
+  //   if (!(io.MouseDown[1] || io.MouseDown[2] || (fabs(io.MouseWheel) > 0.01f))) {
+  //     return;
+  //   }
 
   static int cntr = 0;
   cntr++;

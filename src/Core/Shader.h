@@ -20,7 +20,7 @@ class Shader {
   void setUniform1i(const std::string& name, int value);
   void setUniform1f(const std::string& name, float value);
 
-  // void setUniform3f(const std::string& name, float x, float y, float z) {}
+  void setUniform3f(const std::string& name, float x, float y, float z);
   // void setUniform4f(const std::string& name, float x, float y, float z, float w) {}
   void setUniformMat4(const std::string& name, const glm::mat4& matrix);
 

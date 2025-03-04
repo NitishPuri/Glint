@@ -109,9 +109,13 @@ void Shader::bind() const { GLCall(glUseProgram(m_ID)); }
 
 void Shader::unbind() const { GLCall(glUseProgram(0)); }
 
-void Shader::setUniform1i(const std::string& name, int value) { glUniform1i(getUniformLocation(name), value); }
+void Shader::setUniform1i(const std::string& name, int value) { GLCall(glUniform1i(getUniformLocation(name), value)); }
 
 void Shader::setUniform1f(const std::string& name, float value) { glUniform1f(getUniformLocation(name), value); }
+
+void Shader::setUniform3f(const std::string& name, float x, float y, float z) {
+  GLCall(glUniform3f(getUniformLocation(name), x, y, z));
+}
 
 void Shader::setUniformMat4(const std::string& name, const glm::mat4& matrix) {
   glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
@@ -120,7 +124,7 @@ void Shader::setUniformMat4(const std::string& name, const glm::mat4& matrix) {
 int Shader::getUniformLocation(const std::string& name) {
   if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) return m_UniformLocationCache[name];
 
-  int location = glGetUniformLocation(m_ID, name.c_str());
+  int location = GLCall(glGetUniformLocation(m_ID, name.c_str()));
   if (location == -1) Logger::log("Warning: uniform '", name, "' doesn't exist!");
 
   m_UniformLocationCache[name] = location;

@@ -31,3 +31,10 @@ bool GLLogCall(const char* function, const char* file, int line);
 inline std::string getRootDir() { return std::string(ROOT); }
 
 inline std::string getFilePath(const std::string& path) { return getRootDir() + path; }
+
+using uint = unsigned int;
+using uchar = unsigned char;
+
+using std::make_unique;
+using std::shared_ptr;
+using std::unique_ptr;
