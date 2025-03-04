@@ -17,7 +17,9 @@ class Mesh {
 
   const int getTriangleCount() const { return int(indices.size() / 3); }
 
-  void index();
+  void index(bool computeTBN = false);
+
+  void computeTangentBasis();
 
  private:
   void loadMesh(const std::string& filename);
@@ -26,4 +28,7 @@ class Mesh {
   std::vector<glm::vec3> normals;
   std::vector<glm::vec2> texCoords;
   std::vector<unsigned int> indices;
+
+  std::vector<glm::vec3> tangents;
+  std::vector<glm::vec3> bitangents;
 };
