@@ -31,7 +31,7 @@ class ShadowMapping : public SceneBase {
 
     Renderer::setup3D();
 
-    m_Mesh = std::make_unique<Mesh>(getFilePath("/res/room/room.obj"));
+    m_Mesh = std::make_unique<Mesh>(getFilePath("/res/room/room_thickwalls.obj"));
     m_Mesh->index();
 
     m_VertexArray = std::make_unique<VertexArray>();
@@ -119,8 +119,8 @@ class ShadowMapping : public SceneBase {
     m_depthShader.bind();
 
     // glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
-    glm::vec3 lightInvDir = -m_LightPos;
-    // glm::vec3 lightInvDir = m_LightPos;
+    // glm::vec3 lightInvDir = -m_LightPos;
+    glm::vec3 lightInvDir = m_lightDirIsNeg ? -m_LightPos : m_LightPos;
 
     // Compute the MVP matrix from the light's point of view
     glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
@@ -192,8 +192,8 @@ class ShadowMapping : public SceneBase {
     m_shadowMapping.setUniformMat4("DepthBiasMVP", depthBiasMVP);
 
     // glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
-    glm::vec3 lightInvDir = -m_LightPos;
-    // glm::vec3 lightInvDir = m_LightPos;
+    // glm::vec3 lightInvDir = -m_LightPos;
+    glm::vec3 lightInvDir = m_lightDirIsNeg ? -m_LightPos : m_LightPos;
 
     m_shadowMapping.setUniform3f("LightInvDirection_worldspace", lightInvDir.x, lightInvDir.y, lightInvDir.z);
 
@@ -261,7 +261,7 @@ class ShadowMapping : public SceneBase {
 
     ImGui::SliderFloat3("Light Position", glm::value_ptr(m_LightPos), -10.0f, 10.0f);
     ImGui::ColorEdit3("Light Color", glm::value_ptr(m_LightColor));
-    ImGui::SliderFloat("Light Power", &m_LightPower, 0.0f, 100.0f);
+    ImGui::SliderFloat("Light Power", &m_LightPower, 0.0f, 5.0f);
 
     ImGui::Separator();
     ImGui::SliderFloat("Material Ambient", &m_AmbientStrength, 0.0f, 1.0f);
@@ -271,13 +271,11 @@ class ShadowMapping : public SceneBase {
     ImGui::Checkbox("Show Depth Buffer", &m_ShowDepthBuffer);
 
     if (m_ShowDepthBuffer) {
-      ImGui::SliderFloat("Depth Near", &m_depthNear, 0.001f, 0.1f);
-      ImGui::SliderFloat("Depth Far", &m_depthFar, 0.1f, 10.0f);
-      ImGui::SliderFloat("Depth Scale", &m_depthScale, 0.1f, 100.0f);
-
       ImGui::Image(m_offscreenBuffer.getDepthRenderBuffer(),
                    ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), {0, 1}, {1, 0});
     }
+
+    ImGui::Checkbox("LightDir is -", &m_lightDirIsNeg);
 
     ImGui::End();
 
@@ -296,7 +294,7 @@ class ShadowMapping : public SceneBase {
 
   glm::vec3 m_LightPos = glm::vec3(4, 4, 4);
   glm::vec3 m_LightColor = glm::vec3(1, 1, 1);
-  float m_LightPower = 50.f;
+  float m_LightPower = 2.f;
 
   float m_AmbientStrength = 0.1f;
   float m_SpecularStrength = 0.3f;
@@ -324,4 +322,11 @@ class ShadowMapping : public SceneBase {
 
   Shader m_shadowMapping;
   glm::mat4 m_depthMVP;
+
+  // TODO: This is for debugging,
+  //  still not sure if the light direction is correct
+  //  there are other problems with the shadow as well,
+  //  like i think the sphere is not receiving any shadows.
+  //  need closer inspection and debugging
+  bool m_lightDirIsNeg = false;
 };
