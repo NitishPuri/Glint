@@ -6,6 +6,8 @@ set(NAME Glint)
 set(CMAKE_CXX_STANDARD 20)
 project(${NAME} VERSION 0.0.1)
 
+find_package(OpenGL REQUIRED)
+
 ################## Dependencies ##################
 # GLFW
 set(GLFW_PATH ${PROJECT_SOURCE_DIR}/ext/glfw-3.4.bin.WIN64)
@@ -38,8 +40,9 @@ set(GLM_INCLUDE ${GLM_PATH})
 # Source files
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE HEADERS ${PROJECT_SOURCE_DIR}/src/*.h)
+file(GLOB_RECURSE SHADERS ${PROJECT_SOURCE_DIR}/shaders/*.vert ${PROJECT_SOURCE_DIR}/shaders/*.frag)
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${SHADERS})
 target_sources(${PROJECT_NAME} PRIVATE ${GLAD_SOURCES})
 target_sources(${PROJECT_NAME} PRIVATE ${IMGUI_SOURCES})
 
@@ -52,6 +55,12 @@ target_link_libraries(${PROJECT_NAME}
 glfw3
 opengl32.lib
 )
+
+
+SOURCE_GROUP(0_External REGULAR_EXPRESSION "^${PROJECT_SOURCE_DIR}/ext/.*" )
+SOURCE_GROUP(Shaders REGULAR_EXPRESSION ".*[.](vert|frag)$" )
+SOURCE_GROUP(Core REGULAR_EXPRESSION "^${PROJECT_SOURCE_DIR}/src/Core/.*$" )
+SOURCE_GROUP(Graphics REGULAR_EXPRESSION "^${PROJECT_SOURCE_DIR}/src/Core/.*$" )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${PROJECT_SOURCE_DIR}/src
