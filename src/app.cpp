@@ -14,6 +14,7 @@
 #include "Scenes/NormalMapping.h"
 #include "Scenes/QuadScene.h"
 #include "Scenes/RenderToTexture.h"
+#include "Scenes/ShadowMapping.h"
 #include "Scenes/UVCubeScene.h"
 #include "Scenes/VBOIndexing.h"
 
@@ -48,6 +49,7 @@ class Application {
     m_SceneManager.registerScene("5_vbo_indexing", []() { return std::make_shared<VBOIndexing>(); });
     m_SceneManager.registerScene("6_normal_mapping", []() { return std::make_shared<NormalMapping>(); });
     m_SceneManager.registerScene("7_render_to_texture", []() { return std::make_shared<RenderToTexture>(); });
+    m_SceneManager.registerScene("8_shadow_mapping", []() { return std::make_shared<ShadowMapping>(); });
   }
 
   void run() {

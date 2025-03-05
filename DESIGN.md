@@ -18,3 +18,12 @@ There is no design.
 
 
 ## TODO
+
+- Manage Vertex Atributes and Layouts
+- Shader state?
+- Material system ?
+- Renderer to control rendering logic and flow?
+- render pipeline
+- ECS
+- Resource Manager for shaders, textures, meshes
+- Framebuffer management pool
