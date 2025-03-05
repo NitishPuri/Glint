@@ -95,8 +95,6 @@ class ShadowMapping : public SceneBase {
     m_RTTInitialized = true;
   }
 
-  //   void setupShadowMapping() {}
-
   void onDetach() override { glDisable(GL_CULL_FACE); };
 
   void onUpdate(float deltaTime) override {
@@ -120,7 +118,9 @@ class ShadowMapping : public SceneBase {
     // Use our shader
     m_depthShader.bind();
 
-    glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
+    // glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
+    glm::vec3 lightInvDir = -m_LightPos;
+    // glm::vec3 lightInvDir = m_LightPos;
 
     // Compute the MVP matrix from the light's point of view
     glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
@@ -191,7 +191,11 @@ class ShadowMapping : public SceneBase {
     m_shadowMapping.setUniformMat4("M", Model);
     m_shadowMapping.setUniformMat4("DepthBiasMVP", depthBiasMVP);
 
-    m_shadowMapping.setUniform3f("LightInvDirection_worldspace", 0.5f, 2, 2);
+    // glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
+    glm::vec3 lightInvDir = -m_LightPos;
+    // glm::vec3 lightInvDir = m_LightPos;
+
+    m_shadowMapping.setUniform3f("LightInvDirection_worldspace", lightInvDir.x, lightInvDir.y, lightInvDir.z);
 
     // Bind our texture in Texture Unit 0
     m_shadowMapping.bindTexture("myTextureSampler", m_Texture, 0);
@@ -206,13 +210,13 @@ class ShadowMapping : public SceneBase {
     m_shadowMapping.setUniform1i("shadowMap", 1);
 
     // Lights
-    //   m_depthShader.setUniform3f("LightPosition_worldspace", m_LightPos.x, m_LightPos.y, m_LightPos.z);
-    //   m_depthShader.setUniform3f("LightColor", m_LightColor.x, m_LightColor.y, m_LightColor.z);
-    //   m_depthShader.setUniform1f("LightPower", m_LightPower);
+    m_shadowMapping.setUniform3f("LightPosition_worldspace", m_LightPos.x, m_LightPos.y, m_LightPos.z);
+    m_shadowMapping.setUniform3f("LightColor", m_LightColor.x, m_LightColor.y, m_LightColor.z);
+    m_shadowMapping.setUniform1f("LightPower", m_LightPower);
 
-    //   // Material
-    //   m_depthShader.setUniform1f("MaterialAmbient", m_AmbientStrength);
-    //   m_depthShader.setUniform1f("MaterialSpecular", m_SpecularStrength);
+    // Material
+    m_shadowMapping.setUniform1f("MaterialAmbient", m_AmbientStrength);
+    m_shadowMapping.setUniform1f("MaterialSpecular", m_SpecularStrength);
 
     m_VertexArray->bind();
 
@@ -270,6 +274,9 @@ class ShadowMapping : public SceneBase {
       ImGui::SliderFloat("Depth Near", &m_depthNear, 0.001f, 0.1f);
       ImGui::SliderFloat("Depth Far", &m_depthFar, 0.1f, 10.0f);
       ImGui::SliderFloat("Depth Scale", &m_depthScale, 0.1f, 100.0f);
+
+      ImGui::Image(m_offscreenBuffer.getDepthRenderBuffer(),
+                   ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), {0, 1}, {1, 0});
     }
 
     ImGui::End();

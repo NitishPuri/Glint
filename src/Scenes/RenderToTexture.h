@@ -68,15 +68,16 @@ class RenderToTexture : public SceneBase {
     m_offscreenBuffer.createDepthAttachment(FrameBuffer::DepthAttachmentType::Texture);
 
     // Set the list of draw buffers.
+    // TODO: Move this into FrameBuffer class?
     GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, DrawBuffers);  // "1" is the size of DrawBuffers
 
     // Always check that our framebuffer is ok
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-      Logger::error("Framebuffer not complete!");
-      return;
-      // return false
-    }
+    // if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+    //   Logger::error("Framebuffer not complete!");
+    //   return;
+    //   // return false
+    // }
 
     // The fullscreen quad's FBO
     static const GLfloat g_quad_vertex_buffer_data[] = {

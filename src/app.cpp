@@ -56,7 +56,7 @@ class Application {
     Logger::log("Running application...");
 
     // Load initial scene
-    m_SceneManager.loadScene("7_render_to_texture");
+    m_SceneManager.loadScene("8_shadow_mapping");
 
     auto last_time = std::chrono::high_resolution_clock::now();
 
