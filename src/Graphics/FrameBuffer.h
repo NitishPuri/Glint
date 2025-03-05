@@ -6,9 +6,16 @@
 
 class FrameBuffer {
  public:
+  enum class DepthAttachmentType {
+    None,
+    RenderBuffer,  // faster, cant sample from it
+    Texture        // slower, can sample from it
+  };
+
   ~FrameBuffer() {
-    glDeleteFramebuffers(1, &m_fbo);
-    glDeleteRenderbuffers(1, &m_depthRenderBuffer);
+    cleanup();
+    // glDeleteFramebuffers(1, &m_fbo);
+    // glDeleteRenderbuffers(1, &m_depthRenderBuffer);
   }
 
   void create(int width, int height) {
@@ -21,35 +28,27 @@ class FrameBuffer {
   void createColorAttachment() {
     m_ColorAttachment = make_unique<Texture>(m_Width, m_Height);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_ColorAttachment->getID(), 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    return;
+
+    setTextureParameters();
+
+    checkFramebufferStatus();
   }
 
-  void genDepthRenderBuffer() {
-    // GLuint depthrenderbuffer;
-    glGenRenderbuffers(1, &m_depthRenderBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_depthRenderBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthRenderBuffer);
-  }
+  void createDepthAttachment(DepthAttachmentType type) {
+    cleanupDepthAttachment();
 
-  void createDepthRenderTexture() {
-    // cleanup ??
-    // glDeleteRenderbuffers(1, &m_depthRenderBuffer); ??
+    switch (type) {
+      case DepthAttachmentType::RenderBuffer:
+        createDepthRenderBuffer();
+        break;
+      case DepthAttachmentType::Texture:
+        createDepthTexture();
+        break;
+      default:
+        break;
+    }
 
-    // GLuint depthTexture;
-    glGenTextures(1, &m_depthRenderBuffer);
-    glBindTexture(GL_TEXTURE_2D, m_depthRenderBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_Width, m_Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthRenderBuffer, 0);
+    checkFramebufferStatus();
   }
 
   void bind() { glBindFramebuffer(GL_FRAMEBUFFER, m_fbo); }
@@ -57,16 +56,61 @@ class FrameBuffer {
 
   const unique_ptr<Texture>& getColorAttachment() { return m_ColorAttachment; }
   // Texture* getDepthAttachment() { return m_DepthAttachment.get(); }
-
   GLuint getID() const { return m_fbo; }
-  GLuint getDepthRenderBuffer() const { return m_depthRenderBuffer; }
+  GLuint getDepthRenderBuffer() const { return m_depthAttachment; }
 
  private:
-  GLuint m_fbo;
+  void cleanup() {
+    if (m_fbo != 0) {
+      glDeleteFramebuffers(1, &m_fbo);
+      m_fbo = 0;
+    }
+    cleanupDepthAttachment();
+    m_ColorAttachment.reset();
+  }
+
+  void cleanupDepthAttachment() {
+    if (m_depthAttachment != 0) {
+      glDeleteRenderbuffers(1, &m_depthAttachment);
+      glDeleteTextures(1, &m_depthAttachment);
+      m_depthAttachment = 0;
+    }
+  }
+
+  void createDepthRenderBuffer() {
+    glGenRenderbuffers(1, &m_depthAttachment);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_depthAttachment);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthAttachment);
+  }
+
+  void createDepthTexture() {
+    glGenTextures(1, &m_depthAttachment);
+    glBindTexture(GL_TEXTURE_2D, m_depthAttachment);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_Width, m_Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    setTextureParameters();
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthAttachment, 0);
+  }
+
+  void setTextureParameters() {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  }
+
+  void checkFramebufferStatus() {
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+      throw std::runtime_error("Framebuffer is not complete!");
+    }
+  }
+
+  GLuint m_fbo = 0;
 
   unique_ptr<Texture> m_ColorAttachment;
   // unique_ptr<Texture> m_DepthAttachment;
 
   int m_Width = -1, m_Height = -1;
-  GLuint m_depthRenderBuffer;
+  GLuint m_depthAttachment;
 };

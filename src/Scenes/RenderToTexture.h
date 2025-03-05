@@ -64,12 +64,8 @@ class RenderToTexture : public SceneBase {
     // generate and bind texture we are going to render to
     // this now also sets the texture as the currentcolor attachment #0
     m_offscreenBuffer.createColorAttachment();
-
     // and the depth buffer
-    // m_offscreenBuffer.genDepthRenderBuffer();
-
-    //// Alternative : Depth texture. Slower, but you can sample it later in your shader
-    m_offscreenBuffer.createDepthRenderTexture();
+    m_offscreenBuffer.createDepthAttachment(FrameBuffer::DepthAttachmentType::Texture);
 
     // Set the list of draw buffers.
     GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
@@ -175,7 +171,6 @@ class RenderToTexture : public SceneBase {
     /// render to screen
     {
       m_offscreenBuffer.unbind();
-      // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
       auto windowWidth = int(ImGui::GetIO().DisplaySize.x);
       auto windowHeight = int(ImGui::GetIO().DisplaySize.y);
@@ -189,7 +184,6 @@ class RenderToTexture : public SceneBase {
 
       // Bind our texture in Texture Unit 0
       if (m_ShowDepthBuffer) {
-        // m_quadShader.bindTexture("renderedTexture", m_offscreenBuffer.getColorAttachment(), 0);
         glActiveTexture(GL_TEXTURE0 + 0);
         glBindTexture(GL_TEXTURE_2D, m_offscreenBuffer.getDepthRenderBuffer());
       } else {
