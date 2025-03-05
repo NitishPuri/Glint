@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 set(NAME Glint)
 
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 project(${NAME} VERSION 0.0.1)
 
 ################## Dependencies ##################
@@ -60,5 +60,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${GLFW_INCLUDE}
     ${GLM_INCLUDE}
 )
+
+# Enable warnings
+if (MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive-)
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+endif()
 
 ################## Core ##################

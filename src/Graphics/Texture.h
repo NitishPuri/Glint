@@ -4,6 +4,7 @@
 
 class Texture {
  public:
+  Texture();
   Texture(const std::string& path);
   ~Texture();
 
@@ -11,6 +12,8 @@ class Texture {
   void unbind() const;
 
   std::string getFilePath() const { return m_FilePath; }
+
+  unsigned int getID() const { return m_ID; }
 
  private:
   unsigned int m_ID;

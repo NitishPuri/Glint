@@ -8,7 +8,7 @@ in vec3 LightDirection_cameraspace;
 
 out vec3 color;
 
-uniform sampler2D myTextureSampler;
+uniform sampler2D diffuseSampler;
 uniform mat4 MV;
 
 // light
@@ -22,7 +22,7 @@ uniform float MaterialSpecular;
 void main(){
 	
 	// Material properties
-	vec3 MaterialDiffuseColor = texture( myTextureSampler, UV ).rgb;
+	vec3 MaterialDiffuseColor = texture( diffuseSampler, UV ).rgb;
 	vec3 MaterialAmbientColor = vec3(MaterialAmbient) * MaterialDiffuseColor;
 	vec3 MaterialSpecularColor = vec3(MaterialSpecular);
 

@@ -5,6 +5,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
+Texture::Texture() : m_ID(0), m_Width(0), m_Height(0), m_BPP(0), m_FilePath("") {
+  GLCall(glGenTextures(1, &m_ID));
+  GLCall(glBindTexture(GL_TEXTURE_2D, m_ID));
+}
+
 Texture::Texture(const std::string& path) : m_ID(0), m_Width(0), m_Height(0), m_BPP(0), m_FilePath(path) {
   Logger::log("Loading texture: ", path);
   stbi_set_flip_vertically_on_load(1);
