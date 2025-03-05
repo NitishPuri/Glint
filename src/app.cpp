@@ -13,6 +13,7 @@
 #include "Scenes/CubeScene.h"
 #include "Scenes/NormalMapping.h"
 #include "Scenes/QuadScene.h"
+#include "Scenes/RenderToTexture.h"
 #include "Scenes/UVCubeScene.h"
 #include "Scenes/VBOIndexing.h"
 
@@ -46,13 +47,14 @@ class Application {
     m_SceneManager.registerScene("4_basic_shading", []() { return std::make_shared<BasicShading>(); });
     m_SceneManager.registerScene("5_vbo_indexing", []() { return std::make_shared<VBOIndexing>(); });
     m_SceneManager.registerScene("6_normal_mapping", []() { return std::make_shared<NormalMapping>(); });
+    m_SceneManager.registerScene("7_render_to_texture", []() { return std::make_shared<RenderToTexture>(); });
   }
 
   void run() {
     Logger::log("Running application...");
 
     // Load initial scene
-    m_SceneManager.loadScene("6_normal_mapping");
+    m_SceneManager.loadScene("7_render_to_texture");
 
     auto last_time = std::chrono::high_resolution_clock::now();
 
