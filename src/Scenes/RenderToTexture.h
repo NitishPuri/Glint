@@ -61,27 +61,15 @@ class RenderToTexture : public SceneBase {
     }
 
     m_offscreenBuffer.create(windowWidth, windowHeight);
-
     // generate and bind texture we are going to render to
     // this now also sets the texture as the currentcolor attachment #0
     m_offscreenBuffer.createColorAttachment();
-    // m_RenderedTexture = std::make_unique<Texture>(windowWidth, windowHeight);
 
-    // The depth buffer
-    m_offscreenBuffer.genDepthRenderBuffer();
+    // and the depth buffer
+    // m_offscreenBuffer.genDepthRenderBuffer();
 
     //// Alternative : Depth texture. Slower, but you can sample it later in your shader
-    // GLuint depthTexture;
-    // glGenTextures(1, &depthTexture);
-    // glBindTexture(GL_TEXTURE_2D, depthTexture);
-    // glTexImage2D(GL_TEXTURE_2D, 0,GL_DEPTH_COMPONENT24, 1024, 768, 0,GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    //// Depth texture alternative :
-    // glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+    m_offscreenBuffer.createDepthRenderTexture();
 
     // Set the list of draw buffers.
     GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
@@ -186,24 +174,35 @@ class RenderToTexture : public SceneBase {
 
     /// render to screen
     {
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      m_offscreenBuffer.unbind();
+      // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
       auto windowWidth = int(ImGui::GetIO().DisplaySize.x);
       auto windowHeight = int(ImGui::GetIO().DisplaySize.y);
 
       // Render on the whole framebuffer, complete from the lower left corner to the upper right
       glViewport(0, 0, windowWidth, windowHeight);
-
-      // Clear the screen
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      // Use RTT shader
+      // Use passthrough quad shader
       m_quadShader.bind();
 
       // Bind our texture in Texture Unit 0
-      m_quadShader.bindTexture("renderedTexture", m_offscreenBuffer.getColorAttachment(), 0);
+      if (m_ShowDepthBuffer) {
+        // m_quadShader.bindTexture("renderedTexture", m_offscreenBuffer.getColorAttachment(), 0);
+        glActiveTexture(GL_TEXTURE0 + 0);
+        glBindTexture(GL_TEXTURE_2D, m_offscreenBuffer.getDepthRenderBuffer());
+      } else {
+        m_quadShader.bindTexture("renderedTexture", m_offscreenBuffer.getColorAttachment(), 0);
+      }
 
       m_quadShader.setUniform1f("time", (float)(glfwGetTime() * 10.0f));
+      m_quadShader.setUniform1i("isDepth", m_ShowDepthBuffer ? 1 : 0);
+      if (m_ShowDepthBuffer) {
+        m_quadShader.setUniform1f("depthNear", m_depthNear);
+        m_quadShader.setUniform1f("depthFar", m_depthFar);
+        m_quadShader.setUniform1f("depthScale", m_depthScale);
+      }
 
       // 1rst attribute buffer : vertices
       glEnableVertexAttribArray(0);
@@ -228,6 +227,15 @@ class RenderToTexture : public SceneBase {
     ImGui::SliderFloat("Material Ambient", &m_AmbientStrength, 0.0f, 1.0f);
     ImGui::SliderFloat("Material Specular", &m_SpecularStrength, 0.0f, 10.0f);
 
+    ImGui::Separator();
+    ImGui::Checkbox("Show Depth Buffer", &m_ShowDepthBuffer);
+
+    if (m_ShowDepthBuffer) {
+      ImGui::SliderFloat("Depth Near", &m_depthNear, 0.001f, 0.1f);
+      ImGui::SliderFloat("Depth Far", &m_depthFar, 0.1f, 10.0f);
+      ImGui::SliderFloat("Depth Scale", &m_depthScale, 0.1f, 100.0f);
+    }
+
     ImGui::End();
 
     m_CameraController.onImGuiRender();
@@ -249,6 +257,12 @@ class RenderToTexture : public SceneBase {
 
   float m_AmbientStrength = 0.1f;
   float m_SpecularStrength = 0.3f;
+
+  // used to visualize depth
+  bool m_ShowDepthBuffer = false;
+  float m_depthNear = 0.1f;
+  float m_depthFar = 100.0f;
+  float m_depthScale = 1.0f;
 
   CameraController m_CameraController;
 
