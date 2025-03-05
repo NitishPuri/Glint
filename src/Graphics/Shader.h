@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "Core/Renderer.h"
+#include "Texture.h"
 #include "glm/glm.hpp"
 
 class Shader {
@@ -27,11 +28,13 @@ class Shader {
 
   GLuint getID() const { return m_ID; }
 
+  void bindTexture(const std::string& uniformName, const unique_ptr<Texture>& texture, GLuint slot = 0) {
+    texture->bind(slot);
+    setUniform1i(uniformName, slot);
+  }
+
  private:
   GLuint m_ID;
   std::unordered_map<std::string, int> m_UniformLocationCache;
   int getUniformLocation(const std::string& name);
 };
-
-// GLuint LoadShaders(const char* vertex_file_path,
-//                    const char* fragment_file_path);

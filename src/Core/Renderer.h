@@ -48,7 +48,9 @@ class RendererConfig {
   static bool m_Blend;
 };
 
+// TODO: Use this method in scenes
 class Renderer {
+  // TODO: Use this method in scenes
   static void setup3D() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -58,6 +60,7 @@ class Renderer {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
 
+  // TODO: Use this method in scenes
   static void setp2D() {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
