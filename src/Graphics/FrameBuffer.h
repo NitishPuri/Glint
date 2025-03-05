@@ -4,6 +4,16 @@
 #include "Core/Renderer.h"
 #include "Texture.h"
 
+/*  TODO:
+Add buider pattern for better interfaces?
+FrameBuffer& withColorAttachment();
+FrameBuffer& withDepthAttachment(DepthAttachmentType type);
+
+// Add state validation
+bool isComplete() const;
+bool hasDepthAttachment() const;
+*/
+
 class FrameBuffer {
  public:
   enum class DepthAttachmentType {
@@ -108,8 +118,9 @@ class FrameBuffer {
 
   GLuint m_fbo = 0;
 
-  unique_ptr<Texture> m_ColorAttachment;
-  // unique_ptr<Texture> m_DepthAttachment;
+  // TODO: multiple render targets
+  std::vector<std::unique_ptr<Texture>> m_colorAttachments;
+  unique_ptr<Texture> m_ColorAttachment;  
 
   int m_Width = -1, m_Height = -1;
   GLuint m_depthAttachment;
