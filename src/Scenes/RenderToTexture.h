@@ -3,6 +3,7 @@
 // core
 #include "Core/SceneBase.h"
 #include "Graphics/Camera.h"
+#include "Graphics/FrameBuffer.h"
 #include "Graphics/IndexBuffer.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Shader.h"
@@ -24,10 +25,7 @@ class RenderToTexture : public SceneBase {
     Logger::log("RenderToTexture::onAttach()\n\n");
     m_standarShader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading.frag"));
 
-    // TODO: Move to something like Renderer::setup3D() ?
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glEnable(GL_CULL_FACE);
+    Renderer::setup3D();
 
     m_Mesh = std::make_unique<Mesh>(getFilePath("/res/suzanne.obj"));
     m_Mesh->index();
@@ -52,35 +50,25 @@ class RenderToTexture : public SceneBase {
   }
 
   void setupRtt() {
-    glGenFramebuffers(1, &m_offscreenBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_offscreenBuffer);
+    if (m_RTTInitialized) return;
 
     auto windowWidth = int(ImGui::GetIO().DisplaySize.x);
     auto windowHeight = int(ImGui::GetIO().DisplaySize.y);
     Logger::log("Window Width: ", windowWidth, " Window Height: ", windowHeight);
     if (windowWidth < 0 || windowHeight < 0) {
-      // TODO: handle better, another way to ensure we get the right window size here?
-      //  or maybe delay initialization until we have the window size?
-      Logger::error("Window width or height is not set yet.");
-      windowWidth = 800;
-      windowHeight = 600;
+      Logger::error("Window width or height is not set yet. Will try again later.");
+      return;
     }
-    // generate and bind texture we are going to render to
-    m_RenderedTexture = std::make_unique<Texture>(windowWidth, windowHeight);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 
-    // Poor filtering
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    m_offscreenBuffer.create(windowWidth, windowHeight);
+
+    // generate and bind texture we are going to render to
+    // this now also sets the texture as the currentcolor attachment #0
+    m_offscreenBuffer.createColorAttachment();
+    // m_RenderedTexture = std::make_unique<Texture>(windowWidth, windowHeight);
 
     // The depth buffer
-    GLuint depthrenderbuffer;
-    glGenRenderbuffers(1, &depthrenderbuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+    m_offscreenBuffer.genDepthRenderBuffer();
 
     //// Alternative : Depth texture. Slower, but you can sample it later in your shader
     // GLuint depthTexture;
@@ -91,9 +79,6 @@ class RenderToTexture : public SceneBase {
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    // Set "m_RenderedTexture" as our colour attachement #0
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_RenderedTexture->getID(), 0);
 
     //// Depth texture alternative :
     // glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
@@ -116,35 +101,28 @@ class RenderToTexture : public SceneBase {
     };
 
     m_quadVertexBuffer = make_unique<VertexBuffer>(g_quad_vertex_buffer_data, sizeof(g_quad_vertex_buffer_data));
-    // GLuint quad_vertexbuffer;
-    // glGenBuffers(1, &quad_vertexbuffer);
-    // glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-
     // Create and compile our GLSL program from the shaders
     m_quadShader.init(getFilePath("/shaders/passthrough.vert"), getFilePath("/shaders/wobbly_texture.frag"));
-    // m_RTTShader.bind();
-    // m_RTTShader.setUniform1i("renderedTexture", 0);
-    // GLuint texID = glGetUniformLocation(quad_programID, "renderedTexture");
-    // GLuint timeID = glGetUniformLocation(quad_programID, "time");
+
     m_RTTInitialized = true;
   }
 
   void onDetach() override { glDisable(GL_CULL_FACE); };
 
   void onUpdate(float deltaTime) override {
-    // Rotate Quad
-    // m_Rotation += m_RotationSpeed * deltaTime * 10;
-    // if (m_Rotation > 360.0f) m_Rotation -= 360.0f;
-
     // Update camera
     m_CameraController.update(deltaTime);
   };
 
   void onRender() override {
+    if (!m_RTTInitialized) {
+      Logger::error("RTT not initialized yet. Retrying...");
+      setupRtt();
+      return;
+    }
     // Render to our framebuffer
     {
-      glBindFramebuffer(GL_FRAMEBUFFER, m_offscreenBuffer);
+      m_offscreenBuffer.bind();
       glViewport(0, 0, int(ImGui::GetIO().DisplaySize.x), int(ImGui::GetIO().DisplaySize.y));
 
       // Clear the screen
@@ -223,29 +201,14 @@ class RenderToTexture : public SceneBase {
       m_quadShader.bind();
 
       // Bind our texture in Texture Unit 0
-      m_quadShader.bindTexture("renderedTexture", m_RenderedTexture, 0);
-      // m_RenderedTexture->bind(0);
-      // m_quadShader.setUniform1i("renderedTexture", 0);
+      m_quadShader.bindTexture("renderedTexture", m_offscreenBuffer.getColorAttachment(), 0);
 
-      // glActiveTexture(GL_TEXTURE0);
-      // glBindTexture(GL_TEXTURE_2D, m_RenderedTexture->getID());
-      // Set our "renderedTexture" sampler to use Texture Unit 0
-      // glUniform1i(texID, 0);
-
-      // m_quadShader.setUniform1f("time", (float)(glfwGetTime() * 10.0f));
-      // glUniform1f(timeID, (float)(glfwGetTime() * 10.0f));
+      m_quadShader.setUniform1f("time", (float)(glfwGetTime() * 10.0f));
 
       // 1rst attribute buffer : vertices
       glEnableVertexAttribArray(0);
       m_quadVertexBuffer->bind();
-      // glBindBuffer(GL_ARRAY_BUFFER, m_quadVertexBuffer->getID());
-      glVertexAttribPointer(0,  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-                            3,  // size
-                            GL_FLOAT,  // type
-                            GL_FALSE,  // normalized?
-                            0,         // stride
-                            (void *)0  // array buffer offset
-      );
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
       // Draw the triangles !
       glDrawArrays(GL_TRIANGLES, 0, 6);  // 2*3 indices starting at 0 -> 2 triangles
@@ -255,7 +218,7 @@ class RenderToTexture : public SceneBase {
   }
 
   void onImGuiRender() override {
-    ImGui::Begin("Quad Control Panel");
+    ImGui::Begin("RTT Panel");
 
     ImGui::SliderFloat3("Light Position", glm::value_ptr(m_LightPos), -10.0f, 10.0f);
     ImGui::ColorEdit3("Light Color", glm::value_ptr(m_LightColor));
@@ -265,10 +228,9 @@ class RenderToTexture : public SceneBase {
     ImGui::SliderFloat("Material Ambient", &m_AmbientStrength, 0.0f, 1.0f);
     ImGui::SliderFloat("Material Specular", &m_SpecularStrength, 0.0f, 10.0f);
 
-    // TODO: put this in camera controller
-    m_CameraController.onImGuiRender();
-
     ImGui::End();
+
+    m_CameraController.onImGuiRender();
   };
 
   void onWindowResize(int width, int height) override {
@@ -300,7 +262,6 @@ class RenderToTexture : public SceneBase {
   // TODO: create abstraction for Framebuffer, or the genral concept of RTT?
   bool m_RTTInitialized = false;
   Shader m_quadShader;
-  GLuint m_offscreenBuffer = 0;
-  unique_ptr<Texture> m_RenderedTexture;
+  FrameBuffer m_offscreenBuffer;
   unique_ptr<VertexBuffer> m_quadVertexBuffer;
 };
