@@ -99,12 +99,9 @@ class NormalMapping : public SceneBase {
       m_Shader.setUniform1f("MaterialSpecular", m_SpecularStrength);
     }
 
-    m_DiffuseTexture->bind(0);
-    m_Shader.setUniform1i("DiffuseTextureSampler", 0);
-    m_NormalTexture->bind(1);
-    m_Shader.setUniform1i("NormalTextureSampler", 1);
-    m_SpecularTexture->bind(2);
-    m_Shader.setUniform1i("SpecularTextureSampler", 2);
+    m_Shader.bindTexture("DiffuseTextureSampler", m_DiffuseTexture, 0);
+    m_Shader.bindTexture("NormalTextureSampler", m_NormalTexture, 1);
+    m_Shader.bindTexture("SpecularTextureSampler", m_SpecularTexture, 2);
 
     m_VertexArray->bind();
 
