@@ -19,18 +19,21 @@
 class ShadowMapping : public SceneBase {
  public:
   ShadowMapping() : SceneBase("Shadow Mapping"), m_CameraController(getDefaultCameraProps()) {
-    m_CameraController.getProps().position = glm::vec3(0, 0, 5);
+    m_CameraController.getProps().position = glm::vec3(5, 4, -13);
   }
   void onAttach() override {
-    Logger::log("RenderToTexture::onAttach()\n\n");
-    m_standarShader.init(getFilePath("/shaders/standard_shading.vert"), getFilePath("/shaders/standard_shading.frag"));
+    Logger::log("ShadowMapping::onAttach()\n\n");
+
+    glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f);
+
+    m_depthShader.init(getFilePath("/shaders/depth_rtt.vert"), getFilePath("/shaders/depth_rtt.frag"));
+    m_shadowMapping.init(getFilePath("/shaders/shadow_mapping.vert"), getFilePath("/shaders/shadow_mapping.frag"));
 
     Renderer::setup3D();
 
-    m_Mesh = std::make_unique<Mesh>(getFilePath("/res/suzanne.obj"));
+    m_Mesh = std::make_unique<Mesh>(getFilePath("/res/room/room.obj"));
     m_Mesh->index();
 
-    // TODO: order matters here, does it?
     m_VertexArray = std::make_unique<VertexArray>();
 
     const auto &vertices = m_Mesh->getVertices();
@@ -43,7 +46,7 @@ class ShadowMapping : public SceneBase {
     m_UVBuffer = std::make_unique<VertexBuffer>(tex_coords.data(), tex_coords.size() * sizeof(glm::vec2));
     m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), int(indices.size()));
 
-    m_Texture = std::make_unique<Texture>(getFilePath("/res/suzanne.jpg"));
+    m_Texture = std::make_unique<Texture>(getFilePath("/res/room/uvmap.jpg"));
 
     /// Setup RTT
     setupRtt();
@@ -63,20 +66,21 @@ class ShadowMapping : public SceneBase {
     m_offscreenBuffer.create(windowWidth, windowHeight);
     // generate and bind texture we are going to render to
     // this now also sets the texture as the currentcolor attachment #0
-    m_offscreenBuffer.createColorAttachment();
+    // m_offscreenBuffer.createColorAttachment();
     // and the depth buffer
     m_offscreenBuffer.createDepthAttachment(FrameBuffer::DepthAttachmentType::Texture);
 
-    // Set the list of draw buffers.
-    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, DrawBuffers);  // "1" is the size of DrawBuffers
+    // No color output in the bound framebuffer, only depth.
+    // TODO: Move this into FrameBuffer class?
+    // check if this is needed
+    glDrawBuffer(GL_NONE);
 
     // Always check that our framebuffer is ok
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-      Logger::error("Framebuffer not complete!");
-      return;
-      // return false
-    }
+    // if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+    //   Logger::error("Framebuffer not complete!");
+    //   return;
+    //   // return false
+    // }
 
     // The fullscreen quad's FBO
     static const GLfloat g_quad_vertex_buffer_data[] = {
@@ -86,10 +90,12 @@ class ShadowMapping : public SceneBase {
 
     m_quadVertexBuffer = make_unique<VertexBuffer>(g_quad_vertex_buffer_data, sizeof(g_quad_vertex_buffer_data));
     // Create and compile our GLSL program from the shaders
-    m_quadShader.init(getFilePath("/shaders/passthrough.vert"), getFilePath("/shaders/wobbly_texture.frag"));
+    m_quadShader.init(getFilePath("/shaders/passthrough.vert"), getFilePath("/shaders/SimpleTexture.frag"));
 
     m_RTTInitialized = true;
   }
+
+  //   void setupShadowMapping() {}
 
   void onDetach() override { glDisable(GL_CULL_FACE); };
 
@@ -98,116 +104,152 @@ class ShadowMapping : public SceneBase {
     m_CameraController.update(deltaTime);
   };
 
+  void renderDepth() {
+    m_offscreenBuffer.bind();
+    glViewport(0, 0, int(ImGui::GetIO().DisplaySize.x), int(ImGui::GetIO().DisplaySize.y));
+
+    // We don't use bias in the shader, but instead we draw back faces,
+    // which are already separated from the front faces by a small distance
+    // (if your geometry is made this way)
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);  // Cull back-facing triangles -> draw only front-facing triangles
+
+    // Clear the screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Use our shader
+    m_depthShader.bind();
+
+    glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
+
+    // Compute the MVP matrix from the light's point of view
+    glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+    glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    // or, for spot light :
+    // glm::vec3 lightPos(5, 20, 20);
+    // glm::mat4 depthProjectionMatrix = glm::perspective<float>(45.0f, 1.0f, 2.0f, 50.0f);
+    // glm::mat4 depthViewMatrix = glm::lookAt(lightPos, lightPos-lightInvDir, glm::vec3(0,1,0));
+
+    glm::mat4 depthModelMatrix = glm::mat4(1.0);
+    m_depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+
+    // Send our transformation to the currently bound shader,
+    // in the "MVP" uniform
+    m_depthShader.setUniformMat4("depthMVP", m_depthMVP);
+
+    // m_VertexArray->bind();
+
+    //  1rst attribute buffer : vertices
+    glEnableVertexAttribArray(0);
+    m_VertexBuffer->bind();
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    m_IndexBuffer->bind();
+
+    GLCall(glDrawElements(GL_TRIANGLES, int(m_Mesh->getIndices().size()), GL_UNSIGNED_INT, nullptr));
+
+    glEnableVertexAttribArray(0);
+  }
+
+  void renderToScreen() {
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    m_offscreenBuffer.unbind();
+
+    // Render on the whole framebuffer, complete from the lower left corner to the upper right
+    auto windowWidth = int(ImGui::GetIO().DisplaySize.x);
+    auto windowHeight = int(ImGui::GetIO().DisplaySize.y);
+    glViewport(0, 0, windowWidth, windowHeight);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);  // Cull back-facing triangles -> draw only front-facing triangles
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    m_shadowMapping.bind();
+
+    glm::mat4 Projection = m_CameraController.getProjectionMatrix();
+    glm::mat4 View = m_CameraController.getViewMatrix();
+    glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
+    glm::mat4 MVP = Projection * View * Model;
+
+    glm::mat4 biasMatrix(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0);
+
+    glm::mat4 depthBiasMVP = biasMatrix * m_depthMVP;
+
+    // Send our transformation to the currently bound shader,
+    // in the "MVP" uniform
+    // glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    // glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+    // glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+    // glUniformMatrix4fv(DepthBiasID, 1, GL_FALSE, &depthBiasMVP[0][0]);
+
+    // glUniform3f(lightInvDirID, lightInvDir.x, lightInvDir.y, lightInvDir.z);
+
+    // Camera
+    m_shadowMapping.setUniformMat4("MVP", MVP);
+    m_shadowMapping.setUniformMat4("V", View);
+    m_shadowMapping.setUniformMat4("M", Model);
+    m_shadowMapping.setUniformMat4("DepthBiasMVP", depthBiasMVP);
+
+    m_shadowMapping.setUniform3f("LightInvDirection_worldspace", 0.5f, 2, 2);
+
+    // Bind our texture in Texture Unit 0
+    m_shadowMapping.bindTexture("myTextureSampler", m_Texture, 0);
+    //   glActiveTexture(GL_TEXTURE0);
+    //   glBindTexture(GL_TEXTURE_2D, Texture);
+    // Set our "myTextureSampler" sampler to use Texture Unit 0
+    //   glUniform1i(TextureID, 0);
+
+    //   m_shadowMapping.bindTexture("shadowMap", m_offscreenBuffer.getDepthRenderBuffer(), 1);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, m_offscreenBuffer.getDepthRenderBuffer());
+    m_shadowMapping.setUniform1i("shadowMap", 1);
+
+    // Lights
+    //   m_depthShader.setUniform3f("LightPosition_worldspace", m_LightPos.x, m_LightPos.y, m_LightPos.z);
+    //   m_depthShader.setUniform3f("LightColor", m_LightColor.x, m_LightColor.y, m_LightColor.z);
+    //   m_depthShader.setUniform1f("LightPower", m_LightPower);
+
+    //   // Material
+    //   m_depthShader.setUniform1f("MaterialAmbient", m_AmbientStrength);
+    //   m_depthShader.setUniform1f("MaterialSpecular", m_SpecularStrength);
+
+    m_VertexArray->bind();
+
+    // TODO: Refactor these calls into the mesh or into a mesh renderer class maybe?
+    //  1rst attribute buffer : vertices
+    glEnableVertexAttribArray(0);
+    m_VertexBuffer->bind();
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+    // 2nd attribute buffer : UV
+    glEnableVertexAttribArray(1);
+    m_UVBuffer->bind();
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+    // 3rd attribute buffer : normals
+    glEnableVertexAttribArray(2);
+    m_NormalBuffer->bind();
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+    m_IndexBuffer->bind();
+
+    auto indices_count = int(m_Mesh->getIndices().size());
+    GLCall(glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_INT, nullptr));
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
+  }
+
   void onRender() override {
     if (!m_RTTInitialized) {
       Logger::error("RTT not initialized yet. Retrying...");
       setupRtt();
       return;
     }
-    // Render to our framebuffer
-    {
-      m_offscreenBuffer.bind();
-      glViewport(0, 0, int(ImGui::GetIO().DisplaySize.x), int(ImGui::GetIO().DisplaySize.y));
-
-      // Clear the screen
-      GLCall(glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f));
-      GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
-      // Use our shader
-      m_standarShader.bind();
-
-      glm::mat4 View = m_CameraController.getViewProjection();
-      glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
-      glm::mat4 MVP = View * Model;
-
-      // Uniforms
-      m_standarShader.bind();
-      {
-        // Camera
-        m_standarShader.setUniformMat4("MVP", MVP);
-        m_standarShader.setUniformMat4("V", View);
-        m_standarShader.setUniformMat4("M", Model);
-
-        // Lights
-        m_standarShader.setUniform3f("LightPosition_worldspace", m_LightPos.x, m_LightPos.y, m_LightPos.z);
-        m_standarShader.setUniform3f("LightColor", m_LightColor.x, m_LightColor.y, m_LightColor.z);
-        m_standarShader.setUniform1f("LightPower", m_LightPower);
-
-        // Material
-        m_standarShader.setUniform1f("MaterialAmbient", m_AmbientStrength);
-        m_standarShader.setUniform1f("MaterialSpecular", m_SpecularStrength);
-      }
-
-      m_standarShader.bindTexture("diffuseSampler", m_Texture, 0);
-
-      m_VertexArray->bind();
-
-      // TODO: Refactor these calls into the mesh or into a mesh renderer class maybe?
-      //  1rst attribute buffer : vertices
-      glEnableVertexAttribArray(0);
-      m_VertexBuffer->bind();
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-      // 2nd attribute buffer : UV
-      glEnableVertexAttribArray(1);
-      m_UVBuffer->bind();
-      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-      // 3rd attribute buffer : normals
-      glEnableVertexAttribArray(2);
-      m_NormalBuffer->bind();
-      glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-      m_IndexBuffer->bind();
-
-      auto indices_count = int(m_Mesh->getIndices().size());
-      GLCall(glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_INT, nullptr));
-
-      glDisableVertexAttribArray(0);
-      glDisableVertexAttribArray(1);
-      glDisableVertexAttribArray(2);
-    }
-
-    /// render to screen
-    {
-      m_offscreenBuffer.unbind();
-
-      auto windowWidth = int(ImGui::GetIO().DisplaySize.x);
-      auto windowHeight = int(ImGui::GetIO().DisplaySize.y);
-
-      // Render on the whole framebuffer, complete from the lower left corner to the upper right
-      glViewport(0, 0, windowWidth, windowHeight);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      // Use passthrough quad shader
-      m_quadShader.bind();
-
-      // Bind our texture in Texture Unit 0
-      if (m_ShowDepthBuffer) {
-        glActiveTexture(GL_TEXTURE0 + 0);
-        glBindTexture(GL_TEXTURE_2D, m_offscreenBuffer.getDepthRenderBuffer());
-      } else {
-        m_quadShader.bindTexture("renderedTexture", m_offscreenBuffer.getColorAttachment(), 0);
-      }
-
-      m_quadShader.setUniform1f("time", (float)(glfwGetTime() * 10.0f));
-      m_quadShader.setUniform1i("isDepth", m_ShowDepthBuffer ? 1 : 0);
-      if (m_ShowDepthBuffer) {
-        m_quadShader.setUniform1f("depthNear", m_depthNear);
-        m_quadShader.setUniform1f("depthFar", m_depthFar);
-        m_quadShader.setUniform1f("depthScale", m_depthScale);
-      }
-
-      // 1rst attribute buffer : vertices
-      glEnableVertexAttribArray(0);
-      m_quadVertexBuffer->bind();
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-      // Draw the triangles !
-      glDrawArrays(GL_TRIANGLES, 0, 6);  // 2*3 indices starting at 0 -> 2 triangles
-
-      glDisableVertexAttribArray(0);
-    }
+    renderDepth();
+    renderToScreen();
   }
 
   void onImGuiRender() override {
@@ -260,7 +302,7 @@ class ShadowMapping : public SceneBase {
 
   CameraController m_CameraController;
 
-  Shader m_standarShader;
+  Shader m_depthShader;
   unique_ptr<Mesh> m_Mesh;
   unique_ptr<VertexArray> m_VertexArray;
   unique_ptr<VertexBuffer> m_VertexBuffer, m_NormalBuffer, m_UVBuffer;
@@ -272,4 +314,7 @@ class ShadowMapping : public SceneBase {
   Shader m_quadShader;
   FrameBuffer m_offscreenBuffer;
   unique_ptr<VertexBuffer> m_quadVertexBuffer;
+
+  Shader m_shadowMapping;
+  glm::mat4 m_depthMVP;
 };
