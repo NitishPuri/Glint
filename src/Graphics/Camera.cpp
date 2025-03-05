@@ -111,5 +111,12 @@ void CameraController::onImGuiRender() {
 
   ImGui::SliderFloat("speed", &m_speed, 0.2f, 2.0f);
 
+  ImGui::SliderFloat("FOV", &m_Props.fov, 10.0f, 179.0f);
+  ImGui::SliderFloat("Near", &m_Props.near, 0.01f, 1.0f);
+  ImGui::SliderFloat("Far", &m_Props.far, 100.f, 10000.0f);
+
+  ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", m_Props.position.x, m_Props.position.y, m_Props.position.z);
+  ImGui::Text("Camera Target: (%.2f, %.2f, %.2f)", m_Props.target.x, m_Props.target.y, m_Props.target.z);
+
   ImGui::End();
 }
