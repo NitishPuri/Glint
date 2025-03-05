@@ -49,4 +49,6 @@ class CameraController {
 
   CameraProps m_Props;
   glm::mat4 m_ViewProjection;
+
+  float m_speed = 0.1f;
 };

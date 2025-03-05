@@ -28,8 +28,9 @@ void CameraController::processInputs(float dt) {
   ImGuiIO& io = ImGui::GetIO();
 
   // update aspect ratio
-  m_Props.aspect = io.DisplaySize.x / io.DisplaySize.y;
 
+  m_Props.aspect = io.DisplaySize.x / io.DisplaySize.y;
+  // Logger::logf("Display Size: {}, aspect, {} ", io.DisplaySize, m_Props.aspect);
   ImVec2 mouse_drag = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right, 0.01f);
   ImGui::ResetMouseDragDelta(ImGuiMouseButton_Right);
 
@@ -75,9 +76,8 @@ void CameraController::processInputs(float dt) {
 
     // float view[16];  // TODO: Can just use this, instead of recalculating view matrix.
 
-    auto speed = 0.1f;
     arcball_camera_update(eye, target, up, nullptr,                      //
-                          dt, 0.1f, 0.1f, 1.0f,                          //
+                          dt, m_speed, m_speed, m_speed,                 //
                           int(io.DisplaySize.x), int(io.DisplaySize.y),  //
                           int(io.MousePosPrev.x), int(io.MousePos.x),    //
                           int(io.MousePosPrev.y), int(io.MousePos.y),    //
@@ -108,6 +108,8 @@ void CameraController::onImGuiRender() {
   if (ImGui::RadioButton("Arcball Mode", m_Mode == CAMERA_MODE_ARCBALL)) {
     m_Mode = CAMERA_MODE_ARCBALL;
   }
+
+  ImGui::SliderFloat("speed", &m_speed, 0.2f, 2.0f);
 
   ImGui::End();
 }
