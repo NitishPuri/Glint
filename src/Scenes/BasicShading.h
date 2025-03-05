@@ -78,8 +78,6 @@ class BasicShading : public SceneBase {
     GLCall(glClearColor(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], 1.0f));
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    auto &props = m_CameraController.getProps();
-
     glm::mat4 View = m_CameraController.getViewProjection();
     glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
     glm::mat4 MVP = View * Model;

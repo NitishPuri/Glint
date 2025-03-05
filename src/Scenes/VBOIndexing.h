@@ -125,9 +125,9 @@ class VBOIndexing : public SceneBase {
     // Draw the monkey again, translated.
     {
       auto ViewProjection = m_CameraController.getViewProjection();
-      glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
+      Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
       Model = glm::translate(Model, glm::vec3(1.0f, 0.0f, 0.0f));
-      glm::mat4 MVP = ViewProjection * Model;
+      MVP = ViewProjection * Model;
 
       // Camera
       m_Shader.setUniformMat4("MVP", MVP);
