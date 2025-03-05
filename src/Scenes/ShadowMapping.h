@@ -28,6 +28,8 @@ class ShadowMapping : public SceneBase {
 
     m_depthShader.init(getFilePath("/shaders/depth_rtt.vert"), getFilePath("/shaders/depth_rtt.frag"));
     m_shadowMapping.init(getFilePath("/shaders/shadow_mapping.vert"), getFilePath("/shaders/shadow_mapping.frag"));
+    m_shadowMapping_simple.init(getFilePath("/shaders/shadow_mapping_simple.vert"),
+                                getFilePath("/shaders/shadow_mapping_simple.frag"));
 
     Renderer::setup3D();
 
@@ -89,8 +91,6 @@ class ShadowMapping : public SceneBase {
     };
 
     m_quadVertexBuffer = make_unique<VertexBuffer>(g_quad_vertex_buffer_data, sizeof(g_quad_vertex_buffer_data));
-    // Create and compile our GLSL program from the shaders
-    m_quadShader.init(getFilePath("/shaders/passthrough.vert"), getFilePath("/shaders/SimpleTexture.frag"));
 
     m_RTTInitialized = true;
   }
@@ -118,17 +118,17 @@ class ShadowMapping : public SceneBase {
     // Use our shader
     m_depthShader.bind();
 
-    // glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
-    // glm::vec3 lightInvDir = -m_LightPos;
     glm::vec3 lightInvDir = m_lightDirIsNeg ? -m_LightPos : m_LightPos;
 
+    glm::mat4 depthProjectionMatrix, depthViewMatrix;
     // Compute the MVP matrix from the light's point of view
-    glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
-    glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    // or, for spot light :
-    // glm::vec3 lightPos(5, 20, 20);
-    // glm::mat4 depthProjectionMatrix = glm::perspective<float>(45.0f, 1.0f, 2.0f, 50.0f);
-    // glm::mat4 depthViewMatrix = glm::lookAt(lightPos, lightPos-lightInvDir, glm::vec3(0,1,0));
+    if (m_SpotLight) {
+      depthProjectionMatrix = glm::perspective<float>(45.0f, 1.0f, 2.0f, 50.0f);
+      depthViewMatrix = glm::lookAt(m_LightPos, m_LightPos - lightInvDir, glm::vec3(0, 1, 0));
+    } else {
+      depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+      depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    }
 
     glm::mat4 depthModelMatrix = glm::mat4(1.0);
     m_depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
@@ -155,6 +155,8 @@ class ShadowMapping : public SceneBase {
     // glBindFramebuffer(GL_FRAMEBUFFER, 0);
     m_offscreenBuffer.unbind();
 
+    auto &shader = m_useSimpleShadowMapping ? m_shadowMapping_simple : m_shadowMapping;
+
     // Render on the whole framebuffer, complete from the lower left corner to the upper right
     auto windowWidth = int(ImGui::GetIO().DisplaySize.x);
     auto windowHeight = int(ImGui::GetIO().DisplaySize.y);
@@ -165,58 +167,45 @@ class ShadowMapping : public SceneBase {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_shadowMapping.bind();
+    shader.bind();
 
     glm::mat4 Projection = m_CameraController.getProjectionMatrix();
     glm::mat4 View = m_CameraController.getViewMatrix();
     glm::mat4 Model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.5f, 1.0f, 0.0f));
     glm::mat4 MVP = Projection * View * Model;
 
-    glm::mat4 biasMatrix(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0);
-
+    glm::mat4 biasMatrix(0.5, 0.0, 0.0, 0.0,  //
+                         0.0, 0.5, 0.0, 0.0,  //
+                         0.0, 0.0, 0.5, 0.0,  //
+                         0.5, 0.5, 0.5, 1.0);
     glm::mat4 depthBiasMVP = biasMatrix * m_depthMVP;
 
-    // Send our transformation to the currently bound shader,
-    // in the "MVP" uniform
-    // glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-    // glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
-    // glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
-    // glUniformMatrix4fv(DepthBiasID, 1, GL_FALSE, &depthBiasMVP[0][0]);
-
-    // glUniform3f(lightInvDirID, lightInvDir.x, lightInvDir.y, lightInvDir.z);
-
     // Camera
-    m_shadowMapping.setUniformMat4("MVP", MVP);
-    m_shadowMapping.setUniformMat4("V", View);
-    m_shadowMapping.setUniformMat4("M", Model);
-    m_shadowMapping.setUniformMat4("DepthBiasMVP", depthBiasMVP);
+    shader.setUniformMat4("MVP", MVP);
+    shader.setUniformMat4("V", View);
+    shader.setUniformMat4("M", Model);
+    shader.setUniformMat4("DepthBiasMVP", depthBiasMVP);
 
-    // glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
-    // glm::vec3 lightInvDir = -m_LightPos;
     glm::vec3 lightInvDir = m_lightDirIsNeg ? -m_LightPos : m_LightPos;
 
-    m_shadowMapping.setUniform3f("LightInvDirection_worldspace", lightInvDir.x, lightInvDir.y, lightInvDir.z);
+    shader.setUniform3f("LightInvDirection_worldspace", lightInvDir.x, lightInvDir.y, lightInvDir.z);
 
     // Bind our texture in Texture Unit 0
-    m_shadowMapping.bindTexture("myTextureSampler", m_Texture, 0);
-    //   glActiveTexture(GL_TEXTURE0);
-    //   glBindTexture(GL_TEXTURE_2D, Texture);
-    // Set our "myTextureSampler" sampler to use Texture Unit 0
-    //   glUniform1i(TextureID, 0);
+    shader.bindTexture("myTextureSampler", m_Texture, 0);
 
-    //   m_shadowMapping.bindTexture("shadowMap", m_offscreenBuffer.getDepthRenderBuffer(), 1);
+    //   shader.bindTexture("shadowMap", m_offscreenBuffer.getDepthRenderBuffer(), 1);
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, m_offscreenBuffer.getDepthRenderBuffer());
-    m_shadowMapping.setUniform1i("shadowMap", 1);
+    shader.setUniform1i("shadowMap", 1);
 
     // Lights
-    m_shadowMapping.setUniform3f("LightPosition_worldspace", m_LightPos.x, m_LightPos.y, m_LightPos.z);
-    m_shadowMapping.setUniform3f("LightColor", m_LightColor.x, m_LightColor.y, m_LightColor.z);
-    m_shadowMapping.setUniform1f("LightPower", m_LightPower);
+    shader.setUniform3f("LightPosition_worldspace", m_LightPos.x, m_LightPos.y, m_LightPos.z);
+    shader.setUniform3f("LightColor", m_LightColor.x, m_LightColor.y, m_LightColor.z);
+    shader.setUniform1f("LightPower", m_LightPower);
 
     // Material
-    m_shadowMapping.setUniform1f("MaterialAmbient", m_AmbientStrength);
-    m_shadowMapping.setUniform1f("MaterialSpecular", m_SpecularStrength);
+    shader.setUniform1f("MaterialAmbient", m_AmbientStrength);
+    shader.setUniform1f("MaterialSpecular", m_SpecularStrength);
 
     m_VertexArray->bind();
 
@@ -256,6 +245,22 @@ class ShadowMapping : public SceneBase {
     renderToScreen();
   }
 
+  ImVec2 calculatePanelSize(int imageWidth, int imageHeight) {
+    ImVec2 available_size = ImGui::GetContentRegionAvail();
+    float aspect_ratio = static_cast<float>(imageWidth) / imageHeight;
+    ImVec2 image_size;
+
+    if (available_size.x / aspect_ratio <= available_size.y) {
+      image_size.x = available_size.x;
+      image_size.y = available_size.x / aspect_ratio;
+    } else {
+      image_size.x = available_size.y * aspect_ratio;
+      image_size.y = available_size.y;
+    }
+
+    return image_size;
+  }
+
   void onImGuiRender() override {
     ImGui::Begin("RTT Panel");
 
@@ -269,13 +274,14 @@ class ShadowMapping : public SceneBase {
 
     ImGui::Separator();
     ImGui::Checkbox("Show Depth Buffer", &m_ShowDepthBuffer);
+    ImGui::Checkbox("LightDir is -", &m_lightDirIsNeg);
+    ImGui::Checkbox("Spotlight ? ", &m_SpotLight);
+    ImGui::Checkbox("Simple ? ", &m_useSimpleShadowMapping);
 
     if (m_ShowDepthBuffer) {
-      ImGui::Image(m_offscreenBuffer.getDepthRenderBuffer(),
-                   ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), {0, 1}, {1, 0});
+      auto imageSize = calculatePanelSize(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2);
+      ImGui::Image(m_offscreenBuffer.getDepthRenderBuffer(), imageSize, {0, 1}, {1, 0});
     }
-
-    ImGui::Checkbox("LightDir is -", &m_lightDirIsNeg);
 
     ImGui::End();
 
@@ -295,6 +301,7 @@ class ShadowMapping : public SceneBase {
   glm::vec3 m_LightPos = glm::vec3(4, 4, 4);
   glm::vec3 m_LightColor = glm::vec3(1, 1, 1);
   float m_LightPower = 2.f;
+  bool m_SpotLight = false;
 
   float m_AmbientStrength = 0.1f;
   float m_SpecularStrength = 0.3f;
@@ -316,12 +323,13 @@ class ShadowMapping : public SceneBase {
 
   // TODO: create abstraction for Framebuffer, or the genral concept of RTT?
   bool m_RTTInitialized = false;
-  Shader m_quadShader;
   FrameBuffer m_offscreenBuffer;
   unique_ptr<VertexBuffer> m_quadVertexBuffer;
 
   Shader m_shadowMapping;
+  Shader m_shadowMapping_simple;
   glm::mat4 m_depthMVP;
+  bool m_useSimpleShadowMapping = false;
 
   // TODO: This is for debugging,
   //  still not sure if the light direction is correct
