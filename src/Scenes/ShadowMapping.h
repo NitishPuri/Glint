@@ -16,6 +16,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+// Reference:
+//   https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
 class ShadowMapping : public SceneBase {
  public:
   ShadowMapping() : SceneBase("Shadow Mapping"), m_CameraController(getDefaultCameraProps()) {

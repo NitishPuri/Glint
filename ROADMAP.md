@@ -1,4 +1,7 @@
 
+
+
+
 Moth/Fireflies
 Seeking Light/Emiting Light
 Illumination.
@@ -27,3 +30,18 @@ There is no design.
 - ECS
 - Resource Manager for shaders, textures, meshes
 - Framebuffer management pool
+
+
+- Compile to wasm.
+- Load into github pages.
+
+
+# Big leap?
+
+Add support for multiple rendering backends.
+- OpenGL
+- OpenGL
+- Vulkan
+- WebGPU
+- DirectX 12
+- Metal

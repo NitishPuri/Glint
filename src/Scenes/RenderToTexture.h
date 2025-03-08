@@ -250,7 +250,7 @@ class RenderToTexture : public SceneBase {
   unique_ptr<IndexBuffer> m_IndexBuffer;
   unique_ptr<Texture> m_Texture;
 
-  // TODO: create abstraction for Framebuffer, or the genral concept of RTT?
+  // TODO: create abstraction for the genral concept of RTT? RenderToTarget class?
   bool m_RTTInitialized = false;
   Shader m_quadShader;
   FrameBuffer m_offscreenBuffer;
