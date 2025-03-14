@@ -31,6 +31,11 @@ There is no design.
 - Resource Manager for shaders, textures, meshes
 - Framebuffer management pool
 
+- Ditch OpenGL
+- Build with Vulkan Instead.
+- Figure out how to compile to use WebGPU backebnd in the same code base.
+
+
 
 - Compile to wasm.
 - Load into github pages.
@@ -45,3 +50,5 @@ Add support for multiple rendering backends.
 - WebGPU
 - DirectX 12
 - Metal
+
+## Next

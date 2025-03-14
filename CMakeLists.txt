@@ -48,7 +48,7 @@ target_sources(${PROJECT_NAME} PRIVATE ${IMGUI_SOURCES})
 
 
 add_compile_definitions(${PROJECT_NAME} PUBLIC ROOT="${PROJECT_SOURCE_DIR}")
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 target_link_directories(${PROJECT_NAME} PUBLIC ${GLFW_LIB_DIR})
 target_link_libraries(${PROJECT_NAME} 
