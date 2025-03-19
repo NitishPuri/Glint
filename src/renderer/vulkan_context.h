@@ -6,13 +6,17 @@
 #include <string>
 #include <vector>
 
+#include "logger.h"
+
 namespace glint {
 
 class Window;
 
+// handles instance, debug messenger, surface, and device creation, and manages the lifecycle of these objects
 class VulkanContext {
  public:
-  VulkanContext(Window* window, const std::string& appName = "Glint Engine");
+  // VulkanContext(Window* window, const std::string& appName = "Glint Engine");
+  VulkanContext(Window* window);
   ~VulkanContext();
 
   // Prevent copying
@@ -35,9 +39,16 @@ class VulkanContext {
 
   QueueFamilyIndices getQueueFamilyIndices() const { return m_QueueFamilyIndices; }
 
+  void init();
+  void cleanup();
+
  private:
-  void createInstance(const std::string& appName);
+  // void createInstance(const std::string& appName);
+  void createInstance();
+
   void setupDebugMessenger();
+  void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+
   void createSurface();
   void pickPhysicalDevice();
   void createLogicalDevice();

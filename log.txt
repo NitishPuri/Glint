@@ -1,91 +1,55 @@
 Illiterate Vulkan!
 App::initWindow {
-  glfwInit()
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API)
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
   Creating window:  800 x 600  -  Vulkan
   glfwCreateWindow
 }
 App::initVulkan {
-  App::createInstance {
-    App::checkValidationLayerSupport {
-      vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data())
-      found validation layer:  VK_LAYER_KHRONOS_validation
-    }
-    VkInstanceCreateInfo createInfo{}
-    App::getRequiredExtensions {
-      glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount)
-      vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data())
-      Available Extensions:  19
-         VK_KHR_device_group_creation
-         VK_KHR_external_fence_capabilities
-         VK_KHR_external_memory_capabilities
-         VK_KHR_external_semaphore_capabilities
-         VK_KHR_get_physical_device_properties2
-         VK_KHR_get_surface_capabilities2
-         VK_KHR_surface
-         VK_KHR_win32_surface
-         VK_EXT_debug_report
-         VK_EXT_debug_utils
-         VK_EXT_swapchain_colorspace
-         VK_KHR_display
-         VK_KHR_get_display_properties2
-         VK_KHR_surface_protected_capabilities
-         VK_EXT_direct_mode_display
-         VK_EXT_surface_maintenance1
-         VK_NV_external_memory_capabilities
-         VK_KHR_portability_enumeration
-         VK_LUNARG_direct_driver_loading
-      Required Extensions:  3
-         VK_KHR_surface
-         VK_KHR_win32_surface
-         VK_EXT_debug_utils
-    }
-    validation layers are enabled
-    App::populateDebugMessengerCreateInfo {
-    }
-    vkCreateInstance(&createInfo, nullptr, &instance)
+  glint::VulkanContext::VulkanContext {
   }
-  App::setupDebugMessenger {
-    App::populateDebugMessengerCreateInfo {
-    }
-    CreateDebugUtilsMessengerEXT {
-      auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT")
-      return func(instance, pCreateInfo, pAllocator, pDebugMessenger)
-    }
-  }
-  glint::Window::createSurface {
-    VkResult result = glfwCreateWindowSurface(instance, m_Window, nullptr, &surface)
-  }
-  App::pickPhysicalDevice {
-    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data())
-    Available Devices:  2
-    App::isDeviceSuitable {
-      App::findQueueFamilies {
-        queueFamilyCount : 6
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data())
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport)
-        found queue families 0 0
+  glint::VulkanContext::init {
+    glint::VulkanContext::createInstance {
+      glint::VulkanContext::checkValidationLayerSupport {
+        found validation layer:  VK_LAYER_KHRONOS_validation
       }
-      App::checkDeviceExtensionSupport {
-        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data())
+      glint::VulkanContext::getRequiredExtensions {
+        Required Extensions:  3
+           VK_KHR_surface
+           VK_KHR_win32_surface
+           VK_EXT_debug_utils
       }
-      App::querySwapChainSupport {
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities)
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr)
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr)
+      validation layers are enabled
+      glint::VulkanContext::populateDebugMessengerCreateInfo {
+      }
+      vkCreateInstance(&createInfo, nullptr, &m_Instance)
+    }
+    glint::VulkanContext::setupDebugMessenger {
+      glint::VulkanContext::populateDebugMessengerCreateInfo {
+      }
+      glint::CreateDebugUtilsMessengerEXT {
       }
     }
-    found suitable device  NVIDIA GeForce RTX 3060 Laptop GPU
-  }
-  App::createLogicalDevice {
-    App::findQueueFamilies {
-      queueFamilyCount : 6
-      vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data())
-      vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport)
-      found queue families 0 0
+    glint::VulkanContext::createSurface {
+      glint::Window::createSurface {
+        VkResult result = glfwCreateWindowSurface(instance, m_Window, nullptr, &surface)
+      }
     }
-    vkCreateDevice(physicalDevice, &createInfo, nullptr, &device)
+    glint::VulkanContext::pickPhysicalDevice {
+      Available Devices:  2
+      glint::VulkanContext::isDeviceSuitable {
+        glint::VulkanContext::findQueueFamilies {
+          queueFamilyCount:  6
+        }
+        glint::VulkanContext::checkDeviceExtensionSupport {
+        }
+      }
+      found suitable device  NVIDIA GeForce RTX 3060 Laptop GPU
+    }
+    glint::VulkanContext::createLogicalDevice {
+      glint::VulkanContext::findQueueFamilies {
+        queueFamilyCount:  6
+      }
+      vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device)
+    }
   }
   App::createSwapChain {
     App::querySwapChainSupport {
@@ -309,13 +273,8 @@ App::cleanup {
   vkDestroyImageView(device, imageView, nullptr)
   vkDestroyImageView(device, imageView, nullptr)
   vkDestroySwapchainKHR(device, swapChain, nullptr)
-  vkDestroyDevice(device, nullptr)
-  DestroyDebugUtilsMessengerEXT {
-    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT")
-    func(instance, debugMessenger, pAllocator)
+  glint::VulkanContext::~VulkanContext {
   }
-  vkDestroySurfaceKHR(instance, surface, nullptr)
-  vkDestroyInstance(instance, nullptr)
   glint::Window::~Window {
     glint::Window::shutdown {
       glfwDestroyWindow(m_Window)
