@@ -3,7 +3,8 @@ App::initWindow {
   glfwInit()
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API)
   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
-  window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr)
+  Creating window:  800 x 600  -  Vulkan
+  glfwCreateWindow
 }
 App::initVulkan {
   App::createInstance {
@@ -53,8 +54,8 @@ App::initVulkan {
       return func(instance, pCreateInfo, pAllocator, pDebugMessenger)
     }
   }
-  App::createSurface {
-    glfwCreateWindowSurface(instance, window, nullptr, &surface)
+  glint::Window::createSurface {
+    VkResult result = glfwCreateWindowSurface(instance, m_Window, nullptr, &surface)
   }
   App::pickPhysicalDevice {
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data())
@@ -247,7 +248,7 @@ App::initVulkan {
   }
 }
 App::mainLoop {
-  while (!glfwWindowShouldClose(window))
+  while (!window->shouldClose())
   App::drawFrame {
     --------------------------------------------------------------
     Outline of a frame..
@@ -315,6 +316,10 @@ App::cleanup {
   }
   vkDestroySurfaceKHR(instance, surface, nullptr)
   vkDestroyInstance(instance, nullptr)
-  glfwDestroyWindow(window)
-  glfwTerminate()
+  glint::Window::~Window {
+    glint::Window::shutdown {
+      glfwDestroyWindow(m_Window)
+      glfwTerminate()
+    }
+  }
 }

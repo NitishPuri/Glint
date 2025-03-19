@@ -22,7 +22,7 @@ class Window {
         : title(title), width(width), height(height), resizable(resizable) {}
   };
 
-  Window(const WindowProps& props = WindowProps());
+Window(const WindowProps& props = WindowProps());
   ~Window();
 
   // Prevent copying

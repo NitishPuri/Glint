@@ -1,5 +1,3 @@
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 
 #include <algorithm>
 #include <cstdlib>
@@ -10,9 +8,8 @@
 #include <stdexcept>
 #include <vector>
 
-// #include ""
-
 #include "logger.h"
+#include "window.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -110,7 +107,14 @@ class App {
     LOGCALL(glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API));
     LOGCALL(glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE));
 
-    LOGCALL(window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr));
+    // LOGCALL(window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr));
+    glint::Window::WindowProps props;
+    props.title = "Vulkan";
+    props.width = WIDTH;
+    props.height = HEIGHT;
+    props.resizable = false;
+
+    window = std::make_unique<glint::Window>(props);
   }
 
   void initVulkan() {
@@ -134,7 +138,8 @@ class App {
     LOGFN;
 
     static int frames = 0;
-    LOGCALL(while (!glfwWindowShouldClose(window))) {
+    // LOGCALL(while (!glfwWindowShouldClose(window))) {
+    LOGCALL(while (!window->shouldClose())) {
       glfwPollEvents();
       drawFrame();
 
@@ -176,14 +181,17 @@ class App {
 
     LOGCALL(vkDestroyInstance(instance, nullptr));
 
-    LOGCALL(glfwDestroyWindow(window));
-    LOGCALL(glfwTerminate());
+    // LOGCALL(glfwDestroyWindow(window));
+    // LOGCALL(glfwTerminate());
+    // delete window;
+    window.reset();
   }
 
 #pragma endregion APP
 
 #pragma region VARIABLES
-  GLFWwindow* window = nullptr;
+  // GLFWwindow* window = nullptr;
+  std::unique_ptr<glint::Window> window = nullptr;
 
   VkInstance instance{};
   VkDebugUtilsMessengerEXT debugMessenger;
@@ -499,10 +507,11 @@ class App {
 
 #pragma region SURFACE
   void createSurface() {
-    LOGFN;
-    if (LOGCALL(glfwCreateWindowSurface(instance, window, nullptr, &surface)) != VK_SUCCESS) {
-      throw std::runtime_error("failed to create window surface!");
-    }
+    // LOGFN;
+    // if (LOGCALL(glfwCreateWindowSurface(instance, window, nullptr, &surface)) != VK_SUCCESS) {
+    //   throw std::runtime_error("failed to create window surface!");
+    // }
+    surface = window->createSurface(instance);
   }
 #pragma endregion SURFACE
 
@@ -566,10 +575,12 @@ class App {
     if (capabilities.currentExtent.width != UINT32_MAX) {
       return capabilities.currentExtent;
     } else {
-      int width, height;
-      LOGCALL(glfwGetFramebufferSize(window, &width, &height));
+      // int width, height;
+      // LOGCALL(glfwGetFramebufferSize(window, &width, &height));
+      uint32_t width = window->getWidth();
+      uint32_t height = window->getHeight();
 
-      LOG("window size: ", WIDTH, "x", HEIGHT);
+      // LOG("window size: ", WIDTH, "x", HEIGHT);
       LOG("frame buffer size ", width, "x", height);
 
       VkExtent2D actualExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};

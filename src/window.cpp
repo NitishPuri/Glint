@@ -2,17 +2,23 @@
 
 #include <iostream>
 
+#include "logger.h"
+
 namespace glint {
 
 static bool s_GLFWInitialized = false;
 
 static void GLFWErrorCallback(int error, const char* description) {
   std::cerr << "GLFW Error (" << error << "): " << description << std::endl;
+  LOG("GLFW Error (", error, "): ", description);
 }
 
 Window::Window(const WindowProps& props) { init(props); }
 
-Window::~Window() { shutdown(); }
+Window::~Window() {
+  LOGFN;
+  shutdown();
+}
 
 void Window::init(const WindowProps& props) {
   m_Data.title = props.title;
@@ -35,6 +41,8 @@ void Window::init(const WindowProps& props) {
   glfwWindowHint(GLFW_RESIZABLE, props.resizable ? GLFW_TRUE : GLFW_FALSE);
 
   // Create the GLFW window
+  LOG("Creating window: ", props.width, "x", props.height, " - ", props.title);
+  LOG("glfwCreateWindow");
   m_Window = glfwCreateWindow(static_cast<int>(props.width), static_cast<int>(props.height), m_Data.title.c_str(),
                               nullptr, nullptr);
 
@@ -60,11 +68,12 @@ void Window::init(const WindowProps& props) {
 }
 
 void Window::shutdown() {
-  glfwDestroyWindow(m_Window);
+  LOGFN;
+  LOGCALL(glfwDestroyWindow(m_Window));
 
   // Only terminate GLFW if this is the last window
   // In a real application, you might want to track this globally
-  glfwTerminate();
+  LOGCALL(glfwTerminate());
   s_GLFWInitialized = false;
 }
 
@@ -73,8 +82,9 @@ bool Window::shouldClose() const { return glfwWindowShouldClose(m_Window); }
 void Window::pollEvents() const { glfwPollEvents(); }
 
 VkSurfaceKHR Window::createSurface(VkInstance instance) {
+  LOGFN;
   VkSurfaceKHR surface;
-  VkResult result = glfwCreateWindowSurface(instance, m_Window, nullptr, &surface);
+  LOGCALL(VkResult result = glfwCreateWindowSurface(instance, m_Window, nullptr, &surface));
 
   if (result != VK_SUCCESS) {
     throw std::runtime_error("Failed to create window surface!");
