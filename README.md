@@ -1,5 +1,6 @@
 # Glint
 
+```
 Glint_vk/
 ├── src/ # Core engine source code
 │ ├── core/ # Core engine systems
@@ -43,3 +44,4 @@ Glint_vk/
 ├── assets/ # Textures, models, etc.
 ├── CMakeLists.txt # CMake build system
 └── README.md # Project documentation
+```
