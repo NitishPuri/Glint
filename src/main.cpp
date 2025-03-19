@@ -10,6 +10,7 @@
 
 #include "core/window.h"
 #include "logger.h"
+#include "renderer/swapchain.h"
 #include "renderer/vulkan_context.h"
 
 const uint32_t WIDTH = 800;
@@ -36,12 +37,6 @@ static std::vector<char> readFile(const std::string& filename) {
   file.close();
   return buffer;
 }
-
-#pragma region VALIDATION_CALLBACK
-
-const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-
-#pragma endregion VALIDATION_CALLBACK
 
 class App {
  public:
@@ -76,14 +71,23 @@ class App {
     device = vulkanContext->getDevice();
     graphicsQueue = vulkanContext->getGraphicsQueue();
     presentQueue = vulkanContext->getPresentQueue();
-    physicalDevice = vulkanContext->getPhysicalDevice();
+    // physicalDevice = vulkanContext->getPhysicalDevice();
     surface = vulkanContext->getSurface();
 
-    createSwapChain();
-    createImageViews();
+    // Create SwapChain
+    swapChain = std::make_unique<glint::SwapChain>(vulkanContext.get());
+    // createSwapChain();
+    // createImageViews();
+    swapChainImageFormat = swapChain->getImageFormat();
+    swapChainExtent = swapChain->getExtent();
+
     createRenderPass();
     createGraphicsPipeline();
-    createSwapChainBuffers();
+
+    // Create Framebuffers
+    swapChain->createFramebuffers(renderPass);
+
+    // createSwapChainBuffers();
     createCommandPool();
     createCommandBuffer();
     createSyncObjects();
@@ -113,20 +117,23 @@ class App {
     LOGCALL(vkDestroyFence(device, inFlightFence, nullptr));
 
     LOGCALL(vkDestroyCommandPool(device, commandPool, nullptr));
-    for (auto framebuffer : swapChainFrameBuffers) {
-      LOGCALL(vkDestroyFramebuffer(device, framebuffer, nullptr));
-    }
+
+    // for (auto framebuffer : swapChainFrameBuffers) {
+    //   LOGCALL(vkDestroyFramebuffer(device, framebuffer, nullptr));
+    // }
 
     LOGCALL(vkDestroyPipeline(device, graphicsPipeline, nullptr));
     LOGCALL(vkDestroyPipelineLayout(device, pipelineLayout, nullptr));
     LOGCALL(vkDestroyRenderPass(device, renderPass, nullptr));
 
-    for (auto imageView : swapChainImageViews) {
-      LOGCALL(vkDestroyImageView(device, imageView, nullptr));
-    }
+    // for (auto imageView : swapChainImageViews) {
+    //   LOGCALL(vkDestroyImageView(device, imageView, nullptr));
+    // }
 
-    LOGCALL(vkDestroySwapchainKHR(device, swapChain, nullptr));
+    // LOGCALL(vkDestroySwapchainKHR(device, swapChain, nullptr));
 
+    swapChain.reset();
+    // vulkanContext->cleanup();
     vulkanContext.reset();
     window.reset();
   }
@@ -135,13 +142,13 @@ class App {
 
 #pragma region VARIABLES
   std::unique_ptr<glint::Window> window = nullptr;
-
   std::unique_ptr<glint::VulkanContext> vulkanContext = nullptr;
+  std::unique_ptr<glint::SwapChain> swapChain = nullptr;
 
   // VkInstance instance{};
-  VkDebugUtilsMessengerEXT debugMessenger;
+  // VkDebugUtilsMessengerEXT debugMessenger;
 
-  VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+  // VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
   VkDevice device;
   VkQueue graphicsQueue;
@@ -149,19 +156,19 @@ class App {
   VkSurfaceKHR surface;
   VkQueue presentQueue;
 
-  VkSwapchainKHR swapChain;
+  // VkSwapchainKHR swapChain;
   std::vector<VkImage> swapChainImages;
   VkFormat swapChainImageFormat;
   VkExtent2D swapChainExtent;
 
-  std::vector<VkImageView> swapChainImageViews;
+  // std::vector<VkImageView> swapChainImageViews;
 
   VkRenderPass renderPass;
   VkPipelineLayout pipelineLayout;
 
   VkPipeline graphicsPipeline;
 
-  std::vector<VkFramebuffer> swapChainFrameBuffers;
+  // std::vector<VkFramebuffer> swapChainFrameBuffers;
 
   VkCommandPool commandPool;
   VkCommandBuffer commandBuffer;
@@ -171,190 +178,6 @@ class App {
   VkFence inFlightFence;
 
 #pragma endregion VARIABLES
-
-#pragma region SWAPCHAIN
-  struct SwapChainSupportDetails {
-    VkSurfaceCapabilitiesKHR capabilities;
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> presentModes;
-  };
-
-  SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) {
-    LOGFN;
-    SwapChainSupportDetails details;
-
-    LOGCALL(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities));
-
-    uint32_t formatCount;
-    LOGCALL(vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr));
-    if (formatCount != 0) {
-      details.formats.resize(formatCount);
-      vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
-    }
-
-    uint32_t presentModeCount;
-    LOGCALL(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr));
-    if (presentModeCount != 0) {
-      details.presentModes.resize(presentModeCount);
-      vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
-    }
-
-    return details;
-  }
-
-  VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
-    LOGFN;
-    for (const auto& availableFormat : availableFormats) {
-      if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
-          availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-        return availableFormat;
-      }
-    }
-
-    return availableFormats[0];
-  }
-
-  VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
-    LOGFN;
-    for (const auto& availablePresentMode : availablePresentModes) {
-      // Use VK_PRESENT_MODE_MAILBOX_KHR for triple buffering id enerygy is not a concern
-      // Use VK_PRESENT_MODE_FIFO_KHR for double buffering, preferable on mobile devices
-      if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-        return availablePresentMode;
-      }
-    }
-
-    return VK_PRESENT_MODE_FIFO_KHR;
-  }
-
-  VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
-    LOGFN;
-    if (capabilities.currentExtent.width != UINT32_MAX) {
-      return capabilities.currentExtent;
-    } else {
-      // int width, height;
-      // LOGCALL(glfwGetFramebufferSize(window, &width, &height));
-      uint32_t width = window->getWidth();
-      uint32_t height = window->getHeight();
-
-      // LOG("window size: ", WIDTH, "x", HEIGHT);
-      LOG("frame buffer size ", width, "x", height);
-
-      VkExtent2D actualExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
-
-      actualExtent.width =
-          std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-      actualExtent.height =
-          std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-      return actualExtent;
-    }
-  }
-
-  void createSwapChain() {
-    LOGFN;
-    SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
-
-    VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-    VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-    VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
-
-    // recommended to request at least one more image than the minimum
-    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-    if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
-      imageCount = swapChainSupport.capabilities.maxImageCount;
-    }
-
-    VkSwapchainCreateInfoKHR createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = surface;
-    createInfo.minImageCount = imageCount;
-    createInfo.imageFormat = surfaceFormat.format;
-    createInfo.imageColorSpace = surfaceFormat.colorSpace;
-    createInfo.imageExtent = extent;
-    createInfo.imageArrayLayers = 1;  // always 1, unless Stereo 3D!!
-    createInfo.imageUsage =
-        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;  // means that we render directly to images in this swapchain
-    LOG("imageUsage: VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT");
-
-    // for rendering to a separate image first,
-    // then copy to the swapchain image, use VK_IMAGE_USAGE_TRANSFER_DST_BIT
-    // for post-processing, use VK_IMAGE_USAGE_TRANSFER_SRC_BIT
-
-    // for sharing images between queues
-    auto indices = vulkanContext->getQueueFamilyIndices();
-    uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
-    if (indices.graphicsFamily != indices.presentFamily) {
-      LOG("graphics and present queues are different");
-      LOGCALL(createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT);
-      createInfo.queueFamilyIndexCount = 2;
-      createInfo.pQueueFamilyIndices = queueFamilyIndices;
-    } else {
-      LOG("graphics and present queues are the same");
-      LOGCALL(createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE);
-      createInfo.queueFamilyIndexCount = 0;      // Optional
-      createInfo.pQueueFamilyIndices = nullptr;  // Optional
-    }
-
-    // Used for transformations (eg. 90 degree rotation for mobile devices)
-    LOGCALL(createInfo.preTransform = swapChainSupport.capabilities.currentTransform);
-    // QUESTION: Can support transparent windows using this flag??
-    LOGCALL(createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR);
-    LOGCALL(createInfo.presentMode = presentMode);
-    // This is window clipping, i.e. if some other window is in front of this one
-    // then we can clip the rendering to the visible area
-    createInfo.clipped = VK_TRUE;
-
-    // QUESTION: What is the purpose of oldSwapChain?
-    LOGCALL(createInfo.oldSwapchain = VK_NULL_HANDLE);
-
-    if (LOGCALL(vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain)) != VK_SUCCESS) {
-      throw std::runtime_error("failed to create swap chain!");
-    }
-
-    vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
-    swapChainImages.resize(imageCount);
-    LOGCALL(vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data()));
-    swapChainImageFormat = surfaceFormat.format;
-    swapChainExtent = extent;
-  }
-
-#pragma endregion SWAPCHAIN
-
-#pragma region IMAGE_VIEW
-  void createImageViews() {
-    LOGFN;
-    LOGCALL(swapChainImageViews.resize(swapChainImages.size()));
-    LOG("swapChainImages.size(): ", swapChainImages.size());
-
-    for (size_t i = 0; i < swapChainImages.size(); i++) {
-      VkImageViewCreateInfo createInfo{};
-      createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-      createInfo.image = swapChainImages[i];
-      LOGCALL(createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D);
-      createInfo.format = swapChainImageFormat;
-      LOG("format: ", swapChainImageFormat);
-
-      LOG("components: VK_COMPONENT_SWIZZLE_IDENTITY");
-      createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-      createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-      createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-      createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-      LOG("No mipmapping or multiple layers");
-      LOGCALL(createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
-      createInfo.subresourceRange.baseMipLevel = 0;
-      createInfo.subresourceRange.levelCount = 1;
-      createInfo.subresourceRange.baseArrayLayer = 0;
-      createInfo.subresourceRange.layerCount = 1;
-
-      if (LOGCALL(vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i])) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create image views!");
-      }
-    }
-  }
-
-#pragma endregion IMAGE_VIEW
 
 #pragma region PIPELINE
   void createGraphicsPipeline() {
@@ -613,30 +436,6 @@ class App {
 
 #pragma endregion RENDER_PASS
 
-#pragma region FRAME_BUFFERS
-  void createSwapChainBuffers() {
-    LOGFN;
-    LOGCALL(swapChainFrameBuffers.resize(swapChainImageViews.size()));
-
-    for (size_t i = 0; i < swapChainImageViews.size(); i++) {
-      VkImageView attachments[] = {swapChainImageViews[i]};
-
-      VkFramebufferCreateInfo framebufferInfo{};
-      framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-      framebufferInfo.renderPass = renderPass;
-      framebufferInfo.attachmentCount = 1;
-      framebufferInfo.pAttachments = attachments;
-      framebufferInfo.width = swapChainExtent.width;
-      framebufferInfo.height = swapChainExtent.height;
-      framebufferInfo.layers = 1;
-
-      if (LOGCALL(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFrameBuffers[i])) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create framebuffer!");
-      }
-    }
-  }
-#pragma endregion FRAME_BUFFERS
-
 #pragma region COMMAND_BUFFERS
   void createCommandPool() {
     LOGFN;
@@ -682,7 +481,7 @@ class App {
     LOGCALL_ONCE(VkRenderPassBeginInfo renderPassInfo{});
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
-    renderPassInfo.framebuffer = swapChainFrameBuffers[imageIndex];
+    renderPassInfo.framebuffer = swapChain->getFramebuffer(imageIndex);
 
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = swapChainExtent;
@@ -770,8 +569,8 @@ class App {
 
     LOG_ONCE("Acquire an image from the swap chain");
     uint32_t imageIndex;
-    LOGCALL_ONCE(
-        vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex));
+    LOGCALL_ONCE(vkAcquireNextImageKHR(device, swapChain->getSwapChain(), UINT64_MAX, imageAvailableSemaphore,
+                                       VK_NULL_HANDLE, &imageIndex));
 
     LOGCALL_ONCE(vkResetCommandBuffer(commandBuffer, 0));
     LOG_ONCE("Record a command buffer which draws the scene onto the image.");
@@ -809,7 +608,7 @@ class App {
     presentInfo.pWaitSemaphores = signalSemaphores;
 
     LOG_ONCE("Specify swap chain to present to.");
-    VkSwapchainKHR swapChains[] = {swapChain};
+    VkSwapchainKHR swapChains[] = {swapChain->getSwapChain()};
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;

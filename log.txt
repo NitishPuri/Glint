@@ -37,7 +37,6 @@ App::initVulkan {
       Available Devices:  2
       glint::VulkanContext::isDeviceSuitable {
         glint::VulkanContext::findQueueFamilies {
-          queueFamilyCount:  6
         }
         glint::VulkanContext::checkDeviceExtensionSupport {
         }
@@ -46,60 +45,26 @@ App::initVulkan {
     }
     glint::VulkanContext::createLogicalDevice {
       glint::VulkanContext::findQueueFamilies {
-        queueFamilyCount:  6
       }
       vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device)
     }
   }
-  App::createSwapChain {
-    App::querySwapChainSupport {
-      vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities)
-      vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr)
-      vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr)
+  glint::SwapChain::SwapChain {
+    glint::SwapChain::createSwapChain {
+      glint::SwapChain::querySwapChainSupport {
+      }
+      glint::SwapChain::chooseSwapSurfaceFormat {
+      }
+      glint::SwapChain::chooseSwapPresentMode {
+        Using VK_PRESENT_MODE_MAILBOX_KHR (triple buffering)
+      }
+      glint::SwapChain::chooseSwapExtent {
+      }
+      graphics and present queues are the same
+      Using exclusive sharing mode
     }
-    App::chooseSwapSurfaceFormat {
+    glint::SwapChain::createImageViews {
     }
-    App::chooseSwapPresentMode {
-    }
-    App::chooseSwapExtent {
-    }
-    imageUsage: VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
-    App::findQueueFamilies {
-      queueFamilyCount : 6
-      vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data())
-      vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport)
-      found queue families 0 0
-    }
-    graphics and present queues are the same
-    createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE
-    createInfo.preTransform = swapChainSupport.capabilities.currentTransform
-    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR
-    createInfo.presentMode = presentMode
-    createInfo.oldSwapchain = VK_NULL_HANDLE
-    vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain)
-    vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data())
-  }
-  App::createImageViews {
-    swapChainImageViews.resize(swapChainImages.size())
-    swapChainImages.size():  3
-    createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D
-    format:  50
-    components: VK_COMPONENT_SWIZZLE_IDENTITY
-    No mipmapping or multiple layers
-    createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT
-    vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i])
-    createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D
-    format:  50
-    components: VK_COMPONENT_SWIZZLE_IDENTITY
-    No mipmapping or multiple layers
-    createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT
-    vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i])
-    createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D
-    format:  50
-    components: VK_COMPONENT_SWIZZLE_IDENTITY
-    No mipmapping or multiple layers
-    createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT
-    vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i])
   }
   App::createRenderPass {
     clear the values to a constant at the start
@@ -179,19 +144,9 @@ App::initVulkan {
     vkDestroyShaderModule(device, vertShaderModule, nullptr)
     vkDestroyShaderModule(device, fragShaderModule, nullptr)
   }
-  App::createSwapChainBuffers {
-    swapChainFrameBuffers.resize(swapChainImageViews.size())
-    vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFrameBuffers[i])
-    vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFrameBuffers[i])
-    vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFrameBuffers[i])
+  glint::SwapChain::createFramebuffers {
   }
   App::createCommandPool {
-    App::findQueueFamilies {
-      queueFamilyCount : 6
-      vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data())
-      vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport)
-      found queue families 0 0
-    }
     VkCommandPoolCreateInfo poolInfo{}
     Choose graphics family as we are using the command buffer for rendering
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value()
@@ -226,7 +181,7 @@ App::mainLoop {
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX)
     vkResetFences(device, 1, &inFlightFence)
     Acquire an image from the swap chain
-    vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex)
+    vkAcquireNextImageKHR(device, swapChain->getSwapChain(), UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex)
     vkResetCommandBuffer(commandBuffer, 0)
     Record a command buffer which draws the scene onto the image.
     App::recordCommandBuffer {
@@ -263,17 +218,16 @@ App::cleanup {
   vkDestroySemaphore(device, imageAvailableSemaphore, nullptr)
   vkDestroyFence(device, inFlightFence, nullptr)
   vkDestroyCommandPool(device, commandPool, nullptr)
-  vkDestroyFramebuffer(device, framebuffer, nullptr)
-  vkDestroyFramebuffer(device, framebuffer, nullptr)
-  vkDestroyFramebuffer(device, framebuffer, nullptr)
   vkDestroyPipeline(device, graphicsPipeline, nullptr)
   vkDestroyPipelineLayout(device, pipelineLayout, nullptr)
   vkDestroyRenderPass(device, renderPass, nullptr)
-  vkDestroyImageView(device, imageView, nullptr)
-  vkDestroyImageView(device, imageView, nullptr)
-  vkDestroyImageView(device, imageView, nullptr)
-  vkDestroySwapchainKHR(device, swapChain, nullptr)
+  glint::SwapChain::~SwapChain {
+  }
   glint::VulkanContext::~VulkanContext {
+    glint::VulkanContext::cleanup {
+      glint::DestroyDebugUtilsMessengerEXT {
+      }
+    }
   }
   glint::Window::~Window {
     glint::Window::shutdown {

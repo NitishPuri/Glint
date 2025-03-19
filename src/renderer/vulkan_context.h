@@ -31,6 +31,8 @@ class VulkanContext {
   VkQueue getPresentQueue() const { return m_PresentQueue; }
   VkSurfaceKHR getSurface() const { return m_Surface; }
 
+  Window* getWindow() const { return m_Window; }
+
   struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
