@@ -6,7 +6,7 @@ Glint_vk/
 │ ├── core/ # Core engine systems
 │ │ ├── application.h # Application management
 │ │ ├── application.cpp
-│ │ ├── logger.h # Your existing logging system
+│ │ ├── logger.h # logging system
 │ │ ├── logger.cpp
 │ │ ├── window.h # GLFW window handling
 │ │ └── window.cpp
@@ -30,11 +30,11 @@ Glint_vk/
 │ │ └── shader.frag # Fragment shader
 │ └── main.cpp # Entry point
 ├── samples/ # Different sample applications
-│ ├── hello_triangle/ # Your current hello triangle
+│ ├── hello_triangle/ # hello triangle
 │ ├── texture_sample/ # Future texture sample
 │ └── ...
 ├── include/ # Public API headers
-│ └── glint/ # Your engine namespace
+│ └── glint/ # engine namespace
 ├── build/ # Build artifacts
 ├── bin/ # Compiled binaries
 │ └── shaders/ # Compiled shaders
