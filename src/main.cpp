@@ -10,6 +10,7 @@
 
 #include "core/window.h"
 #include "logger.h"
+#include "renderer/render_pass.h"
 #include "renderer/swapchain.h"
 #include "renderer/vulkan_context.h"
 
@@ -71,21 +72,18 @@ class App {
     device = vulkanContext->getDevice();
     graphicsQueue = vulkanContext->getGraphicsQueue();
     presentQueue = vulkanContext->getPresentQueue();
-    // physicalDevice = vulkanContext->getPhysicalDevice();
-    surface = vulkanContext->getSurface();
 
     // Create SwapChain
     swapChain = std::make_unique<glint::SwapChain>(vulkanContext.get());
-    // createSwapChain();
-    // createImageViews();
     swapChainImageFormat = swapChain->getImageFormat();
     swapChainExtent = swapChain->getExtent();
 
-    createRenderPass();
+    // Create RenderPass
+    renderPass = std::make_unique<glint::RenderPass>(vulkanContext.get(), swapChain.get());
     createGraphicsPipeline();
 
     // Create Framebuffers
-    swapChain->createFramebuffers(renderPass);
+    swapChain->createFramebuffers(renderPass->getRenderPass());
 
     // createSwapChainBuffers();
     createCommandPool();
@@ -124,7 +122,9 @@ class App {
 
     LOGCALL(vkDestroyPipeline(device, graphicsPipeline, nullptr));
     LOGCALL(vkDestroyPipelineLayout(device, pipelineLayout, nullptr));
-    LOGCALL(vkDestroyRenderPass(device, renderPass, nullptr));
+    // LOGCALL(vkDestroyRenderPass(device, renderPass, nullptr));
+
+    renderPass.reset();
 
     // for (auto imageView : swapChainImageViews) {
     //   LOGCALL(vkDestroyImageView(device, imageView, nullptr));
@@ -144,31 +144,21 @@ class App {
   std::unique_ptr<glint::Window> window = nullptr;
   std::unique_ptr<glint::VulkanContext> vulkanContext = nullptr;
   std::unique_ptr<glint::SwapChain> swapChain = nullptr;
-
-  // VkInstance instance{};
-  // VkDebugUtilsMessengerEXT debugMessenger;
-
-  // VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+  std::unique_ptr<glint::RenderPass> renderPass = nullptr;
 
   VkDevice device;
   VkQueue graphicsQueue;
 
-  VkSurfaceKHR surface;
   VkQueue presentQueue;
 
-  // VkSwapchainKHR swapChain;
   std::vector<VkImage> swapChainImages;
   VkFormat swapChainImageFormat;
   VkExtent2D swapChainExtent;
 
-  // std::vector<VkImageView> swapChainImageViews;
-
-  VkRenderPass renderPass;
+  // VkRenderPass renderPass;
   VkPipelineLayout pipelineLayout;
 
   VkPipeline graphicsPipeline;
-
-  // std::vector<VkFramebuffer> swapChainFrameBuffers;
 
   VkCommandPool commandPool;
   VkCommandBuffer commandBuffer;
@@ -345,7 +335,7 @@ class App {
     pipelineInfo.pDynamicState = &dynamicState;
 
     pipelineInfo.layout = pipelineLayout;
-    pipelineInfo.renderPass = renderPass;
+    pipelineInfo.renderPass = renderPass->getRenderPass();
     pipelineInfo.subpass = 0;
 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;  // Optional
@@ -377,64 +367,6 @@ class App {
   }
 
 #pragma endregion PIPELINE
-
-#pragma region RENDER_PASS
-  void createRenderPass() {
-    LOGFN;
-
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = swapChainImageFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    LOG("clear the values to a constant at the start");
-    LOGCALL(colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR);
-    LOG("store the values to memory for reading later");
-    LOGCALL(colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE);
-    LOG("not using stencil buffer");
-    LOGCALL(colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE);
-    LOGCALL(colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE);
-    LOG("layout transition before and after render pass");
-    LOGCALL(colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED);
-    LOGCALL(colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-
-    // Subpasses
-    VkAttachmentReference colorAttachmentRef{};
-    LOG("which attachment to reference by its index in the attachment descriptions array");
-    LOGCALL(colorAttachmentRef.attachment = 0);
-    LOG("layout the attachment will have during a subpass");
-    LOGCALL(colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-    VkSubpassDescription subpass{};
-    LOG("subpass dependencies, for layout transitions");
-    LOGCALL(subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS);
-    LOGCALL(subpass.colorAttachmentCount = 1);
-    LOGCALL(subpass.pColorAttachments = &colorAttachmentRef);
-
-    VkSubpassDependency dependency{};
-    LOG("dependency between the subpass and the external render pass");
-    LOGCALL(dependency.srcSubpass = VK_SUBPASS_EXTERNAL);
-    LOGCALL(dependency.dstSubpass = 0);
-    LOGCALL(dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-    LOGCALL(dependency.srcAccessMask = 0);
-    LOGCALL(dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-    LOGCALL(dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-
-    // Render pass
-    LOG("Render Pass");
-    LOGCALL(VkRenderPassCreateInfo renderPassInfo{});
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
-
-    if (LOGCALL(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS) {
-      throw std::runtime_error("failed to create render pass!");
-    }
-  }
-
-#pragma endregion RENDER_PASS
 
 #pragma region COMMAND_BUFFERS
   void createCommandPool() {
@@ -477,20 +409,8 @@ class App {
       throw std::runtime_error("failed to begin recording command buffer!");
     }
 
-    LOG_ONCE("Start Render Pass");
-    LOGCALL_ONCE(VkRenderPassBeginInfo renderPassInfo{});
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = renderPass;
-    renderPassInfo.framebuffer = swapChain->getFramebuffer(imageIndex);
-
-    renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = swapChainExtent;
-
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
-
-    LOGCALL_ONCE(vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE));
+    renderPass->begin(commandBuffer, imageIndex, clearColor);
 
     LOG_ONCE("Bind Pipeline");
     LOGCALL_ONCE(vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline));
@@ -513,8 +433,7 @@ class App {
     LOG_ONCE("FINALLY DRAW!!!");
     LOGCALL_ONCE(vkCmdDraw(commandBuffer, 3, 1, 0, 0));
 
-    LOG_ONCE("End Render Pass");
-    LOGCALL_ONCE(vkCmdEndRenderPass(commandBuffer));
+    renderPass->end(commandBuffer);
 
     if (LOGCALL_ONCE(vkEndCommandBuffer(commandBuffer)) != VK_SUCCESS) {
       throw std::runtime_error("failed to record command buffer!");

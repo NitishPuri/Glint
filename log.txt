@@ -66,35 +66,37 @@ App::initVulkan {
     glint::SwapChain::createImageViews {
     }
   }
-  App::createRenderPass {
-    clear the values to a constant at the start
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR
-    store the values to memory for reading later
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE
-    not using stencil buffer
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE
-    layout transition before and after render pass
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-    which attachment to reference by its index in the attachment descriptions array
-    colorAttachmentRef.attachment = 0
-    layout the attachment will have during a subpass
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-    subpass dependencies, for layout transitions
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS
-    subpass.colorAttachmentCount = 1
-    subpass.pColorAttachments = &colorAttachmentRef
-    dependency between the subpass and the external render pass
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL
-    dependency.dstSubpass = 0
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-    dependency.srcAccessMask = 0
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
-    Render Pass
-    VkRenderPassCreateInfo renderPassInfo{}
-    vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass)
+  glint::RenderPass::RenderPass {
+    glint::RenderPass::createRenderPass {
+      clear the values to a constant at the start
+      colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR
+      store the values to memory for reading later
+      colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE
+      not using stencil buffer
+      colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE
+      colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE
+      layout transition before and after render pass
+      colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
+      colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+      which attachment to reference by its index in the attachment descriptions array
+      colorAttachmentRef.attachment = 0
+      layout the attachment will have during a subpass
+      colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+      subpass dependencies, for layout transitions
+      subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS
+      subpass.colorAttachmentCount = 1
+      subpass.pColorAttachments = &colorAttachmentRef
+      dependency between the subpass and the external render pass
+      dependency.srcSubpass = VK_SUBPASS_EXTERNAL
+      dependency.dstSubpass = 0
+      dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+      dependency.srcAccessMask = 0
+      dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+      dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+      Render Pass
+      VkRenderPassCreateInfo renderPassInfo{}
+      vkCreateRenderPass(m_Context->getDevice(), &renderPassInfo, nullptr, &m_RenderPass)
+    }
   }
   App::createGraphicsPipeline {
     Loading shaders, can wither load pre compiled shaders, or compile at runtime to SPIR-V
@@ -186,9 +188,11 @@ App::mainLoop {
     Record a command buffer which draws the scene onto the image.
     App::recordCommandBuffer {
       vkBeginCommandBuffer(commandBuffer, &beginInfo)
-      Start Render Pass
-      VkRenderPassBeginInfo renderPassInfo{}
-      vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE)
+      glint::RenderPass::begin {
+        Start Render Pass
+        VkRenderPassBeginInfo renderPassInfo{}
+        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE)
+      }
       Bind Pipeline
       vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline)
       Set dynamic states
@@ -196,8 +200,10 @@ App::mainLoop {
       vkCmdSetScissor(commandBuffer, 0, 1, &scissor)
       FINALLY DRAW!!!
       vkCmdDraw(commandBuffer, 3, 1, 0, 0)
-      End Render Pass
-      vkCmdEndRenderPass(commandBuffer)
+      glint::RenderPass::end {
+        End Render Pass
+        vkCmdEndRenderPass(commandBuffer)
+      }
       vkEndCommandBuffer(commandBuffer)
       Command Buffer Recorded
     }
@@ -220,7 +226,8 @@ App::cleanup {
   vkDestroyCommandPool(device, commandPool, nullptr)
   vkDestroyPipeline(device, graphicsPipeline, nullptr)
   vkDestroyPipelineLayout(device, pipelineLayout, nullptr)
-  vkDestroyRenderPass(device, renderPass, nullptr)
+  glint::RenderPass::~RenderPass {
+  }
   glint::SwapChain::~SwapChain {
   }
   glint::VulkanContext::~VulkanContext {
