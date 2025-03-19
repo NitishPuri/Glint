@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Vulkan
 find_package(Vulkan REQUIRED)
-include_directories(${Vulkan_INCLUDE_DIRS})
 
 # GLFW
 set(GLFW_PATH ${PROJECT_SOURCE_DIR}/ext/glfw-3.4.bin.WIN64)
@@ -17,18 +16,24 @@ set(GLFW_LIB_DIR ${GLFW_PATH}/lib-vc2022)
 
 ################## Dependencies ##################
 
-file(GLOB SOURCES
+file(GLOB_RECURSE SOURCES
     src/*.cpp
+    src/*.h
+)
+    
+file (GLOB_RECURSE SHADERS
     src/shaders/*.vert
     src/shaders/*.frag
 )
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:MSVCRT")
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES} ${SHADERS})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${GLFW_INCLUDE}
+    ${Vulkan_INCLUDE_DIRS}
+    ${PROJECT_SOURCE_DIR}/src
 )
 
 

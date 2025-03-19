@@ -8,8 +8,9 @@
 #include <stdexcept>
 #include <vector>
 
+#include "core/window.h"
 #include "logger.h"
-#include "window.h"
+#include "vulkan_context.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -190,7 +191,6 @@ class App {
 #pragma endregion APP
 
 #pragma region VARIABLES
-  // GLFWwindow* window = nullptr;
   std::unique_ptr<glint::Window> window = nullptr;
 
   VkInstance instance{};
