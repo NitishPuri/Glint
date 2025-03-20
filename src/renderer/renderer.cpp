@@ -8,6 +8,7 @@
 #include "swapchain.h"
 #include "synchronization_manager.h"
 #include "vk_context.h"
+#include "vk_utils.h"
 
 namespace glint {
 
@@ -27,6 +28,8 @@ void Renderer::init() {
   // Create Vulkan Context
   m_Context = std::make_unique<VkContext>(m_Window);
   m_Context->init();
+
+  VkUtils::init(m_Context.get());
 
   // Create SwapChain
   m_SwapChain = std::make_unique<SwapChain>(m_Context.get());
@@ -112,10 +115,11 @@ void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCo
 
   // Reset and record command buffer
   m_CommandManager->resetCommandBuffer(m_CurrentFrame);
+
+  // m_CommandManager->recordCommandBuffer(m_CurrentFrame, recordCommandsFunc);
+
   m_CommandManager->beginSingleTimeCommands(m_CurrentFrame);
-
   recordCommandsFunc(m_CommandManager->getCommandBuffer(m_CurrentFrame), imageIndex);
-
   m_CommandManager->endSingleTimeCommands(m_CurrentFrame);
 
   // Submit command buffer

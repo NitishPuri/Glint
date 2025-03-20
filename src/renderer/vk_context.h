@@ -34,9 +34,8 @@ class VkContext {
   Window* getWindow() const { return m_Window; }
 
   uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-  void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer,
-                    VkDeviceMemory& bufferMemory);
 
+  // TODO: Remove this, try to use the command manager insttead whereever this is used.
   VkCommandPool getCommandPool() const { return m_CommandPool; }
   void setCommandPool(VkCommandPool commamndPool) { m_CommandPool = commamndPool; }
 

@@ -2,6 +2,7 @@
 
 #include "logger.h"
 #include "vk_context.h"
+#include "vk_utils.h"
 
 namespace glint {
 
@@ -67,17 +68,17 @@ void Mesh::createVertexBuffer() {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
 
-  m_Context->createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-                          stagingBufferMemory);
+  VkUtils::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                        stagingBufferMemory);
 
   void* data;
   vkMapMemory(m_Context->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
   memcpy(data, m_Vertices.data(), static_cast<size_t>(bufferSize));
   vkUnmapMemory(m_Context->getDevice(), stagingBufferMemory);
 
-  m_Context->createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_VertexBuffer, m_VertexBufferMemory);
+  VkUtils::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_VertexBuffer, m_VertexBufferMemory);
 
   copyBuffer(stagingBuffer, m_VertexBuffer, bufferSize);
 
@@ -92,17 +93,17 @@ void Mesh::createIndexBuffer() {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
 
-  m_Context->createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-                          stagingBufferMemory);
+  VkUtils::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                        stagingBufferMemory);
 
   void* data;
   vkMapMemory(m_Context->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
   memcpy(data, m_Indices.data(), static_cast<size_t>(bufferSize));
   vkUnmapMemory(m_Context->getDevice(), stagingBufferMemory);
 
-  m_Context->createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_IndexBuffer, m_IndexBufferMemory);
+  VkUtils::createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_IndexBuffer, m_IndexBufferMemory);
 
   copyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
 
@@ -110,6 +111,7 @@ void Mesh::createIndexBuffer() {
   vkFreeMemory(m_Context->getDevice(), stagingBufferMemory, nullptr);
 }
 
+// TODO: Remove this function
 void Mesh::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
   LOGFN;
   // auto commandManager = m_Context->getCommandManager();

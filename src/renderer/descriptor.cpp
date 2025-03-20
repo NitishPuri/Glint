@@ -4,6 +4,7 @@
 
 #include "../logger.h"
 #include "vk_context.h"
+#include "vk_utils.h"
 
 namespace glint {
 
@@ -156,7 +157,7 @@ void Descriptor::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLa
 UniformBuffer::UniformBuffer(VkContext* context, size_t size) : m_Context(context), m_MappedData(nullptr) {
   LOGFN;
 
-  context->createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+  VkUtils::createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Buffer, m_Memory);
 
   // Map memory persistently for the lifetime of the buffer
