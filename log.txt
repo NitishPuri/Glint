@@ -8295,6 +8295,28 @@ glint::Mesh::~Mesh {
   vkDestroyBuffer(device, m_IndexBuffer, nullptr)
   vkFreeMemory(device, m_IndexBufferMemory, nullptr)
 }
+glint::Mesh::~Mesh {
+  vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+  vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+  vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+  vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+}
+glint::UniformBuffer::~UniformBuffer {
+}
+glint::UniformBuffer::~UniformBuffer {
+}
+glint::Descriptor::~Descriptor {
+}
+glint::DescriptorPool::~DescriptorPool {
+}
+glint::DescriptorSetLayout::~DescriptorSetLayout {
+}
+glint::Mesh::~Mesh {
+  vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+  vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+  vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+  vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+}
 glint::Renderer::~Renderer {
 }
 glint::SynchronizationManager::~SynchronizationManager {
