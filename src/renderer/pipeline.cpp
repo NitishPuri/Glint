@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "descriptor.h"
 #include "logger.h"
 #include "mesh.h"
 #include "render_pass.h"
@@ -13,8 +14,12 @@
 namespace glint {
 
 Pipeline::Pipeline(VkContext* context, RenderPass* renderPass, const std::string& vertShaderPath,
-                   const std::string& fragShaderPath)
-    : m_Context(context), m_RenderPass(renderPass), m_PipelineLayout(VK_NULL_HANDLE), m_Pipeline(VK_NULL_HANDLE) {
+                   const std::string& fragShaderPath, DescriptorSetLayout* descriptorSetLayout)
+    : m_Context(context),
+      m_RenderPass(renderPass),
+      m_PipelineLayout(VK_NULL_HANDLE),
+      m_Pipeline(VK_NULL_HANDLE),
+      m_DescriptorSetLayout(descriptorSetLayout) {
   LOGFN;
   createGraphicsPipeline(vertShaderPath, fragShaderPath);
 }
@@ -100,8 +105,14 @@ void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const s
   LOG("Using anything else requires enabling GPU features.");
   LOGCALL(rasterizer.polygonMode = VK_POLYGON_MODE_FILL);  // VK_POLYGON_MODE_LINE, VK_POLYGON_MODE_POINT
   LOGCALL(rasterizer.lineWidth = 1.0f);
-  rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;     // VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_FRONT_AND_BACK
-  rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;  // VK_FRONT_FACE_COUNTER_CLOCKWISE
+  rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;  // VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_FRONT_AND_BACK
+
+  // Use counter-clockwise winding order for ALL pipelines
+  // This works with both transformed and untransformed geometry with proper setup
+  rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+  // rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+  LOG("Using counter-clockwise winding for all geometry");
+
   LOGCALL(rasterizer.depthBiasEnable = VK_FALSE);
   LOG("Depth Bias, for shadow mapping.");
   rasterizer.depthBiasConstantFactor = 0.0f;  // Optional
@@ -156,9 +167,21 @@ void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const s
   LOG("Pipeline Layout");
   LOG("uniform values, push constants, etc.");
   LOGCALL(VkPipelineLayoutCreateInfo pipelineLayoutInfo{});
+
+  if (m_DescriptorSetLayout) {
+    LOG("Including descriptor set layout in pipeline layout");
+
+    VkDescriptorSetLayout layout = m_DescriptorSetLayout->getLayout();
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &layout;
+  } else {
+    LOG("No descriptor set layout for pipeline layout");
+
+    pipelineLayoutInfo.setLayoutCount = 0;
+    pipelineLayoutInfo.pSetLayouts = nullptr;
+  }
+
   pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  pipelineLayoutInfo.setLayoutCount = 0;             // Optional
-  pipelineLayoutInfo.pSetLayouts = nullptr;          // Optional
   pipelineLayoutInfo.pushConstantRangeCount = 0;     // Optional
   pipelineLayoutInfo.pPushConstantRanges = nullptr;  // Optional
 

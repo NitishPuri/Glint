@@ -11,10 +11,13 @@ class VkContext;
 class SwapChain;
 class RenderPass;
 
+class DescriptorSetLayout;
+// class DescriptorPool;
+
 class Pipeline {
  public:
   Pipeline(VkContext* context, RenderPass* renderPass, const std::string& vertShaderPath,
-           const std::string& fragShaderPath);
+           const std::string& fragShaderPath, DescriptorSetLayout* descriptorSetLayout = nullptr);
   ~Pipeline();
 
   // Prevent copying
@@ -27,6 +30,8 @@ class Pipeline {
 
   void bind(VkCommandBuffer commandBuffer);
 
+  // void setDescriptorSetLayout(DescriptorSetLayout* layout) { m_DescriptorSetLayout = layout; }
+
  private:
   void createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath);
   VkShaderModule createShaderModule(const std::vector<char>& code);
@@ -37,6 +42,10 @@ class Pipeline {
   RenderPass* m_RenderPass;
   VkPipelineLayout m_PipelineLayout;
   VkPipeline m_Pipeline;
+
+  DescriptorSetLayout* m_DescriptorSetLayout = nullptr;
+  // VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
+  // DescriptorPool* m_DescriptorPool;
 };
 
 }  // namespace glint
