@@ -158,7 +158,8 @@ App::initRenderer {
       glint::CommandManager::createCommandPool {
         Choose graphics family as we are using the command buffer for rendering
       }
-      glint::CommandManager::createCommandBuffer {
+      glint::CommandManager::createCommandBuffers {
+        Creating 2 command buffers
       }
     }
     glint::SynchronizationManager::SynchronizationManager {
@@ -166,9 +167,11 @@ App::initRenderer {
         Synchronization:
         Semaphors: signal and wait for the image available and render finished, sync between queues
         Fences: wait for the frame to finish before starting the next one, sync between CPU and GPU
+        Creating 2 sets of synchronization objects
         Create fence in signaled state, so that the first frame can start immediately
       }
     }
+    Renderer initialized with 2 frames in flight and 3 swap chain images
   }
 }
 App::mainLoop {
@@ -185,9 +188,7 @@ App::mainLoop {
     glint::SynchronizationManager::waitForFence {
       Wait for the previous frame to be finished
     }
-    glint::SynchronizationManager::resetFence {
-    }
-    glint::CommandManager::reset {
+    glint::CommandManager::resetCommandBuffer {
     }
     glint::CommandManager::beginSingleTimeCommands {
     }
@@ -211,6 +212,8 @@ App::mainLoop {
       }
     }
     glint::CommandManager::endSingleTimeCommands {
+    }
+    glint::SynchronizationManager::resetFence {
     }
   }
   glint::Renderer::waitIdle {

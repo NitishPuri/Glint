@@ -11,7 +11,10 @@
 
 namespace glint {
 
-Renderer::Renderer(Window* window) : m_Window(window) { LOGFN; }
+Renderer::Renderer(Window* window, uint32_t maxFramesInFlight)
+    : m_Window(window), m_MaxFramesInFlight(maxFramesInFlight), m_CurrentFrame(0) {
+  LOGFN;
+}
 
 Renderer::~Renderer() {
   LOGFN;
@@ -38,10 +41,17 @@ void Renderer::init(const std::string& vertShaderPath, const std::string& fragSh
   m_SwapChain->createFramebuffers(m_RenderPass->getRenderPass());
 
   // Create Command Manager
-  m_CommandManager = std::make_unique<CommandManager>(m_Context.get());
+  m_CommandManager = std::make_unique<CommandManager>(m_Context.get(), m_MaxFramesInFlight);
 
   // Create Synchronization Manager
-  m_SyncManager = std::make_unique<SynchronizationManager>(m_Context.get());
+  m_SyncManager = std::make_unique<SynchronizationManager>(m_Context.get(), m_MaxFramesInFlight);
+
+  // Initialize images in flight
+  uint32_t imageCount = m_SwapChain->getImageCount();
+  //   m_ImagesInFlight.resize(imageCount, VK_NULL_HANDLE);
+  m_ImageIndices.resize(m_MaxFramesInFlight);
+
+  LOG("Renderer initialized with", m_MaxFramesInFlight, "frames in flight and", imageCount, "swap chain images");
 }
 
 void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCommandsFunc) {
@@ -57,47 +67,54 @@ void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCo
   LOG_ONCE("--------------------------------------------------------------");
 
   // Wait for the previous frame to finish
-  m_SyncManager->waitForFence();
-  m_SyncManager->resetFence();
+  m_SyncManager->waitForFence(m_CurrentFrame);
 
   // Get next image from swap chain
   uint32_t imageIndex;
-  VkResult result = vkAcquireNextImageKHR(m_Context->getDevice(), m_SwapChain->getSwapChain(), UINT64_MAX,
-                                          m_SyncManager->getImageAvailableSemaphore(), VK_NULL_HANDLE, &imageIndex);
+  VkResult result =
+      vkAcquireNextImageKHR(m_Context->getDevice(), m_SwapChain->getSwapChain(), UINT64_MAX,
+                            m_SyncManager->getImageAvailableSemaphore(m_CurrentFrame), VK_NULL_HANDLE, &imageIndex);
 
   if (result != VK_SUCCESS) {
     throw std::runtime_error("Failed to acquire swap chain image!");
   }
 
+  // Save the image index for this frame
+  m_ImageIndices[m_CurrentFrame] = imageIndex;
+
   // Reset and record command buffer
-  m_CommandManager->reset();
-  m_CommandManager->beginSingleTimeCommands();
-  recordCommandsFunc(m_CommandManager->getCommandBuffer(), imageIndex);
-  m_CommandManager->endSingleTimeCommands();
+  m_CommandManager->resetCommandBuffer(m_CurrentFrame);
+  m_CommandManager->beginSingleTimeCommands(m_CurrentFrame);
+
+  recordCommandsFunc(m_CommandManager->getCommandBuffer(m_CurrentFrame), imageIndex);
+
+  m_CommandManager->endSingleTimeCommands(m_CurrentFrame);
 
   // Submit command buffer
   VkSubmitInfo submitInfo{};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
   // Wait for image available semaphore
-  VkSemaphore waitSemaphores[] = {m_SyncManager->getImageAvailableSemaphore()};
+  VkSemaphore waitSemaphores[] = {m_SyncManager->getImageAvailableSemaphore(m_CurrentFrame)};
   VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
   submitInfo.waitSemaphoreCount = 1;
   submitInfo.pWaitSemaphores = waitSemaphores;
   submitInfo.pWaitDstStageMask = waitStages;
 
   // Command buffer to submit
-  VkCommandBuffer cmdBuffer = m_CommandManager->getCommandBuffer();
+  VkCommandBuffer cmdBuffer = m_CommandManager->getCommandBuffer(m_CurrentFrame);
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = &cmdBuffer;
 
   // Signal render finished semaphore
-  VkSemaphore signalSemaphores[] = {m_SyncManager->getRenderFinishedSemaphore()};
+  VkSemaphore signalSemaphores[] = {m_SyncManager->getRenderFinishedSemaphore(m_CurrentFrame)};
   submitInfo.signalSemaphoreCount = 1;
   submitInfo.pSignalSemaphores = signalSemaphores;
 
   // Submit to queue
-  if (vkQueueSubmit(m_Context->getGraphicsQueue(), 1, &submitInfo, m_SyncManager->getInFlightFence()) != VK_SUCCESS) {
+  m_SyncManager->resetFence(m_CurrentFrame);
+  if (vkQueueSubmit(m_Context->getGraphicsQueue(), 1, &submitInfo, m_SyncManager->getInFlightFence(m_CurrentFrame)) !=
+      VK_SUCCESS) {
     throw std::runtime_error("Failed to submit draw command buffer!");
   }
 
@@ -116,6 +133,9 @@ void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCo
   if (vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo) != VK_SUCCESS) {
     throw std::runtime_error("Failed to present swap chain image!");
   }
+
+  // Advance to the next frame
+  m_CurrentFrame = (m_CurrentFrame + 1) % m_MaxFramesInFlight;
 }
 
 void Renderer::waitIdle() {

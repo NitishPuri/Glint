@@ -18,7 +18,7 @@ class SynchronizationManager;
 
 class Renderer {
  public:
-  Renderer(Window* window);
+  Renderer(Window* window, uint32_t maxFramesInFlight);
   ~Renderer();
 
   // Prevent copying
@@ -42,6 +42,13 @@ class Renderer {
   std::unique_ptr<Pipeline> m_Pipeline;
   std::unique_ptr<CommandManager> m_CommandManager;
   std::unique_ptr<SynchronizationManager> m_SyncManager;
+
+  // Keep track of images in flight
+  uint32_t m_MaxFramesInFlight;
+  uint32_t m_CurrentFrame = 0;
+
+  //   std::vector<VkFence> m_ImagesInFlight;
+  std::vector<uint32_t> m_ImageIndices;
 };
 
 }  // namespace glint

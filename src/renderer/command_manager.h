@@ -2,13 +2,15 @@
 
 #include <vulkan/vulkan.h>
 
+#include <vector>
+
 namespace glint {
 
 class VulkanContext;
 
 class CommandManager {
  public:
-  CommandManager(VulkanContext* context);
+  CommandManager(VulkanContext* context, uint32_t maxFramesInFlight);
   ~CommandManager();
 
   // Prevent copying
@@ -17,29 +19,37 @@ class CommandManager {
 
   // Getters
   VkCommandPool getCommandPool() const { return m_CommandPool; }
-  VkCommandBuffer getCommandBuffer() const { return m_CommandBuffer; }
+  VkCommandBuffer getCommandBuffer(uint32_t frameIndex) const {
+    return frameIndex < m_CommandBuffers.size() ? m_CommandBuffers[frameIndex] : VK_NULL_HANDLE;
+  }
 
   // Command buffer operations
-  void beginSingleTimeCommands();
-  void endSingleTimeCommands();
-  void reset();
+  void beginSingleTimeCommands(uint32_t frameIndex);
+  void endSingleTimeCommands(uint32_t frameIndex);
+  void resetCommandBuffer(uint32_t frameIndex);
 
   // Record a command buffer with the provided function
   template <typename F>
   void recordCommandBuffer(uint32_t imageIndex, F&& recordFunction) {
     beginSingleTimeCommands();
-    recordFunction(m_CommandBuffer, imageIndex);
+    // TODO: imageIndex == frameIndex ???????
+    recordFunction(m_CommandBuffers[imageIndex], imageIndex);
     endSingleTimeCommands();
   }
 
+  // Get maximum frames in flight
+  //   uint32_t getMaxFramesInFlight() const { return static_cast<uint32_t>(m_CommandBuffers.size()); }
+
  private:
   void createCommandPool();
-  void createCommandBuffer();
+  void createCommandBuffers();
 
  private:
   VulkanContext* m_Context;
   VkCommandPool m_CommandPool;
-  VkCommandBuffer m_CommandBuffer;
+
+  std::vector<VkCommandBuffer> m_CommandBuffers;
+  uint32_t m_maxFramesInFlight;
 };
 
 }  // namespace glint

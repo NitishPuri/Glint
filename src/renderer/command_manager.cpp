@@ -7,11 +7,11 @@
 
 namespace glint {
 
-CommandManager::CommandManager(VulkanContext* context)
-    : m_Context(context), m_CommandPool(VK_NULL_HANDLE), m_CommandBuffer(VK_NULL_HANDLE) {
+CommandManager::CommandManager(VulkanContext* context, uint32_t maxFramesInFlight)
+    : m_Context(context), m_maxFramesInFlight(maxFramesInFlight), m_CommandPool(VK_NULL_HANDLE) {
   LOGFN;
   createCommandPool();
-  createCommandBuffer();
+  createCommandBuffers();
 }
 
 CommandManager::~CommandManager() {
@@ -36,44 +36,56 @@ void CommandManager::createCommandPool() {
   }
 }
 
-void CommandManager::createCommandBuffer() {
+void CommandManager::createCommandBuffers() {
   LOGFN;
+  LOG("Creating", m_maxFramesInFlight, "command buffers");
+
+  m_CommandBuffers.resize(m_maxFramesInFlight);
 
   VkCommandBufferAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   allocInfo.commandPool = m_CommandPool;
   allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-  allocInfo.commandBufferCount = 1;
+  allocInfo.commandBufferCount = m_maxFramesInFlight;
 
-  if (vkAllocateCommandBuffers(m_Context->getDevice(), &allocInfo, &m_CommandBuffer) != VK_SUCCESS) {
+  if (vkAllocateCommandBuffers(m_Context->getDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
     throw std::runtime_error("Failed to allocate command buffers!");
   }
 }
 
-void CommandManager::beginSingleTimeCommands() {
+void CommandManager::beginSingleTimeCommands(uint32_t frameIndex) {
   LOGFN_ONCE;
+  if (frameIndex >= m_CommandBuffers.size()) {
+    throw std::runtime_error("Frame index out of bounds: " + std::to_string(frameIndex));
+  }
 
   VkCommandBufferBeginInfo beginInfo{};
   beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   beginInfo.flags = 0;                   // Optional
   beginInfo.pInheritanceInfo = nullptr;  // Optional
 
-  if (vkBeginCommandBuffer(m_CommandBuffer, &beginInfo) != VK_SUCCESS) {
+  if (vkBeginCommandBuffer(m_CommandBuffers[frameIndex], &beginInfo) != VK_SUCCESS) {
     throw std::runtime_error("Failed to begin recording command buffer!");
   }
 }
 
-void CommandManager::endSingleTimeCommands() {
+void CommandManager::endSingleTimeCommands(uint32_t frameIndex) {
   LOGFN_ONCE;
+  if (frameIndex >= m_CommandBuffers.size()) {
+    throw std::runtime_error("Frame index out of bounds: " + std::to_string(frameIndex));
+  }
 
-  if (vkEndCommandBuffer(m_CommandBuffer) != VK_SUCCESS) {
+  if (vkEndCommandBuffer(m_CommandBuffers[frameIndex]) != VK_SUCCESS) {
     throw std::runtime_error("Failed to record command buffer!");
   }
 }
 
-void CommandManager::reset() {
+void CommandManager::resetCommandBuffer(uint32_t frameIndex) {
   LOGFN_ONCE;
-  vkResetCommandBuffer(m_CommandBuffer, 0);
+  if (frameIndex >= m_CommandBuffers.size()) {
+    throw std::runtime_error("Frame index out of bounds: " + std::to_string(frameIndex));
+  }
+  vkResetCommandBuffer(m_CommandBuffers[frameIndex], 0);
 }
 
 }  // namespace glint

@@ -23,6 +23,8 @@ const uint32_t HEIGHT = 600;
 
 std::unordered_set<std::string> glint::OneTimeLogger::loggedFunctions;
 
+const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+
 class App {
  public:
 #pragma region APP
@@ -48,7 +50,7 @@ class App {
 
   void initRenderer() {
     LOGFN;
-    renderer = std::make_unique<glint::Renderer>(window.get());
+    renderer = std::make_unique<glint::Renderer>(window.get(), MAX_FRAMES_IN_FLIGHT);
     renderer->init("./bin/shaders/shader.vert.spv", "./bin/shaders/shader.frag.spv");
   }
 
