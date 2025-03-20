@@ -43,7 +43,7 @@ class App {
     props.title = "Vulkan";
     props.width = WIDTH;
     props.height = HEIGHT;
-    props.resizable = false;
+    props.resizable = true;
 
     window = std::make_unique<glint::Window>(props);
   }

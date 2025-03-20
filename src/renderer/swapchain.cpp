@@ -17,6 +17,11 @@ SwapChain::SwapChain(VulkanContext* context) : m_Context(context), m_SwapChain(V
 
 SwapChain::~SwapChain() {
   LOGFN;
+  cleanup();
+}
+
+void SwapChain::cleanup() {
+  LOGFN;
   VkDevice device = m_Context->getDevice();
 
   LOG("Destroying ", m_Framebuffers.size(), " framebuffers");
@@ -30,6 +35,19 @@ SwapChain::~SwapChain() {
   }
 
   LOGCALL(vkDestroySwapchainKHR(device, m_SwapChain, nullptr));
+}
+
+void SwapChain::recreateSwapchain(VkRenderPass renderPass) {
+  LOGFN;
+
+  VkDevice device = m_Context->getDevice();
+  LOGCALL(vkDeviceWaitIdle(device));
+
+  cleanup();
+
+  createSwapChain();
+  createImageViews();
+  createFramebuffers(renderPass);
 }
 
 void SwapChain::createSwapChain() {

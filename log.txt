@@ -215,6 +215,33 @@ App::mainLoop {
     }
     glint::SynchronizationManager::resetFence {
     }
+    result = vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo)
+  }
+  Window resized:  2560 x 1369
+  glint::SwapChain::recreateSwapchain {
+    vkDeviceWaitIdle(device)
+    glint::SwapChain::cleanup {
+      Destroying  3  framebuffers
+      Destroying  3  image views
+      vkDestroySwapchainKHR(device, m_SwapChain, nullptr)
+    }
+    glint::SwapChain::createSwapChain {
+      glint::SwapChain::querySwapChainSupport {
+      }
+      glint::SwapChain::chooseSwapSurfaceFormat {
+      }
+      glint::SwapChain::chooseSwapPresentMode {
+        Using VK_PRESENT_MODE_MAILBOX_KHR (triple buffering)
+      }
+      glint::SwapChain::chooseSwapExtent {
+      }
+      graphics and present queues are the same
+      Using exclusive sharing mode
+    }
+    glint::SwapChain::createImageViews {
+    }
+    glint::SwapChain::createFramebuffers {
+    }
   }
   glint::Renderer::waitIdle {
   }
@@ -234,9 +261,11 @@ App::cleanup {
     vkDestroyRenderPass(m_Context->getDevice(), m_RenderPass, nullptr)
   }
   glint::SwapChain::~SwapChain {
-    Destroying  3  framebuffers
-    Destroying  3  image views
-    vkDestroySwapchainKHR(device, m_SwapChain, nullptr)
+    glint::SwapChain::cleanup {
+      Destroying  3  framebuffers
+      Destroying  3  image views
+      vkDestroySwapchainKHR(device, m_SwapChain, nullptr)
+    }
   }
   glint::VulkanContext::~VulkanContext {
     glint::VulkanContext::cleanup {

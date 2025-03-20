@@ -34,6 +34,8 @@ class Renderer {
   Pipeline* getPipeline() const { return m_Pipeline.get(); }
   SwapChain* getSwapChain() const { return m_SwapChain.get(); }
 
+  void handleResize();
+
  private:
   Window* m_Window;
   std::unique_ptr<VulkanContext> m_Context;

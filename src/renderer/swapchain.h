@@ -27,6 +27,9 @@ class SwapChain {
 
   void createFramebuffers(VkRenderPass renderPass);
 
+  void cleanup();
+  void recreateSwapchain(VkRenderPass renderPass);
+
  private:
   struct SwapChainSupportDetails {
     VkSurfaceCapabilitiesKHR capabilities;
@@ -43,6 +46,7 @@ class SwapChain {
 
  private:
   VulkanContext* m_Context;
+
   VkSwapchainKHR m_SwapChain;
   std::vector<VkImage> m_Images;
   VkFormat m_ImageFormat;

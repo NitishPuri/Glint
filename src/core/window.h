@@ -12,17 +12,13 @@ namespace glint {
 class Window {
  public:
   struct WindowProps {
-    std::string title;
-    uint32_t width;
-    uint32_t height;
-    bool resizable;
-
-    WindowProps(const std::string& title = "Glint Vulkan", uint32_t width = 800, uint32_t height = 600,
-                bool resizable = false)
-        : title(title), width(width), height(height), resizable(resizable) {}
+    std::string title = "Glint";
+    uint32_t width = 800;
+    uint32_t height = 600;
+    bool resizable = true;
   };
 
-Window(const WindowProps& props = WindowProps());
+  Window(const WindowProps& props = WindowProps());
   ~Window();
 
   // Prevent copying
@@ -43,9 +39,27 @@ Window(const WindowProps& props = WindowProps());
   // Get required instance extensions
   static std::vector<const char*> getRequiredInstanceExtensions();
 
+  // Set window resize callback
+  void setResizeCallback(const std::function<void(uint32_t, uint32_t)>& callback) { m_Data.resizeCallback = callback; }
+
+  bool wasResized() const { return m_Data.resized; }
+  void resetResizedFlag() { m_Data.resized = false; }
+  //  GLFWwindow* getGLFWWindow() const { return m_Window; }
+
+  void waitIfMinimized() {
+    int width = 0, height = 0;
+    while (width == 0 || height == 0) {
+      glfwGetFramebufferSize(m_Window, &width, &height);
+      glfwWaitEvents();
+    }
+  }
+
  private:
   void init(const WindowProps& props);
   void shutdown();
+
+  // GLFW callback function wrappers
+  // static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 
  private:
   GLFWwindow* m_Window;
@@ -53,7 +67,8 @@ Window(const WindowProps& props = WindowProps());
   struct WindowData {
     std::string title;
     uint32_t width, height;
-    bool vsync;
+    bool resized = false;
+    // bool vsync;
 
     // For window resize callback
     std::function<void(uint32_t, uint32_t)> resizeCallback;

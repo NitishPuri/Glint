@@ -54,6 +54,19 @@ void Renderer::init(const std::string& vertShaderPath, const std::string& fragSh
   LOG("Renderer initialized with", m_MaxFramesInFlight, "frames in flight and", imageCount, "swap chain images");
 }
 
+void Renderer::handleResize() {
+  if (!m_Window->wasResized()) {
+    return;
+  }
+
+  m_Window->waitIfMinimized();
+  m_SwapChain->recreateSwapchain(m_RenderPass->getRenderPass());
+  m_Window->resetResizedFlag();
+
+  // Reset any frames in flight tracking
+  //   m_ImageIndices.resize(m_MaxFramesInFlight);
+}
+
 void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCommandsFunc) {
   LOGFN_ONCE;
 
@@ -74,6 +87,13 @@ void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCo
   VkResult result =
       vkAcquireNextImageKHR(m_Context->getDevice(), m_SwapChain->getSwapChain(), UINT64_MAX,
                             m_SyncManager->getImageAvailableSemaphore(m_CurrentFrame), VK_NULL_HANDLE, &imageIndex);
+
+  if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+    handleResize();
+    return;
+  } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+    throw std::runtime_error("failed to acquire swap chain image!");
+  }
 
   if (result != VK_SUCCESS) {
     throw std::runtime_error("Failed to acquire swap chain image!");
@@ -130,8 +150,11 @@ void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCo
   presentInfo.pImageIndices = &imageIndex;
   presentInfo.pResults = nullptr;  // Optional
 
-  if (vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to present swap chain image!");
+  LOGCALL_ONCE(result = vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo));
+  if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_Window->wasResized()) {
+    handleResize();
+  } else if (result != VK_SUCCESS) {
+    throw std::runtime_error("failed to present swap chain image!");
   }
 
   // Advance to the next frame

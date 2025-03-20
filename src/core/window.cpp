@@ -60,6 +60,10 @@ void Window::init(const WindowProps& props) {
       data.width = width;
       data.height = height;
 
+      data.resized = true;
+
+      LOG("Window resized: ", width, "x", height);
+
       if (data.resizeCallback) {
         data.resizeCallback(width, height);
       }
