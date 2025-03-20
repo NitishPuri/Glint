@@ -8,11 +8,13 @@ namespace glint {
 std::unique_ptr<Mesh> MeshFactory::createTriangle(VulkanContext* context) {
   LOGFN;
 
-  std::vector<Vertex> vertices = {{{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-                                  {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-                                  {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}};
+  const std::vector<Vertex> vertices = {{{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+                                        {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+                                        {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}};
 
-  return std::make_unique<Mesh>(context, vertices);
+  const std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
+
+  return std::make_unique<Mesh>(context, vertices, indices);
 }
 
 std::unique_ptr<Mesh> MeshFactory::createQuad(VulkanContext* context) {

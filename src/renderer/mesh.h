@@ -37,7 +37,7 @@ class Mesh {
   // void createVertexBuffer(const std::vector<Vertex>& vertices);
   void createVertexBuffer();
   // void createIndexBuffer(const std::vector<uint32_t>& indices);
-  // void createIndexBuffer();
+  void createIndexBuffer();
   void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
  private:

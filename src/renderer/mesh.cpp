@@ -40,9 +40,9 @@ Mesh::Mesh(VulkanContext* context, const std::vector<Vertex>& vertices, const st
       m_HasIndices(!indices.empty()) {
   LOGFN;
   createVertexBuffer();
-  //   if (m_HasIndices) {
-  //     createIndexBuffer();
-  //   }
+  if (m_HasIndices) {
+    createIndexBuffer();
+  }
 
   LOG("Mesh created with", m_Vertices.size(), "vertices and", m_Indices.size(), "indices");
 }
@@ -64,16 +64,6 @@ void Mesh::createVertexBuffer() {
   LOGFN;
   VkDeviceSize bufferSize = sizeof(m_Vertices[0]) * m_Vertices.size();
 
-  //   m_Context->createBuffer(bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-  //                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-  //                           m_VertexBuffer, m_VertexBufferMemory);
-
-  //   auto device = m_Context->getDevice();
-  //   void* data;
-  //   LOGCALL(vkMapMemory(device, m_VertexBufferMemory, 0, bufferSize, 0, &data));
-  //   LOGCALL(memcpy(data, m_Vertices.data(), (size_t)bufferSize));
-  //   LOGCALL(vkUnmapMemory(device, m_VertexBufferMemory));
-
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
 
@@ -90,6 +80,31 @@ void Mesh::createVertexBuffer() {
                           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_VertexBuffer, m_VertexBufferMemory);
 
   copyBuffer(stagingBuffer, m_VertexBuffer, bufferSize);
+
+  vkDestroyBuffer(m_Context->getDevice(), stagingBuffer, nullptr);
+  vkFreeMemory(m_Context->getDevice(), stagingBufferMemory, nullptr);
+}
+
+void Mesh::createIndexBuffer() {
+  LOGFN;
+  VkDeviceSize bufferSize = sizeof(m_Indices[0]) * m_Indices.size();
+
+  VkBuffer stagingBuffer;
+  VkDeviceMemory stagingBufferMemory;
+
+  m_Context->createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                          stagingBufferMemory);
+
+  void* data;
+  vkMapMemory(m_Context->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+  memcpy(data, m_Indices.data(), static_cast<size_t>(bufferSize));
+  vkUnmapMemory(m_Context->getDevice(), stagingBufferMemory);
+
+  m_Context->createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_IndexBuffer, m_IndexBufferMemory);
+
+  copyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
 
   vkDestroyBuffer(m_Context->getDevice(), stagingBuffer, nullptr);
   vkFreeMemory(m_Context->getDevice(), stagingBufferMemory, nullptr);
