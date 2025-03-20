@@ -1,5 +1,7 @@
 # Glint
 
+![alt text](<doc/Glint 2025-03-19 02.09.21.excalidraw.svg>)
+
 ```
 Glint_vk/
 ├── src/ # Core engine source code

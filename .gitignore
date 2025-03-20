@@ -4,3 +4,4 @@ ext
 bin/
 
 *_.h
+doc/*

@@ -54,6 +54,8 @@ class Window {
     }
   }
 
+  bool isKeyPressed(int key) const { return glfwGetKey(m_Window, key) == GLFW_PRESS; }
+
  private:
   void init(const WindowProps& props);
   void shutdown();

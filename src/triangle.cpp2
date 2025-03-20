@@ -1,6 +1,5 @@
 
 #include <algorithm>
-#include <chrono>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -20,8 +19,6 @@
 #include "renderer/swapchain.h"
 #include "renderer/synchronization_manager.h"
 #include "renderer/vulkan_context.h"
-#include "samples/sample.h"
-#include "samples/sample_manager.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -36,8 +33,7 @@ class App {
   void run() {
     initWindow();
     initRenderer();
-    // initMesh();
-    initSamples();
+    initMesh();
 
     mainLoop();
     cleanup();
@@ -61,47 +57,18 @@ class App {
     renderer->init("./bin/shaders/shader.vert.spv", "./bin/shaders/shader.frag.spv");
   }
 
-  // void initMesh() {
-  //   LOGFN;
-
-  //   mesh = glint::MeshFactory::createTriangle(renderer->getContext());
-  //   // mesh = glint::MeshFactory::createQuad(renderer->getContext());
-  // }
-
-  void initSamples() {
+  void initMesh() {
     LOGFN;
-    sampleManager.init(window.get(), renderer.get());
 
-    sampleManager.registerSample(std::make_unique<glint::TriangleSample>());
-    sampleManager.registerSample(std::make_unique<glint::QuadSample>());
-
-    sampleManager.setActiveSample("Triangle Sample");
+    mesh = glint::MeshFactory::createTriangle(renderer->getContext());
   }
 
   void mainLoop() {
     LOGFN;
 
-    // For calculating delta time
-    auto lastFrameTime = std::chrono::high_resolution_clock::now();
-
     static int frames = 0;
     LOGCALL(while (!window->shouldClose())) {
       window->pollEvents();
-
-      // Handle sample switching
-      if (window->isKeyPressed(GLFW_KEY_1)) {
-        sampleManager.setActiveSample("Triangle Sample");
-      } else if (window->isKeyPressed(GLFW_KEY_2)) {
-        sampleManager.setActiveSample("Quad Sample");
-      }
-
-      // Calculate delta time
-      auto currentTime = std::chrono::high_resolution_clock::now();
-      float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastFrameTime).count();
-      lastFrameTime = currentTime;
-
-      // Update active sample
-      sampleManager.update(deltaTime);
 
       renderer->drawFrame(
           [this](VkCommandBuffer commandBuffer, uint32_t imageIndex) { drawScene(commandBuffer, imageIndex); });
@@ -122,11 +89,7 @@ class App {
 
   std::unique_ptr<glint::Window> window = nullptr;
   std::unique_ptr<glint::Renderer> renderer = nullptr;
-  // std::unique_ptr<glint::Mesh> mesh = nullptr;
-
-  glint::SampleManager sampleManager;
-
-  // std::unique_ptr<Sample> sample = nullptr;
+  std::unique_ptr<glint::Mesh> mesh = nullptr;
 
 #pragma endregion APP
 
@@ -144,6 +107,8 @@ class App {
     renderPass->begin(commandBuffer, imageIndex, clearColor);
     pipeline->bind(commandBuffer);
 
+    mesh->bind(commandBuffer);
+
     LOG_ONCE("Set dynamic states");
     auto swapChainExtent = swapChain->getExtent();
     VkViewport viewport{};
@@ -160,11 +125,7 @@ class App {
     scissor.extent = swapChainExtent;
     LOGCALL_ONCE(vkCmdSetScissor(commandBuffer, 0, 1, &scissor));
 
-    // LOG_ONCE("FINALLY DRAW!!!");
-    // mesh->bind(commandBuffer);
-    // LOGCALL_ONCE(vkCmdDraw(commandBuffer, 3, 1, 0, 0));
-    // mesh->draw(commandBuffer);
-    sampleManager.render(commandBuffer, imageIndex);
+    mesh->draw(commandBuffer);
 
     renderPass->end(commandBuffer);
   }
@@ -174,7 +135,6 @@ class App {
 
 #pragma region MAIN
 int main() {
-  LOG("Illiterate Vulkan!");
   App app;
   try {
     app.run();
