@@ -3,173 +3,177 @@ App::initWindow {
   Creating window:  800 x 600  -  Vulkan
   glfwCreateWindow
 }
-App::initVulkan {
-  glint::VulkanContext::VulkanContext {
+App::initRenderer {
+  glint::Renderer::Renderer {
   }
-  glint::VulkanContext::init {
-    glint::VulkanContext::createInstance {
-      glint::VulkanContext::checkValidationLayerSupport {
-        found validation layer:  VK_LAYER_KHRONOS_validation
-      }
-      glint::VulkanContext::getRequiredExtensions {
-        Required Extensions:  3
-           VK_KHR_surface
-           VK_KHR_win32_surface
-           VK_EXT_debug_utils
-      }
-      validation layers are enabled
-      glint::VulkanContext::populateDebugMessengerCreateInfo {
-      }
-      vkCreateInstance(&createInfo, nullptr, &m_Instance)
+  glint::Renderer::init {
+    glint::VulkanContext::VulkanContext {
     }
-    glint::VulkanContext::setupDebugMessenger {
-      glint::VulkanContext::populateDebugMessengerCreateInfo {
+    glint::VulkanContext::init {
+      glint::VulkanContext::createInstance {
+        glint::VulkanContext::checkValidationLayerSupport {
+          found validation layer:  VK_LAYER_KHRONOS_validation
+        }
+        glint::VulkanContext::getRequiredExtensions {
+          Required Extensions:  3
+             VK_KHR_surface
+             VK_KHR_win32_surface
+             VK_EXT_debug_utils
+        }
+        validation layers are enabled
+        glint::VulkanContext::populateDebugMessengerCreateInfo {
+        }
+        vkCreateInstance(&createInfo, nullptr, &m_Instance)
       }
-      glint::CreateDebugUtilsMessengerEXT {
+      glint::VulkanContext::setupDebugMessenger {
+        glint::VulkanContext::populateDebugMessengerCreateInfo {
+        }
+        glint::CreateDebugUtilsMessengerEXT {
+        }
       }
-    }
-    glint::VulkanContext::createSurface {
-      glint::Window::createSurface {
-        VkResult result = glfwCreateWindowSurface(instance, m_Window, nullptr, &surface)
+      glint::VulkanContext::createSurface {
+        glint::Window::createSurface {
+          VkResult result = glfwCreateWindowSurface(instance, m_Window, nullptr, &surface)
+        }
       }
-    }
-    glint::VulkanContext::pickPhysicalDevice {
-      Available Devices:  2
-      glint::VulkanContext::isDeviceSuitable {
+      glint::VulkanContext::pickPhysicalDevice {
+        Available Devices:  2
+        glint::VulkanContext::isDeviceSuitable {
+          glint::VulkanContext::findQueueFamilies {
+          }
+          glint::VulkanContext::checkDeviceExtensionSupport {
+          }
+        }
+        found suitable device  NVIDIA GeForce RTX 3060 Laptop GPU
+      }
+      glint::VulkanContext::createLogicalDevice {
         glint::VulkanContext::findQueueFamilies {
         }
-        glint::VulkanContext::checkDeviceExtensionSupport {
+        vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device)
+      }
+    }
+    glint::SwapChain::SwapChain {
+      glint::SwapChain::createSwapChain {
+        glint::SwapChain::querySwapChainSupport {
         }
+        glint::SwapChain::chooseSwapSurfaceFormat {
+        }
+        glint::SwapChain::chooseSwapPresentMode {
+          Using VK_PRESENT_MODE_MAILBOX_KHR (triple buffering)
+        }
+        glint::SwapChain::chooseSwapExtent {
+        }
+        graphics and present queues are the same
+        Using exclusive sharing mode
       }
-      found suitable device  NVIDIA GeForce RTX 3060 Laptop GPU
+      glint::SwapChain::createImageViews {
+      }
     }
-    glint::VulkanContext::createLogicalDevice {
-      glint::VulkanContext::findQueueFamilies {
+    glint::RenderPass::RenderPass {
+      glint::RenderPass::createRenderPass {
+        clear the values to a constant at the start
+        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR
+        store the values to memory for reading later
+        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE
+        not using stencil buffer
+        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE
+        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE
+        layout transition before and after render pass
+        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+        which attachment to reference by its index in the attachment descriptions array
+        colorAttachmentRef.attachment = 0
+        layout the attachment will have during a subpass
+        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+        subpass dependencies, for layout transitions
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS
+        subpass.colorAttachmentCount = 1
+        subpass.pColorAttachments = &colorAttachmentRef
+        dependency between the subpass and the external render pass
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL
+        dependency.dstSubpass = 0
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        dependency.srcAccessMask = 0
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+        Render Pass
+        VkRenderPassCreateInfo renderPassInfo{}
+        vkCreateRenderPass(m_Context->getDevice(), &renderPassInfo, nullptr, &m_RenderPass)
       }
-      vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device)
     }
-  }
-  glint::SwapChain::SwapChain {
-    glint::SwapChain::createSwapChain {
-      glint::SwapChain::querySwapChainSupport {
+    glint::Pipeline::Pipeline {
+      glint::Pipeline::createGraphicsPipeline {
+        Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
+        glint::Pipeline::readFile {
+          Loading filename: ./bin/shaders/shader.vert.spv fileSize: 1504 bytes
+        }
+        glint::Pipeline::readFile {
+          Loading filename: ./bin/shaders/shader.frag.spv fileSize: 572 bytes
+        }
+        VkShaderModule vertShaderModule = createShaderModule(vertShaderCode)
+        glint::Pipeline::createShaderModule {
+        }
+        VkShaderModule fragShaderModule = createShaderModule(fragShaderCode)
+        glint::Pipeline::createShaderModule {
+        }
+        Vertex Input
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo{}
+        Input Assembly
+        VkPipelineInputAssemblyStateCreateInfo inputAssembly{}
+        Dynamic States - used for viewport and scissor
+        Viewport State, dynamic states are used for viewport and scissor
+        VkPipelineViewportStateCreateInfo viewportState{}
+        Rasterizer
+        VkPipelineRasterizationStateCreateInfo rasterizer{}
+        Using anything else requires enabling GPU features.
+        rasterizer.polygonMode = VK_POLYGON_MODE_FILL
+        rasterizer.lineWidth = 1.0f
+        rasterizer.depthBiasEnable = VK_FALSE
+        Depth Bias, for shadow mapping.
+        Multisampling, disabled for now.
+        VkPipelineMultisampleStateCreateInfo multisampling{}
+        Depth and Stencil testing, disabled for now, will pass on nullptr
+        Color Blending, finalColor = newColor * newAlpha <colorBlendOp> oldColor * (1 - newAlpha)
+        It is possible to have multiple color blending attachments, have logical ops, and have separate blending for each color channel.
+        VkPipelineColorBlendAttachmentState colorBlendAttachment{}
+        Global color blending settings
+        VkPipelineColorBlendStateCreateInfo colorBlending{}
+        Pipeline Layout
+        uniform values, push constants, etc.
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo{}
+        vkCreatePipelineLayout(m_Context->getDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout)
+        Create Graphics Pipeline
+        Graphics Pipeline, the final pipeline object that will be used in rendering
+        Here we are combining : shaders, fixed function stages(vertex info, input assembly, viewport syate, rasterizer, multisampleing, depthStencil and color blending), pipeline layout and render pass
+        VkGraphicsPipelineCreateInfo pipelineInfo{}
+        vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline)
+        Cleanup shader modules
+        vkDestroyShaderModule(m_Context->getDevice(), fragShaderModule, nullptr)
+        vkDestroyShaderModule(m_Context->getDevice(), vertShaderModule, nullptr)
       }
-      glint::SwapChain::chooseSwapSurfaceFormat {
-      }
-      glint::SwapChain::chooseSwapPresentMode {
-        Using VK_PRESENT_MODE_MAILBOX_KHR (triple buffering)
-      }
-      glint::SwapChain::chooseSwapExtent {
-      }
-      graphics and present queues are the same
-      Using exclusive sharing mode
     }
-    glint::SwapChain::createImageViews {
+    glint::SwapChain::createFramebuffers {
     }
-  }
-  glint::RenderPass::RenderPass {
-    glint::RenderPass::createRenderPass {
-      clear the values to a constant at the start
-      colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR
-      store the values to memory for reading later
-      colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE
-      not using stencil buffer
-      colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE
-      colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE
-      layout transition before and after render pass
-      colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
-      colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-      which attachment to reference by its index in the attachment descriptions array
-      colorAttachmentRef.attachment = 0
-      layout the attachment will have during a subpass
-      colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-      subpass dependencies, for layout transitions
-      subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS
-      subpass.colorAttachmentCount = 1
-      subpass.pColorAttachments = &colorAttachmentRef
-      dependency between the subpass and the external render pass
-      dependency.srcSubpass = VK_SUBPASS_EXTERNAL
-      dependency.dstSubpass = 0
-      dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-      dependency.srcAccessMask = 0
-      dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-      dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
-      Render Pass
-      VkRenderPassCreateInfo renderPassInfo{}
-      vkCreateRenderPass(m_Context->getDevice(), &renderPassInfo, nullptr, &m_RenderPass)
-    }
-  }
-  glint::Pipeline::Pipeline {
-    glint::Pipeline::createGraphicsPipeline {
-      Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
-      glint::Pipeline::readFile {
-        Loading filename: ./bin/shaders/shader.vert.spv fileSize: 1504 bytes
+    glint::CommandManager::CommandManager {
+      glint::CommandManager::createCommandPool {
+        Choose graphics family as we are using the command buffer for rendering
       }
-      glint::Pipeline::readFile {
-        Loading filename: ./bin/shaders/shader.frag.spv fileSize: 572 bytes
+      glint::CommandManager::createCommandBuffer {
       }
-      VkShaderModule vertShaderModule = createShaderModule(vertShaderCode)
-      glint::Pipeline::createShaderModule {
+    }
+    glint::SynchronizationManager::SynchronizationManager {
+      glint::SynchronizationManager::createSyncObjects {
+        Synchronization:
+        Semaphors: signal and wait for the image available and render finished, sync between queues
+        Fences: wait for the frame to finish before starting the next one, sync between CPU and GPU
+        Create fence in signaled state, so that the first frame can start immediately
       }
-      VkShaderModule fragShaderModule = createShaderModule(fragShaderCode)
-      glint::Pipeline::createShaderModule {
-      }
-      Vertex Input
-      VkPipelineVertexInputStateCreateInfo vertexInputInfo{}
-      Input Assembly
-      VkPipelineInputAssemblyStateCreateInfo inputAssembly{}
-      Dynamic States - used for viewport and scissor
-      Viewport State, dynamic states are used for viewport and scissor
-      VkPipelineViewportStateCreateInfo viewportState{}
-      Rasterizer
-      VkPipelineRasterizationStateCreateInfo rasterizer{}
-      Using anything else requires enabling GPU features.
-      rasterizer.polygonMode = VK_POLYGON_MODE_FILL
-      rasterizer.lineWidth = 1.0f
-      rasterizer.depthBiasEnable = VK_FALSE
-      Depth Bias, for shadow mapping.
-      Multisampling, disabled for now.
-      VkPipelineMultisampleStateCreateInfo multisampling{}
-      Depth and Stencil testing, disabled for now, will pass on nullptr
-      Color Blending, finalColor = newColor * newAlpha <colorBlendOp> oldColor * (1 - newAlpha)
-      It is possible to have multiple color blending attachments, have logical ops, and have separate blending for each color channel.
-      VkPipelineColorBlendAttachmentState colorBlendAttachment{}
-      Global color blending settings
-      VkPipelineColorBlendStateCreateInfo colorBlending{}
-      Pipeline Layout
-      uniform values, push constants, etc.
-      VkPipelineLayoutCreateInfo pipelineLayoutInfo{}
-      vkCreatePipelineLayout(m_Context->getDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout)
-      Create Graphics Pipeline
-      Graphics Pipeline, the final pipeline object that will be used in rendering
-      Here we are combining : shaders, fixed function stages(vertex info, input assembly, viewport syate, rasterizer, multisampleing, depthStencil and color blending), pipeline layout and render pass
-      VkGraphicsPipelineCreateInfo pipelineInfo{}
-      vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline)
-      Cleanup shader modules
-      vkDestroyShaderModule(m_Context->getDevice(), fragShaderModule, nullptr)
-      vkDestroyShaderModule(m_Context->getDevice(), vertShaderModule, nullptr)
-    }
-  }
-  glint::SwapChain::createFramebuffers {
-  }
-  glint::CommandManager::CommandManager {
-    glint::CommandManager::createCommandPool {
-      Choose graphics family as we are using the command buffer for rendering
-    }
-    glint::CommandManager::createCommandBuffer {
-    }
-  }
-  glint::SynchronizationManager::SynchronizationManager {
-    glint::SynchronizationManager::createSyncObjects {
-      Synchronization:
-      Semaphors: signal and wait for the image available and render finished, sync between queues
-      Fences: wait for the frame to finish before starting the next one, sync between CPU and GPU
-      Create fence in signaled state, so that the first frame can start immediately
     }
   }
 }
 App::mainLoop {
   while (!window->shouldClose())
-  App::drawFrame {
+  glint::Renderer::drawFrame {
     --------------------------------------------------------------
     Outline of a frame..
     Wait for the previous frame to be finished
@@ -183,21 +187,21 @@ App::mainLoop {
     }
     glint::SynchronizationManager::resetFence {
     }
-    Acquire an image from the swap chain
-    vkAcquireNextImageKHR(device, swapChain->getSwapChain(), UINT64_MAX, syncManager->getImageAvailableSemaphore(), VK_NULL_HANDLE, &imageIndex)
-    vkResetCommandBuffer(commandBuffer, 0)
-    Record a command buffer which draws the scene onto the image.
-    App::recordCommandBuffer {
-      vkBeginCommandBuffer(commandBuffer, &beginInfo)
+    glint::CommandManager::reset {
+    }
+    glint::CommandManager::beginSingleTimeCommands {
+    }
+    App::drawScene {
       glint::RenderPass::begin {
         Start Render Pass
         VkRenderPassBeginInfo renderPassInfo{}
         vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE)
       }
-      Bind Pipeline
-      vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline())
+      glint::Pipeline::bind {
+        Bind Pipeline
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline)
+      }
       Set dynamic states
-      vkCmdSetViewport(commandBuffer, 0, 1, &viewport)
       vkCmdSetScissor(commandBuffer, 0, 1, &scissor)
       FINALLY DRAW!!!
       vkCmdDraw(commandBuffer, 3, 1, 0, 0)
@@ -205,22 +209,16 @@ App::mainLoop {
         End Render Pass
         vkCmdEndRenderPass(commandBuffer)
       }
-      vkEndCommandBuffer(commandBuffer)
-      Command Buffer Recorded
     }
-    Wait for the imageAvailableSemaphore..
-    Wait till the color attachment is ready for writing..
-    Submit the command buffer to the graphics queue
-    vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence)
-    Presentation
-    Wait for the renderFinishedSemaphore..
-    Specify swap chain to present to.
-    Present the image to the swap chain for presentation.
-    vkQueuePresentKHR(presentQueue, &presentInfo)
+    glint::CommandManager::endSingleTimeCommands {
+    }
   }
-  vkDeviceWaitIdle(device)
+  glint::Renderer::waitIdle {
+  }
 }
 App::cleanup {
+  glint::Renderer::~Renderer {
+  }
   glint::SynchronizationManager::~SynchronizationManager {
   }
   glint::CommandManager::~CommandManager {
