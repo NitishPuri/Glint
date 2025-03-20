@@ -1,7 +1,8 @@
+#include "render_pass.h"
+
 #include <stdexcept>
 
 #include "../logger.h"
-#include "render_pass.h"
 #include "swapchain.h"
 #include "vulkan_context.h"
 
@@ -15,7 +16,7 @@ RenderPass::RenderPass(VulkanContext* context, SwapChain* swapChain)
 
 RenderPass::~RenderPass() {
   LOGFN;
-  vkDestroyRenderPass(m_Context->getDevice(), m_RenderPass, nullptr);
+  LOGCALL(vkDestroyRenderPass(m_Context->getDevice(), m_RenderPass, nullptr));
 }
 
 void RenderPass::createRenderPass() {

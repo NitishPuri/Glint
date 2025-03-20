@@ -19,15 +19,17 @@ SwapChain::~SwapChain() {
   LOGFN;
   VkDevice device = m_Context->getDevice();
 
+  LOG("Destroying ", m_Framebuffers.size(), " framebuffers");
   for (auto framebuffer : m_Framebuffers) {
     vkDestroyFramebuffer(device, framebuffer, nullptr);
   }
 
+  LOG("Destroying ", m_ImageViews.size(), " image views");
   for (auto imageView : m_ImageViews) {
     vkDestroyImageView(device, imageView, nullptr);
   }
 
-  vkDestroySwapchainKHR(device, m_SwapChain, nullptr);
+  LOGCALL(vkDestroySwapchainKHR(device, m_SwapChain, nullptr));
 }
 
 void SwapChain::createSwapChain() {
