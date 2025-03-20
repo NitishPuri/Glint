@@ -7,6 +7,9 @@
 
 namespace glint {
 
+///////////////////////////////////////////////////////////////////////////
+// DescriptorSetLayout
+
 DescriptorSetLayout::DescriptorSetLayout(VkContext* context) : m_Context(context) {
   LOGFN;
 
@@ -38,7 +41,9 @@ DescriptorSetLayout::~DescriptorSetLayout() {
   }
 }
 
-// DescriptorPool implementation
+///////////////////////////////////////////////////////////////////////////
+// DescriptorPool
+
 DescriptorPool::DescriptorPool(VkContext* context, uint32_t maxSets) : m_Context(context) {
   LOGFN;
 
@@ -69,37 +74,90 @@ DescriptorPool::~DescriptorPool() {
   }
 }
 
-// UniformBuffer implementation
+///////////////////////////////////////////////////////////////////////////
+// Descriptor
+
+// Add to descriptor.cpp file
+Descriptor::Descriptor(VkContext* context, DescriptorSetLayout* layout, DescriptorPool* pool, uint32_t count)
+    : m_Context(context) {
+  LOGFN;
+
+  // Resize the descriptor sets vector
+  m_DescriptorSets.resize(count, VK_NULL_HANDLE);
+
+  // Create descriptor sets
+  std::vector<VkDescriptorSetLayout> layouts(count, layout->getLayout());
+
+  VkDescriptorSetAllocateInfo allocInfo{};
+  allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+  allocInfo.descriptorPool = pool->getPool();
+  allocInfo.descriptorSetCount = count;
+  allocInfo.pSetLayouts = layouts.data();
+
+  if (vkAllocateDescriptorSets(m_Context->getDevice(), &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS) {
+    throw std::runtime_error("Failed to allocate descriptor sets!");
+  }
+
+  LOG("Allocated", count, "descriptor sets");
+}
+
+Descriptor::~Descriptor() {
+  LOGFN;
+  // No need to explicitly free descriptor sets - they'll be freed when the pool is destroyed
+}
+
+void Descriptor::updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset, uint32_t setIndex) {
+  LOGFN_ONCE;
+  if (setIndex >= m_DescriptorSets.size()) {
+    throw std::runtime_error("Descriptor set index out of bounds!");
+  }
+
+  // Define the descriptor buffer info
+  VkDescriptorBufferInfo bufferInfo{};
+  bufferInfo.buffer = buffer;
+  bufferInfo.offset = offset;
+  bufferInfo.range = size;
+
+  // Define how to update the descriptor set
+  VkWriteDescriptorSet descriptorWrite{};
+  descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  descriptorWrite.dstSet = m_DescriptorSets[setIndex];
+  descriptorWrite.dstBinding = 0;  // Binding point in the shader
+  descriptorWrite.dstArrayElement = 0;
+  descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  descriptorWrite.descriptorCount = 1;
+  descriptorWrite.pBufferInfo = &bufferInfo;
+
+  // Update the descriptor set
+  vkUpdateDescriptorSets(m_Context->getDevice(), 1, &descriptorWrite, 0, nullptr);
+}
+
+// void Descriptor::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex) {
+//   LOGFN_ONCE;
+//   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, setIndex, 1,
+//                           &m_DescriptorSets[setIndex], 0, nullptr);
+// }
+
+void Descriptor::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex) {
+  LOGFN_ONCE;
+  if (setIndex >= m_DescriptorSets.size()) {
+    throw std::runtime_error("Descriptor set index out of bounds!");
+  }
+
+  vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
+                          0,  // First set
+                          1,  // Set count
+                          &m_DescriptorSets[setIndex], 0, nullptr);
+}
+
+///////////////////////////////////////////////////////////////////////////
+// UniformBuffer
+
 UniformBuffer::UniformBuffer(VkContext* context, size_t size) : m_Context(context), m_MappedData(nullptr) {
   LOGFN;
 
-  VkBufferCreateInfo bufferInfo{};
-  bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  bufferInfo.size = size;
-  bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-  bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-  if (vkCreateBuffer(m_Context->getDevice(), &bufferInfo, nullptr, &m_Buffer) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to create uniform buffer!");
-  }
-
-  // Allocate memory for the buffer
-  VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements(m_Context->getDevice(), m_Buffer, &memRequirements);
-
-  VkMemoryAllocateInfo allocInfo{};
-  allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-  allocInfo.allocationSize = memRequirements.size;
-  // Host visible so we can map it, and host coherent so we don't need to flush explicitly
-  allocInfo.memoryTypeIndex = m_Context->findMemoryType(
-      memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-  if (vkAllocateMemory(m_Context->getDevice(), &allocInfo, nullptr, &m_Memory) != VK_SUCCESS) {
-    vkDestroyBuffer(m_Context->getDevice(), m_Buffer, nullptr);
-    throw std::runtime_error("Failed to allocate uniform buffer memory!");
-  }
-
-  vkBindBufferMemory(m_Context->getDevice(), m_Buffer, m_Memory, 0);
+  context->createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Buffer, m_Memory);
 
   // Map memory persistently for the lifetime of the buffer
   if (vkMapMemory(m_Context->getDevice(), m_Memory, 0, size, 0, &m_MappedData) != VK_SUCCESS) {

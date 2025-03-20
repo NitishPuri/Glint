@@ -18,7 +18,7 @@ void SampleManager::cleanup() {
   LOGFN;
   // Wait for GPU to finish operations
   if (m_Renderer) {
-m_Renderer->waitIdle();
+    m_Renderer->waitIdle();
   }
 
   if (m_ActiveSample) {
@@ -50,6 +50,11 @@ void SampleManager::setActiveSample(const std::string& name) {
   auto it = m_Samples.find(name);
   if (it == m_Samples.end()) {
     LOG("Sample not found:", name);
+    return;
+  }
+
+  if (m_ActiveSample && m_ActiveSample->getName() == name) {
+    // LOG("Sample already active:", name);
     return;
   }
 

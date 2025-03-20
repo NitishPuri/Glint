@@ -38,6 +38,8 @@ void BasicSample::init(Window* window, Renderer* renderer) {
   LOGFN;
 
   m_Renderer = renderer;
+  m_Renderer->createPipeline("./bin/shaders/basic.vert.spv", "./bin/shaders/shader.frag.spv");
+
   m_Mesh = MeshFactory::createTriangle(renderer->getContext());
 }
 
@@ -54,12 +56,8 @@ void BasicSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   renderPass->begin(commandBuffer, imageIndex, clearColor);
   pipeline->bind(commandBuffer);
 
-  setupDefaultVieportAndScissor(commandBuffer, m_Renderer);
-
-  //   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1,
-  //                           &descriptorSets[currentFrame], 0, nullptr);
-
   m_Mesh->bind(commandBuffer);
+  setupDefaultVieportAndScissor(commandBuffer, m_Renderer);
   m_Mesh->draw(commandBuffer);
 
   renderPass->end(commandBuffer);

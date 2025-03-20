@@ -27,7 +27,7 @@ class DescriptorSetLayout {
 
 class DescriptorPool {
  public:
-  DescriptorPool(VkContext* context, uint32_t maxSets = 1000);
+  DescriptorPool(VkContext* context, uint32_t maxSets);
   ~DescriptorPool();
 
   // Prevent copying
@@ -39,6 +39,33 @@ class DescriptorPool {
  private:
   VkContext* m_Context;
   VkDescriptorPool m_Pool = VK_NULL_HANDLE;
+};
+
+class Descriptor {
+ public:
+  Descriptor(VkContext* context, DescriptorSetLayout* layout, DescriptorPool* pool, uint32_t count = 1);
+  ~Descriptor();
+
+  // Prevent copying
+  Descriptor(const Descriptor&) = delete;
+  Descriptor& operator=(const Descriptor&) = delete;
+
+  // void updateUniformBuffer(VkBuffer buffer, size_t size);
+  // void updateUniformBuffers(std::vector<std::unique_ptr<UniformBuffer>> buffers, size_t size);
+  // void updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset = 0, uint32_t setIndex = 0);
+  void updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset = 0, uint32_t setIndex = 0);
+
+  void bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex = 0);
+
+  // VkDescriptorSet getDescriptorSet() const { return m_DescriptorSet; }
+
+ private:
+  VkContext* m_Context;
+
+  // DescriptorSetLayout* m_Layout;
+  // DescriptorPool* m_Pool;
+  // VkDescriptorSet m_DescriptorSet = VK_NULL_HANDLE;
+  std::vector<VkDescriptorSet> m_DescriptorSets;
 };
 
 class UniformBuffer {

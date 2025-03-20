@@ -21,7 +21,7 @@ Renderer::~Renderer() {
   // Resources will be cleaned up automatically in reverse order
 }
 
-void Renderer::init(const std::string& vertShaderPath, const std::string& fragShaderPath) {
+void Renderer::init() {
   LOGFN;
 
   // Create Vulkan Context
@@ -33,9 +33,6 @@ void Renderer::init(const std::string& vertShaderPath, const std::string& fragSh
 
   // Create RenderPass
   m_RenderPass = std::make_unique<RenderPass>(m_Context.get(), m_SwapChain.get());
-
-  // Create Pipeline
-  m_Pipeline = std::make_unique<Pipeline>(m_Context.get(), m_RenderPass.get(), vertShaderPath, fragShaderPath);
 
   // Create Framebuffers
   m_SwapChain->createFramebuffers(m_RenderPass->getRenderPass());
@@ -53,6 +50,16 @@ void Renderer::init(const std::string& vertShaderPath, const std::string& fragSh
   m_ImageIndices.resize(m_MaxFramesInFlight);
 
   LOG("Renderer initialized with", m_MaxFramesInFlight, "frames in flight and", imageCount, "swap chain images");
+}
+
+void Renderer::createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath,
+                              DescriptorSetLayout* descriptorLayout) {
+  LOGFN;
+
+  m_Pipeline.reset();
+
+  m_Pipeline =
+      std::make_unique<Pipeline>(m_Context.get(), m_RenderPass.get(), vertShaderPath, fragShaderPath, descriptorLayout);
 }
 
 void Renderer::handleResize() {

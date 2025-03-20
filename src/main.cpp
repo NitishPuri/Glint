@@ -20,6 +20,9 @@
 #include "renderer/swapchain.h"
 #include "renderer/synchronization_manager.h"
 #include "renderer/vk_context.h"
+
+//
+#include "samples/rotating_sample.h"
 #include "samples/sample.h"
 #include "samples/sample_manager.h"
 
@@ -58,15 +61,9 @@ class App {
   void initRenderer() {
     LOGFN;
     renderer = std::make_unique<glint::Renderer>(window.get(), MAX_FRAMES_IN_FLIGHT);
-    renderer->init("./bin/shaders/shader.vert.spv", "./bin/shaders/shader.frag.spv");
+    // renderer->init("./bin/shaders/shader.vert.spv", "./bin/shaders/shader.frag.spv");
+    renderer->init();
   }
-
-  // void initMesh() {
-  //   LOGFN;
-
-  //   mesh = glint::MeshFactory::createTriangle(renderer->getContext());
-  //   // mesh = glint::MeshFactory::createQuad(renderer->getContext());
-  // }
 
   void initSamples() {
     LOGFN;
@@ -74,8 +71,9 @@ class App {
 
     sampleManager.registerSample(std::make_unique<glint::TriangleSample>());
     sampleManager.registerSample(std::make_unique<glint::QuadSample>());
+    sampleManager.registerSample(std::make_unique<glint::RotatingSample>());
 
-    sampleManager.setActiveSample("Triangle Sample");
+    // sampleManager.setActiveSample("Triangle Sample");
   }
 
   void mainLoop() {
@@ -93,6 +91,8 @@ class App {
         sampleManager.setActiveSample("Triangle Sample");
       } else if (window->isKeyPressed(GLFW_KEY_2)) {
         sampleManager.setActiveSample("Quad Sample");
+      } else if (window->isKeyPressed(GLFW_KEY_3)) {
+        sampleManager.setActiveSample("RotatingSample");
       }
 
       // Calculate delta time
@@ -103,8 +103,10 @@ class App {
       // Update active sample
       sampleManager.update(deltaTime);
 
-      renderer->drawFrame(
-          [this](VkCommandBuffer commandBuffer, uint32_t imageIndex) { drawScene(commandBuffer, imageIndex); });
+      renderer->drawFrame([this](VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+        // drawScene(commandBuffer, imageIndex);
+        sampleManager.render(commandBuffer, imageIndex);
+      });
 
       frames++;
     }
@@ -115,59 +117,16 @@ class App {
   void cleanup() {
     LOGFN;
     // cleanup will happen in correct order automatically!
-    // mesh.reset();
-    // renderer.reset();
-    // window.reset();
   }
 
   std::unique_ptr<glint::Window> window = nullptr;
   std::unique_ptr<glint::Renderer> renderer = nullptr;
-  // std::unique_ptr<glint::Mesh> mesh = nullptr;
 
   glint::SampleManager sampleManager;
-
-  // std::unique_ptr<Sample> sample = nullptr;
 
 #pragma endregion APP
 
 #pragma region SCENE
-
-  void drawScene(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-    LOGFN_ONCE;
-
-    // Get components from renderer
-    auto renderPass = renderer->getRenderPass();
-    auto pipeline = renderer->getPipeline();
-    auto swapChain = renderer->getSwapChain();
-
-    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    renderPass->begin(commandBuffer, imageIndex, clearColor);
-    pipeline->bind(commandBuffer);
-
-    LOG_ONCE("Set dynamic states");
-    auto swapChainExtent = swapChain->getExtent();
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = (float)swapChainExtent.width;
-    viewport.height = (float)swapChainExtent.height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = swapChainExtent;
-    LOGCALL_ONCE(vkCmdSetScissor(commandBuffer, 0, 1, &scissor));
-
-    // LOG_ONCE("FINALLY DRAW!!!");
-    // mesh->bind(commandBuffer);
-    // LOGCALL_ONCE(vkCmdDraw(commandBuffer, 3, 1, 0, 0));
-    // mesh->draw(commandBuffer);
-    sampleManager.render(commandBuffer, imageIndex);
-
-    renderPass->end(commandBuffer);
-  }
 
 #pragma endregion SCENE
 };
@@ -179,7 +138,7 @@ int main() {
   try {
     app.run();
   } catch (const std::exception& e) {
-    LOG("[ERROR]", __FUNCTION__, e.what());
+    LOG("[EXCEPTION]", __FUNCTION__, e.what());
     return EXIT_FAILURE;
   }
 
