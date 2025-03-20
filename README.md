@@ -13,7 +13,7 @@ Glint_vk/
 │ │ ├── window.h # GLFW window handling
 │ │ └── window.cpp
 │ ├── renderer/ # Vulkan renderer
-│ │ ├── vulkan_context.h # Vulkan instance, device, etc.
+│ │ ├── vk_context.h # Vulkan instance, device, etc.
 │ │ ├── vulkan_context.cpp
 │ │ ├── swapchain.h # Swapchain management
 │ │ ├── swapchain.cpp

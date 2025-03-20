@@ -18,7 +18,7 @@
 #include "renderer/renderer.h"
 #include "renderer/swapchain.h"
 #include "renderer/synchronization_manager.h"
-#include "renderer/vulkan_context.h"
+#include "renderer/vk_context.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;

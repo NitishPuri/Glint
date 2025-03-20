@@ -8,11 +8,11 @@
 #include "mesh.h"
 #include "render_pass.h"
 #include "swapchain.h"
-#include "vulkan_context.h"
+#include "vk_context.h"
 
 namespace glint {
 
-Pipeline::Pipeline(VulkanContext* context, RenderPass* renderPass, const std::string& vertShaderPath,
+Pipeline::Pipeline(VkContext* context, RenderPass* renderPass, const std::string& vertShaderPath,
                    const std::string& fragShaderPath)
     : m_Context(context), m_RenderPass(renderPass), m_PipelineLayout(VK_NULL_HANDLE), m_Pipeline(VK_NULL_HANDLE) {
   LOGFN;

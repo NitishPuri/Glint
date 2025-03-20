@@ -3,11 +3,11 @@
 #include <stdexcept>
 
 #include "logger.h"
-#include "vulkan_context.h"
+#include "vk_context.h"
 
 namespace glint {
 
-SynchronizationManager::SynchronizationManager(VulkanContext* context, uint32_t maxFramesInFlight)
+SynchronizationManager::SynchronizationManager(VkContext* context, uint32_t maxFramesInFlight)
     : m_Context(context), m_MaxFramesInFlight(maxFramesInFlight) {
   LOGFN;
   createSyncObjects();

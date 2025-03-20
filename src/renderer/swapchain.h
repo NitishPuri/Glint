@@ -6,11 +6,11 @@
 
 namespace glint {
 
-class VulkanContext;
+class VkContext;
 
 class SwapChain {
  public:
-  SwapChain(VulkanContext* context);
+  SwapChain(VkContext* context);
   ~SwapChain();
 
   // Prevent copying
@@ -45,7 +45,7 @@ class SwapChain {
   VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
  private:
-  VulkanContext* m_Context;
+  VkContext* m_Context;
 
   VkSwapchainKHR m_SwapChain;
   std::vector<VkImage> m_Images;

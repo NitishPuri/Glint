@@ -1,4 +1,4 @@
-#include "vulkan_context.h"
+#include "vk_context.h"
 
 #include <set>
 #include <stdexcept>
@@ -48,14 +48,14 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
   }
 }
 
-VulkanContext::VulkanContext(Window* window) : m_Window(window) { LOGFN; }
+VkContext::VkContext(Window* window) : m_Window(window) { LOGFN; }
 
-VulkanContext::~VulkanContext() {
+VkContext::~VkContext() {
   LOGFN;
   cleanup();
 }
 
-void VulkanContext::init() {
+void VkContext::init() {
   LOGFN;
   createInstance();
   setupDebugMessenger();
@@ -64,7 +64,7 @@ void VulkanContext::init() {
   createLogicalDevice();
 }
 
-void VulkanContext::cleanup() {
+void VkContext::cleanup() {
   LOGFN;
   vkDestroyDevice(m_Device, nullptr);
 
@@ -76,7 +76,7 @@ void VulkanContext::cleanup() {
   vkDestroyInstance(m_Instance, nullptr);
 }
 
-void VulkanContext::createInstance() {
+void VkContext::createInstance() {
   LOGFN;
   if (m_EnableValidationLayers && !checkValidationLayerSupport()) {
     throw std::runtime_error("validation layers requested, but not available!");
@@ -119,7 +119,7 @@ void VulkanContext::createInstance() {
   }
 }
 
-void VulkanContext::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
+void VkContext::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
   LOGFN;
   createInfo = {};
   createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -132,7 +132,7 @@ void VulkanContext::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreate
   createInfo.pfnUserCallback = debugCallback;
 }
 
-void VulkanContext::setupDebugMessenger() {
+void VkContext::setupDebugMessenger() {
   LOGFN;
   if (!m_EnableValidationLayers) return;
 
@@ -144,12 +144,12 @@ void VulkanContext::setupDebugMessenger() {
   }
 }
 
-void VulkanContext::createSurface() {
+void VkContext::createSurface() {
   LOGFN;
   m_Surface = m_Window->createSurface(m_Instance);
 }
 
-void VulkanContext::pickPhysicalDevice() {
+void VkContext::pickPhysicalDevice() {
   LOGFN;
   uint32_t deviceCount = 0;
   vkEnumeratePhysicalDevices(m_Instance, &deviceCount, nullptr);
@@ -179,7 +179,7 @@ void VulkanContext::pickPhysicalDevice() {
   }
 }
 
-void VulkanContext::createLogicalDevice() {
+void VkContext::createLogicalDevice() {
   LOGFN;
   m_QueueFamilyIndices = findQueueFamilies(m_PhysicalDevice);
 
@@ -216,7 +216,7 @@ void VulkanContext::createLogicalDevice() {
   vkGetDeviceQueue(m_Device, m_QueueFamilyIndices.presentFamily.value(), 0, &m_PresentQueue);
 }
 
-bool VulkanContext::checkValidationLayerSupport() {
+bool VkContext::checkValidationLayerSupport() {
   LOGFN;
   uint32_t layerCount;
   vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -243,7 +243,7 @@ bool VulkanContext::checkValidationLayerSupport() {
   return true;
 }
 
-std::vector<const char*> VulkanContext::getRequiredExtensions() {
+std::vector<const char*> VkContext::getRequiredExtensions() {
   LOGFN;
   std::vector<const char*> extensions = m_Window->getRequiredInstanceExtensions();
 
@@ -259,7 +259,7 @@ std::vector<const char*> VulkanContext::getRequiredExtensions() {
   return extensions;
 }
 
-bool VulkanContext::isDeviceSuitable(VkPhysicalDevice device) {
+bool VkContext::isDeviceSuitable(VkPhysicalDevice device) {
   LOGFN;
   QueueFamilyIndices indices = findQueueFamilies(device);
 
@@ -283,7 +283,7 @@ bool VulkanContext::isDeviceSuitable(VkPhysicalDevice device) {
   return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
-bool VulkanContext::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+bool VkContext::checkDeviceExtensionSupport(VkPhysicalDevice device) {
   LOGFN;
   uint32_t extensionCount;
   vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -300,7 +300,7 @@ bool VulkanContext::checkDeviceExtensionSupport(VkPhysicalDevice device) {
   return requiredExtensions.empty();
 }
 
-VulkanContext::QueueFamilyIndices VulkanContext::findQueueFamilies(VkPhysicalDevice device) {
+VkContext::QueueFamilyIndices VkContext::findQueueFamilies(VkPhysicalDevice device) {
   LOGFN;
   QueueFamilyIndices indices;
 
@@ -332,7 +332,7 @@ VulkanContext::QueueFamilyIndices VulkanContext::findQueueFamilies(VkPhysicalDev
   return indices;
 }
 
-uint32_t VulkanContext::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+uint32_t VkContext::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
   LOGFN;
   VkPhysicalDeviceMemoryProperties memProperties;
   vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &memProperties);
@@ -346,8 +346,8 @@ uint32_t VulkanContext::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlag
   throw std::runtime_error("failed to find suitable memory type!");
 }
 
-void VulkanContext::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-                                 VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+void VkContext::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
+                             VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
   LOGFN;
   VkBufferCreateInfo bufferInfo{};
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;

@@ -5,11 +5,11 @@
 
 #include "core/window.h"
 #include "logger.h"
-#include "vulkan_context.h"
+#include "vk_context.h"
 
 namespace glint {
 
-SwapChain::SwapChain(VulkanContext* context) : m_Context(context), m_SwapChain(VK_NULL_HANDLE) {
+SwapChain::SwapChain(VkContext* context) : m_Context(context), m_SwapChain(VK_NULL_HANDLE) {
   LOGFN;
   createSwapChain();
   createImageViews();
@@ -75,7 +75,7 @@ void SwapChain::createSwapChain() {
   createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
   // Handle queue family sharing
-  VulkanContext::QueueFamilyIndices indices = m_Context->getQueueFamilyIndices();
+  VkContext::QueueFamilyIndices indices = m_Context->getQueueFamilyIndices();
   uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
   if (indices.graphicsFamily != indices.presentFamily) {

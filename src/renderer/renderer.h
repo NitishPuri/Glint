@@ -9,7 +9,7 @@
 namespace glint {
 
 class Window;
-class VulkanContext;
+class VkContext;
 class SwapChain;
 class RenderPass;
 class Pipeline;
@@ -30,7 +30,7 @@ class Renderer {
   void waitIdle();
 
   // Getters
-  VulkanContext* getContext() const { return m_Context.get(); }
+  VkContext* getContext() const { return m_Context.get(); }
   RenderPass* getRenderPass() const { return m_RenderPass.get(); }
   Pipeline* getPipeline() const { return m_Pipeline.get(); }
   SwapChain* getSwapChain() const { return m_SwapChain.get(); }
@@ -39,7 +39,7 @@ class Renderer {
 
  private:
   Window* m_Window;
-  std::unique_ptr<VulkanContext> m_Context;
+  std::unique_ptr<VkContext> m_Context;
   std::unique_ptr<SwapChain> m_SwapChain;
   std::unique_ptr<RenderPass> m_RenderPass;
   std::unique_ptr<Pipeline> m_Pipeline;

@@ -6,13 +6,13 @@
 
 namespace glint {
 
-class VulkanContext;
+class VkContext;
 
 class MeshFactory {
  public:
-  static std::unique_ptr<Mesh> createTriangle(VulkanContext* context);
-  static std::unique_ptr<Mesh> createQuad(VulkanContext* context);
-  static std::unique_ptr<Mesh> createCube(VulkanContext* context);
+  static std::unique_ptr<Mesh> createTriangle(VkContext* context);
+  static std::unique_ptr<Mesh> createQuad(VkContext* context);
+  static std::unique_ptr<Mesh> createCube(VkContext* context);
 };
 
 }  // namespace glint

@@ -7,7 +7,7 @@
 #include "render_pass.h"
 #include "swapchain.h"
 #include "synchronization_manager.h"
-#include "vulkan_context.h"
+#include "vk_context.h"
 
 namespace glint {
 
@@ -25,7 +25,7 @@ void Renderer::init(const std::string& vertShaderPath, const std::string& fragSh
   LOGFN;
 
   // Create Vulkan Context
-  m_Context = std::make_unique<VulkanContext>(m_Window);
+  m_Context = std::make_unique<VkContext>(m_Window);
   m_Context->init();
 
   // Create SwapChain

@@ -7,11 +7,11 @@
 
 namespace glint {
 
-class VulkanContext;
+class VkContext;
 
 class DescriptorSetLayout {
  public:
-  DescriptorSetLayout(VulkanContext* context);
+  DescriptorSetLayout(VkContext* context);
   ~DescriptorSetLayout();
 
   // Prevent copying
@@ -21,13 +21,13 @@ class DescriptorSetLayout {
   VkDescriptorSetLayout getLayout() const { return m_Layout; }
 
  private:
-  VulkanContext* m_Context;
+  VkContext* m_Context;
   VkDescriptorSetLayout m_Layout = VK_NULL_HANDLE;
 };
 
 class DescriptorPool {
  public:
-  DescriptorPool(VulkanContext* context, uint32_t maxSets = 1000);
+  DescriptorPool(VkContext* context, uint32_t maxSets = 1000);
   ~DescriptorPool();
 
   // Prevent copying
@@ -37,13 +37,13 @@ class DescriptorPool {
   VkDescriptorPool getPool() const { return m_Pool; }
 
  private:
-  VulkanContext* m_Context;
+  VkContext* m_Context;
   VkDescriptorPool m_Pool = VK_NULL_HANDLE;
 };
 
 class UniformBuffer {
  public:
-  UniformBuffer(VulkanContext* context, size_t size);
+  UniformBuffer(VkContext* context, size_t size);
   ~UniformBuffer();
 
   // Prevent copying
@@ -54,7 +54,7 @@ class UniformBuffer {
   VkBuffer getBuffer() const { return m_Buffer; }
 
  private:
-  VulkanContext* m_Context;
+  VkContext* m_Context;
   VkBuffer m_Buffer = VK_NULL_HANDLE;
   VkDeviceMemory m_Memory = VK_NULL_HANDLE;
   void* m_MappedData = nullptr;

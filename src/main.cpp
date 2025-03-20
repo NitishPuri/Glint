@@ -19,7 +19,7 @@
 #include "renderer/renderer.h"
 #include "renderer/swapchain.h"
 #include "renderer/synchronization_manager.h"
-#include "renderer/vulkan_context.h"
+#include "renderer/vk_context.h"
 #include "samples/sample.h"
 #include "samples/sample_manager.h"
 

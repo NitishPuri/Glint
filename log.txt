@@ -377,10 +377,1268 @@ App::mainLoop {
     }
     result = vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo)
   }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Quad Sample
+    glint::QuadSample::init {
+      glint::MeshFactory::createQuad {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 4 vertices and 6 indices
+        }
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Quad Sample
+    glint::QuadSample::init {
+      glint::MeshFactory::createQuad {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 4 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Quad Sample
+    glint::QuadSample::init {
+      glint::MeshFactory::createQuad {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 4 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Quad Sample
+    glint::QuadSample::init {
+      glint::MeshFactory::createQuad {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 4 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Quad Sample
+    glint::QuadSample::init {
+      glint::MeshFactory::createQuad {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 4 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Quad Sample
+    glint::QuadSample::init {
+      glint::MeshFactory::createQuad {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 4 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Quad Sample
+    glint::QuadSample::init {
+      glint::MeshFactory::createQuad {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 4 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Quad Sample
+    glint::QuadSample::init {
+      glint::MeshFactory::createQuad {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 4 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Triangle Sample
+    glint::TriangleSample::init {
+      glint::MeshFactory::createTriangle {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 3 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Triangle Sample
+    glint::TriangleSample::init {
+      glint::MeshFactory::createTriangle {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 3 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Triangle Sample
+    glint::TriangleSample::init {
+      glint::MeshFactory::createTriangle {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 3 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Triangle Sample
+    glint::TriangleSample::init {
+      glint::MeshFactory::createTriangle {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 3 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Triangle Sample
+    glint::TriangleSample::init {
+      glint::MeshFactory::createTriangle {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 3 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Triangle Sample
+    glint::TriangleSample::init {
+      glint::MeshFactory::createTriangle {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 3 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Triangle Sample
+    glint::TriangleSample::init {
+      glint::MeshFactory::createTriangle {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 3 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Triangle Sample
+    glint::TriangleSample::init {
+      glint::MeshFactory::createTriangle {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 3 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
+  glint::SampleManager::setActiveSample {
+    Active sample set to: Triangle Sample
+    glint::TriangleSample::init {
+      glint::MeshFactory::createTriangle {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          glint::Mesh::createIndexBuffer {
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::VulkanContext::createBuffer {
+              vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+              glint::VulkanContext::findMemoryType {
+              }
+              vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 3 vertices and 6 indices
+        }
+      }
+      glint::Mesh::~Mesh {
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+      }
+    }
+  }
   glint::Renderer::waitIdle {
   }
 }
 App::cleanup {
+}
+glint::Mesh::~Mesh {
+  vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+  vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+  vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+  vkFreeMemory(device, m_IndexBufferMemory, nullptr)
 }
 glint::Mesh::~Mesh {
   vkDestroyBuffer(device, m_VertexBuffer, nullptr)

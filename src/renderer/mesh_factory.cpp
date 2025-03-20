@@ -1,11 +1,11 @@
 #include "mesh_factory.h"
 
 #include "../logger.h"
-#include "vulkan_context.h"
+#include "vk_context.h"
 
 namespace glint {
 
-std::unique_ptr<Mesh> MeshFactory::createTriangle(VulkanContext* context) {
+std::unique_ptr<Mesh> MeshFactory::createTriangle(VkContext* context) {
   LOGFN;
 
   const std::vector<Vertex> vertices = {{{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
@@ -17,7 +17,7 @@ std::unique_ptr<Mesh> MeshFactory::createTriangle(VulkanContext* context) {
   return std::make_unique<Mesh>(context, vertices, indices);
 }
 
-std::unique_ptr<Mesh> MeshFactory::createQuad(VulkanContext* context) {
+std::unique_ptr<Mesh> MeshFactory::createQuad(VkContext* context) {
   LOGFN;
 
   std::vector<Vertex> vertices = {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
@@ -30,7 +30,7 @@ std::unique_ptr<Mesh> MeshFactory::createQuad(VulkanContext* context) {
   return std::make_unique<Mesh>(context, vertices, indices);
 }
 
-std::unique_ptr<Mesh> MeshFactory::createCube(VulkanContext* context) {
+std::unique_ptr<Mesh> MeshFactory::createCube(VkContext* context) {
   LOGFN;
 
   std::vector<Vertex> vertices = {

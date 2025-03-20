@@ -4,11 +4,11 @@
 
 #include "../logger.h"
 #include "swapchain.h"
-#include "vulkan_context.h"
+#include "vk_context.h"
 
 namespace glint {
 
-RenderPass::RenderPass(VulkanContext* context, SwapChain* swapChain)
+RenderPass::RenderPass(VkContext* context, SwapChain* swapChain)
     : m_Context(context), m_SwapChain(swapChain), m_RenderPass(VK_NULL_HANDLE) {
   LOGFN;
   createRenderPass();

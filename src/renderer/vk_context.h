@@ -13,15 +13,15 @@ namespace glint {
 class Window;
 
 // handles instance, debug messenger, surface, and device creation, and manages the lifecycle of these objects
-class VulkanContext {
+class VkContext {
  public:
   // VulkanContext(Window* window, const std::string& appName = "Glint Engine");
-  VulkanContext(Window* window);
-  ~VulkanContext();
+  VkContext(Window* window);
+  ~VkContext();
 
   // Prevent copying
-  VulkanContext(const VulkanContext&) = delete;
-  VulkanContext& operator=(const VulkanContext&) = delete;
+  VkContext(const VkContext&) = delete;
+  VkContext& operator=(const VkContext&) = delete;
 
   // Getters
   VkInstance getInstance() const { return m_Instance; }

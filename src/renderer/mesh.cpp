@@ -1,7 +1,7 @@
 #include "mesh.h"
 
 #include "logger.h"
-#include "vulkan_context.h"
+#include "vk_context.h"
 
 namespace glint {
 
@@ -31,7 +31,7 @@ std::array<VkVertexInputAttributeDescription, 2> Vertex::getAttributeDescription
   return attributeDescriptions;
 }
 
-Mesh::Mesh(VulkanContext* context, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+Mesh::Mesh(VkContext* context, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
     : m_Context(context),
       m_Vertices(vertices),
       m_Indices(indices),
