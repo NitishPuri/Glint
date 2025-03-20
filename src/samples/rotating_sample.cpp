@@ -49,8 +49,6 @@ void RotatingSample::init(Window* window, Renderer* renderer) {
   for (uint32_t i = 0; i < framesInFlight; i++) {
     m_Descriptor->updateUniformBuffer(m_UniformBuffers[i]->getBuffer(), sizeof(UniformBufferObject), 0, i);
   }
-  //   m_Descriptor->updateUniformBuffer(m_UniformBuffers[0]->getBuffer(), sizeof(UniformBufferObject), 0, 0);
-  //   m_Descriptor->updateUniformBuffer(m_UniformBuffers[1]->getBuffer(), sizeof(UniformBufferObject), 0, 1);
 
   // Set initial transformation matrices
   VkExtent2D extent = renderer->getSwapChain()->getExtent();

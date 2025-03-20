@@ -14,6 +14,9 @@ set(GLFW_PATH ${PROJECT_SOURCE_DIR}/ext/glfw-3.4.bin.WIN64)
 set(GLFW_INCLUDE ${GLFW_PATH}/include)
 set(GLFW_LIB_DIR ${GLFW_PATH}/lib-vc2022)
 
+# STB
+set(STB_INCLUDE ${PROJECT_SOURCE_DIR}/ext/stb)
+
 ################## Dependencies ##################
 
 file(GLOB_RECURSE SOURCES
@@ -33,6 +36,7 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${SHADERS})
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${GLFW_INCLUDE}
     ${Vulkan_INCLUDE_DIRS}
+    ${STB_INCLUDE}
     ${PROJECT_SOURCE_DIR}/src
 )
 
