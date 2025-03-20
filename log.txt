@@ -105,7 +105,7 @@ App::initRenderer {
       glint::Pipeline::createGraphicsPipeline {
         Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
         glint::Pipeline::readFile {
-          Loading filename: ./bin/shaders/shader.vert.spv fileSize: 1504 bytes
+          Loading filename: ./bin/shaders/shader.vert.spv fileSize: 1052 bytes
         }
         glint::Pipeline::readFile {
           Loading filename: ./bin/shaders/shader.frag.spv fileSize: 572 bytes
@@ -118,6 +118,12 @@ App::initRenderer {
         }
         Vertex Input
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{}
+        glint::Vertex::getBindingDescription {
+        }
+        glint::Vertex::getAttributeDescriptions {
+          attributeDescriptions[0].offset = offsetof(Vertex, position)
+          attributeDescriptions[1].offset = offsetof(Vertex, color)
+        }
         Input Assembly
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{}
         Dynamic States - used for viewport and scissor
@@ -174,6 +180,42 @@ App::initRenderer {
     Renderer initialized with 2 frames in flight and 3 swap chain images
   }
 }
+App::initMesh {
+  glint::MeshFactory::createTriangle {
+    glint::Mesh::Mesh {
+      glint::Mesh::createVertexBuffer {
+        glint::VulkanContext::createBuffer {
+          vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+          glint::VulkanContext::findMemoryType {
+          }
+          vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+        }
+        glint::VulkanContext::createBuffer {
+          vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
+          glint::VulkanContext::findMemoryType {
+          }
+          vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
+        }
+        glint::Mesh::copyBuffer {
+          Command Buffer for Buffer Copy
+          vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+          Begin Command Buffer
+          vkBeginCommandBuffer(commandBuffer, &beginInfo)
+          Copy Buffer
+          vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+          End Command Buffer
+          vkEndCommandBuffer(commandBuffer)
+          Submit Command Buffer
+          vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+          vkQueueWaitIdle(graphicsQueue)
+          Free Command Buffer
+          vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+        }
+      }
+      Mesh created with 3 vertices and 0 indices
+    }
+  }
+}
 App::mainLoop {
   while (!window->shouldClose())
   glint::Renderer::drawFrame {
@@ -202,10 +244,13 @@ App::mainLoop {
         Bind Pipeline
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline)
       }
+      glint::Mesh::bind {
+      }
       Set dynamic states
       vkCmdSetScissor(commandBuffer, 0, 1, &scissor)
       FINALLY DRAW!!!
-      vkCmdDraw(commandBuffer, 3, 1, 0, 0)
+      glint::Mesh::draw {
+      }
       glint::RenderPass::end {
         End Render Pass
         vkCmdEndRenderPass(commandBuffer)
@@ -217,66 +262,44 @@ App::mainLoop {
     }
     result = vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo)
   }
-  Window resized:  2560 x 1369
-  glint::SwapChain::recreateSwapchain {
-    vkDeviceWaitIdle(device)
-    glint::SwapChain::cleanup {
-      Destroying  3  framebuffers
-      Destroying  3  image views
-      vkDestroySwapchainKHR(device, m_SwapChain, nullptr)
-    }
-    glint::SwapChain::createSwapChain {
-      glint::SwapChain::querySwapChainSupport {
-      }
-      glint::SwapChain::chooseSwapSurfaceFormat {
-      }
-      glint::SwapChain::chooseSwapPresentMode {
-        Using VK_PRESENT_MODE_MAILBOX_KHR (triple buffering)
-      }
-      glint::SwapChain::chooseSwapExtent {
-      }
-      graphics and present queues are the same
-      Using exclusive sharing mode
-    }
-    glint::SwapChain::createImageViews {
-    }
-    glint::SwapChain::createFramebuffers {
-    }
-  }
   glint::Renderer::waitIdle {
   }
 }
 App::cleanup {
-  glint::Renderer::~Renderer {
+}
+glint::Mesh::~Mesh {
+  vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+  vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+}
+glint::Renderer::~Renderer {
+}
+glint::SynchronizationManager::~SynchronizationManager {
+}
+glint::CommandManager::~CommandManager {
+}
+glint::Pipeline::~Pipeline {
+  vkDestroyPipeline(device, m_Pipeline, nullptr)
+  vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr)
+}
+glint::RenderPass::~RenderPass {
+  vkDestroyRenderPass(m_Context->getDevice(), m_RenderPass, nullptr)
+}
+glint::SwapChain::~SwapChain {
+  glint::SwapChain::cleanup {
+    Destroying  3  framebuffers
+    Destroying  3  image views
+    vkDestroySwapchainKHR(device, m_SwapChain, nullptr)
   }
-  glint::SynchronizationManager::~SynchronizationManager {
-  }
-  glint::CommandManager::~CommandManager {
-  }
-  glint::Pipeline::~Pipeline {
-    vkDestroyPipeline(device, m_Pipeline, nullptr)
-    vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr)
-  }
-  glint::RenderPass::~RenderPass {
-    vkDestroyRenderPass(m_Context->getDevice(), m_RenderPass, nullptr)
-  }
-  glint::SwapChain::~SwapChain {
-    glint::SwapChain::cleanup {
-      Destroying  3  framebuffers
-      Destroying  3  image views
-      vkDestroySwapchainKHR(device, m_SwapChain, nullptr)
+}
+glint::VulkanContext::~VulkanContext {
+  glint::VulkanContext::cleanup {
+    glint::DestroyDebugUtilsMessengerEXT {
     }
   }
-  glint::VulkanContext::~VulkanContext {
-    glint::VulkanContext::cleanup {
-      glint::DestroyDebugUtilsMessengerEXT {
-      }
-    }
-  }
-  glint::Window::~Window {
-    glint::Window::shutdown {
-      glfwDestroyWindow(m_Window)
-      glfwTerminate()
-    }
+}
+glint::Window::~Window {
+  glint::Window::shutdown {
+    glfwDestroyWindow(m_Window)
+    glfwTerminate()
   }
 }

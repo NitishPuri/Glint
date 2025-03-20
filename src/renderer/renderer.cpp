@@ -42,6 +42,7 @@ void Renderer::init(const std::string& vertShaderPath, const std::string& fragSh
 
   // Create Command Manager
   m_CommandManager = std::make_unique<CommandManager>(m_Context.get(), m_MaxFramesInFlight);
+  m_Context->setCommandPool(m_CommandManager->getCommandPool());  // TODO: Remove this
 
   // Create Synchronization Manager
   m_SyncManager = std::make_unique<SynchronizationManager>(m_Context.get(), m_MaxFramesInFlight);

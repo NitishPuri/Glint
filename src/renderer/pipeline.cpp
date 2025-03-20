@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include "logger.h"
+#include "mesh.h"
 #include "render_pass.h"
 #include "swapchain.h"
 #include "vulkan_context.h"
@@ -60,10 +61,14 @@ void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const s
   LOG("Vertex Input");
   LOGCALL(VkPipelineVertexInputStateCreateInfo vertexInputInfo{});
   vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertexInputInfo.vertexBindingDescriptionCount = 0;
-  vertexInputInfo.pVertexBindingDescriptions = nullptr;  // Optional
-  vertexInputInfo.vertexAttributeDescriptionCount = 0;
-  vertexInputInfo.pVertexAttributeDescriptions = nullptr;  // Optional
+
+  auto bindingDescription = Vertex::getBindingDescription();
+  auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+  vertexInputInfo.vertexBindingDescriptionCount = 1;
+  vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+  vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+  vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
   LOG("Input Assembly");
   LOGCALL(VkPipelineInputAssemblyStateCreateInfo inputAssembly{});

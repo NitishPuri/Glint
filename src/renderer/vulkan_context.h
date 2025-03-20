@@ -33,6 +33,15 @@ class VulkanContext {
 
   Window* getWindow() const { return m_Window; }
 
+  uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+  void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer,
+                    VkDeviceMemory& bufferMemory);
+
+  VkCommandPool getCommandPool() const { return m_CommandPool; }
+  void setCommandPool(VkCommandPool commamndPool) { m_CommandPool = commamndPool; }
+
+  // void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
   struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
@@ -71,6 +80,8 @@ class VulkanContext {
   VkQueue m_GraphicsQueue;
   VkQueue m_PresentQueue;
   QueueFamilyIndices m_QueueFamilyIndices;
+
+  VkCommandPool m_CommandPool;
 
   // Constants
   const std::vector<const char*> m_ValidationLayers = {"VK_LAYER_KHRONOS_validation"};

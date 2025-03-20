@@ -11,6 +11,8 @@
 #include "core/window.h"
 #include "logger.h"
 #include "renderer/command_manager.h"
+#include "renderer/mesh.h"
+#include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
 #include "renderer/render_pass.h"
 #include "renderer/renderer.h"
@@ -31,6 +33,7 @@ class App {
   void run() {
     initWindow();
     initRenderer();
+    initMesh();
 
     mainLoop();
     cleanup();
@@ -54,6 +57,12 @@ class App {
     renderer->init("./bin/shaders/shader.vert.spv", "./bin/shaders/shader.frag.spv");
   }
 
+  void initMesh() {
+    LOGFN;
+
+    mesh = glint::MeshFactory::createTriangle(renderer->getContext());
+  }
+
   void mainLoop() {
     LOGFN;
 
@@ -72,12 +81,15 @@ class App {
 
   void cleanup() {
     LOGFN;
-    renderer.reset();
-    window.reset();
+    // cleanup will happen in correct order automatically!
+    // mesh.reset();
+    // renderer.reset();
+    // window.reset();
   }
 
   std::unique_ptr<glint::Window> window = nullptr;
   std::unique_ptr<glint::Renderer> renderer = nullptr;
+  std::unique_ptr<glint::Mesh> mesh = nullptr;
 
 #pragma endregion APP
 
@@ -94,6 +106,8 @@ class App {
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
     renderPass->begin(commandBuffer, imageIndex, clearColor);
     pipeline->bind(commandBuffer);
+
+    mesh->bind(commandBuffer);
 
     LOG_ONCE("Set dynamic states");
     auto swapChainExtent = swapChain->getExtent();
@@ -112,7 +126,8 @@ class App {
     LOGCALL_ONCE(vkCmdSetScissor(commandBuffer, 0, 1, &scissor));
 
     LOG_ONCE("FINALLY DRAW!!!");
-    LOGCALL_ONCE(vkCmdDraw(commandBuffer, 3, 1, 0, 0));
+    // LOGCALL_ONCE(vkCmdDraw(commandBuffer, 3, 1, 0, 0));
+    mesh->draw(commandBuffer);
 
     renderPass->end(commandBuffer);
   }

@@ -30,6 +30,7 @@ class Renderer {
   void waitIdle();
 
   // Getters
+  VulkanContext* getContext() const { return m_Context.get(); }
   RenderPass* getRenderPass() const { return m_RenderPass.get(); }
   Pipeline* getPipeline() const { return m_Pipeline.get(); }
   SwapChain* getSwapChain() const { return m_SwapChain.get(); }
