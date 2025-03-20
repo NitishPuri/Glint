@@ -10,35 +10,17 @@
 
 #include "core/window.h"
 #include "logger.h"
+#include "renderer/command_manager.h"
 #include "renderer/pipeline.h"
 #include "renderer/render_pass.h"
 #include "renderer/swapchain.h"
+#include "renderer/synchronization_manager.h"
 #include "renderer/vulkan_context.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
 std::unordered_set<std::string> glint::OneTimeLogger::loggedFunctions;
-
-static std::vector<char> readFile(const std::string& filename) {
-  LOGFN;
-  std::ifstream file{filename, std::ios::ate | std::ios::binary};
-
-  if (!file.is_open()) {
-    throw std::runtime_error("failed to open file!");
-  }
-
-  size_t fileSize = (size_t)file.tellg();
-  std::vector<char> buffer(fileSize);
-
-  LOG("Loading filename:", filename, "fileSize:", fileSize, "bytes");
-
-  file.seekg(0);
-  file.read(buffer.data(), fileSize);
-
-  file.close();
-  return buffer;
-}
 
 class App {
  public:
@@ -88,9 +70,8 @@ class App {
     // Create Framebuffers
     swapChain->createFramebuffers(renderPass->getRenderPass());
 
-    // createSwapChainBuffers();
-    createCommandPool();
-    createCommandBuffer();
+    commandManager = std::make_unique<glint::CommandManager>(vulkanContext.get());
+
     createSyncObjects();
   }
 
@@ -117,8 +98,7 @@ class App {
     LOGCALL(vkDestroySemaphore(device, imageAvailableSemaphore, nullptr));
     LOGCALL(vkDestroyFence(device, inFlightFence, nullptr));
 
-    LOGCALL(vkDestroyCommandPool(device, commandPool, nullptr));
-
+    commandManager.reset();
     pipeline.reset();
     renderPass.reset();
     swapChain.reset();
@@ -134,6 +114,7 @@ class App {
   std::unique_ptr<glint::SwapChain> swapChain = nullptr;
   std::unique_ptr<glint::RenderPass> renderPass = nullptr;
   std::unique_ptr<glint::Pipeline> pipeline = nullptr;
+  std::unique_ptr<glint::CommandManager> commandManager = nullptr;
 
   VkDevice device;
   VkQueue graphicsQueue;
@@ -142,8 +123,8 @@ class App {
 
   VkExtent2D swapChainExtent;
 
-  VkCommandPool commandPool;
-  VkCommandBuffer commandBuffer;
+  // VkCommandPool commandPool;
+  // VkCommandBuffer commandBuffer;
 
   VkSemaphore imageAvailableSemaphore;
   VkSemaphore renderFinishedSemaphore;
@@ -152,33 +133,6 @@ class App {
 #pragma endregion VARIABLES
 
 #pragma region COMMAND_BUFFERS
-  void createCommandPool() {
-    LOGFN;
-    auto queueFamilyIndices = vulkanContext->getQueueFamilyIndices();
-    LOGCALL(VkCommandPoolCreateInfo poolInfo{});
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    LOG("Choose graphics family as we are using the command buffer for rendering");
-    LOGCALL(poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value());
-
-    if (LOGCALL(vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool)) != VK_SUCCESS) {
-      throw std::runtime_error("failed to create command pool!");
-    }
-  }
-
-  void createCommandBuffer() {
-    LOGFN;
-
-    LOGCALL(VkCommandBufferAllocateInfo allocInfo{});
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = commandPool;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = 1;
-
-    if (LOGCALL(vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)) != VK_SUCCESS) {
-      throw std::runtime_error("failed to allocate command buffers!");
-    }
-  }
 
   void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
     LOGFN_ONCE;
@@ -274,6 +228,7 @@ class App {
     LOGCALL_ONCE(vkAcquireNextImageKHR(device, swapChain->getSwapChain(), UINT64_MAX, imageAvailableSemaphore,
                                        VK_NULL_HANDLE, &imageIndex));
 
+    auto commandBuffer = commandManager->getCommandBuffer();
     LOGCALL_ONCE(vkResetCommandBuffer(commandBuffer, 0));
     LOG_ONCE("Record a command buffer which draws the scene onto the image.");
     recordCommandBuffer(commandBuffer, imageIndex);

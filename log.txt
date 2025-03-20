@@ -151,15 +151,12 @@ App::initVulkan {
   }
   glint::SwapChain::createFramebuffers {
   }
-  App::createCommandPool {
-    VkCommandPoolCreateInfo poolInfo{}
-    Choose graphics family as we are using the command buffer for rendering
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value()
-    vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool)
-  }
-  App::createCommandBuffer {
-    VkCommandBufferAllocateInfo allocInfo{}
-    vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+  glint::CommandManager::CommandManager {
+    glint::CommandManager::createCommandPool {
+      Choose graphics family as we are using the command buffer for rendering
+    }
+    glint::CommandManager::createCommandBuffer {
+    }
   }
   App::createSyncObjects {
     Synchronization:
@@ -226,7 +223,8 @@ App::cleanup {
   vkDestroySemaphore(device, renderFinishedSemaphore, nullptr)
   vkDestroySemaphore(device, imageAvailableSemaphore, nullptr)
   vkDestroyFence(device, inFlightFence, nullptr)
-  vkDestroyCommandPool(device, commandPool, nullptr)
+  glint::CommandManager::~CommandManager {
+  }
   glint::Pipeline::~Pipeline {
     vkDestroyPipeline(device, m_Pipeline, nullptr)
     vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr)
