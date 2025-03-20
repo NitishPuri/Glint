@@ -7,47 +7,47 @@ App::initRenderer {
   glint::Renderer::Renderer {
   }
   glint::Renderer::init {
-    glint::VulkanContext::VulkanContext {
+    glint::VkContext::VkContext {
     }
-    glint::VulkanContext::init {
-      glint::VulkanContext::createInstance {
-        glint::VulkanContext::checkValidationLayerSupport {
+    glint::VkContext::init {
+      glint::VkContext::createInstance {
+        glint::VkContext::checkValidationLayerSupport {
           found validation layer:  VK_LAYER_KHRONOS_validation
         }
-        glint::VulkanContext::getRequiredExtensions {
+        glint::VkContext::getRequiredExtensions {
           Required Extensions:  3
              VK_KHR_surface
              VK_KHR_win32_surface
              VK_EXT_debug_utils
         }
         validation layers are enabled
-        glint::VulkanContext::populateDebugMessengerCreateInfo {
+        glint::VkContext::populateDebugMessengerCreateInfo {
         }
         vkCreateInstance(&createInfo, nullptr, &m_Instance)
       }
-      glint::VulkanContext::setupDebugMessenger {
-        glint::VulkanContext::populateDebugMessengerCreateInfo {
+      glint::VkContext::setupDebugMessenger {
+        glint::VkContext::populateDebugMessengerCreateInfo {
         }
         glint::CreateDebugUtilsMessengerEXT {
         }
       }
-      glint::VulkanContext::createSurface {
+      glint::VkContext::createSurface {
         glint::Window::createSurface {
           VkResult result = glfwCreateWindowSurface(instance, m_Window, nullptr, &surface)
         }
       }
-      glint::VulkanContext::pickPhysicalDevice {
+      glint::VkContext::pickPhysicalDevice {
         Available Devices:  2
-        glint::VulkanContext::isDeviceSuitable {
-          glint::VulkanContext::findQueueFamilies {
+        glint::VkContext::isDeviceSuitable {
+          glint::VkContext::findQueueFamilies {
           }
-          glint::VulkanContext::checkDeviceExtensionSupport {
+          glint::VkContext::checkDeviceExtensionSupport {
           }
         }
         found suitable device  NVIDIA GeForce RTX 3060 Laptop GPU
       }
-      glint::VulkanContext::createLogicalDevice {
-        glint::VulkanContext::findQueueFamilies {
+      glint::VkContext::createLogicalDevice {
+        glint::VkContext::findQueueFamilies {
         }
         vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device)
       }
@@ -105,7 +105,7 @@ App::initRenderer {
       glint::Pipeline::createGraphicsPipeline {
         Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
         glint::Pipeline::readFile {
-          Loading filename: ./bin/shaders/shader.vert.spv fileSize: 1052 bytes
+          Loading filename: ./bin/shaders/shader.vert.spv fileSize: 1432 bytes
         }
         glint::Pipeline::readFile {
           Loading filename: ./bin/shaders/shader.frag.spv fileSize: 572 bytes
@@ -191,15 +191,15 @@ App::initSamples {
         glint::MeshFactory::createTriangle {
           glint::Mesh::Mesh {
             glint::Mesh::createVertexBuffer {
-              glint::VulkanContext::createBuffer {
+              glint::VkContext::createBuffer {
                 vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
-                glint::VulkanContext::findMemoryType {
+                glint::VkContext::findMemoryType {
                 }
                 vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
               }
-              glint::VulkanContext::createBuffer {
+              glint::VkContext::createBuffer {
                 vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
-                glint::VulkanContext::findMemoryType {
+                glint::VkContext::findMemoryType {
                 }
                 vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
               }
@@ -220,15 +220,15 @@ App::initSamples {
               }
             }
             glint::Mesh::createIndexBuffer {
-              glint::VulkanContext::createBuffer {
+              glint::VkContext::createBuffer {
                 vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
-                glint::VulkanContext::findMemoryType {
+                glint::VkContext::findMemoryType {
                 }
                 vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
               }
-              glint::VulkanContext::createBuffer {
+              glint::VkContext::createBuffer {
                 vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
-                glint::VulkanContext::findMemoryType {
+                glint::VkContext::findMemoryType {
                 }
                 vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
               }
@@ -263,15 +263,15 @@ App::initSamples {
       glint::MeshFactory::createTriangle {
         glint::Mesh::Mesh {
           glint::Mesh::createVertexBuffer {
-            glint::VulkanContext::createBuffer {
+            glint::VkContext::createBuffer {
               vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
-              glint::VulkanContext::findMemoryType {
+              glint::VkContext::findMemoryType {
               }
               vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
             }
-            glint::VulkanContext::createBuffer {
+            glint::VkContext::createBuffer {
               vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
-              glint::VulkanContext::findMemoryType {
+              glint::VkContext::findMemoryType {
               }
               vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
             }
@@ -292,15 +292,15 @@ App::initSamples {
             }
           }
           glint::Mesh::createIndexBuffer {
-            glint::VulkanContext::createBuffer {
+            glint::VkContext::createBuffer {
               vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
-              glint::VulkanContext::findMemoryType {
+              glint::VkContext::findMemoryType {
               }
               vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
             }
-            glint::VulkanContext::createBuffer {
+            glint::VkContext::createBuffer {
               vkCreateBuffer(m_Device, &bufferInfo, nullptr, &buffer)
-              glint::VulkanContext::findMemoryType {
+              glint::VkContext::findMemoryType {
               }
               vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory)
             }
@@ -408,8 +408,8 @@ glint::SwapChain::~SwapChain {
     vkDestroySwapchainKHR(device, m_SwapChain, nullptr)
   }
 }
-glint::VulkanContext::~VulkanContext {
-  glint::VulkanContext::cleanup {
+glint::VkContext::~VkContext {
+  glint::VkContext::cleanup {
     glint::DestroyDebugUtilsMessengerEXT {
     }
   }

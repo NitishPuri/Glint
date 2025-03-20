@@ -3,11 +3,11 @@
 #include <stdexcept>
 
 #include "../logger.h"
-#include "vulkan_context.h"
+#include "vk_context.h"
 
 namespace glint {
 
-DescriptorSetLayout::DescriptorSetLayout(VulkanContext* context) : m_Context(context) {
+DescriptorSetLayout::DescriptorSetLayout(VkContext* context) : m_Context(context) {
   LOGFN;
 
   // Create a descriptor set layout binding for a uniform buffer
@@ -39,7 +39,7 @@ DescriptorSetLayout::~DescriptorSetLayout() {
 }
 
 // DescriptorPool implementation
-DescriptorPool::DescriptorPool(VulkanContext* context, uint32_t maxSets) : m_Context(context) {
+DescriptorPool::DescriptorPool(VkContext* context, uint32_t maxSets) : m_Context(context) {
   LOGFN;
 
   // Define which descriptor types the descriptor pool can allocate
@@ -70,7 +70,7 @@ DescriptorPool::~DescriptorPool() {
 }
 
 // UniformBuffer implementation
-UniformBuffer::UniformBuffer(VulkanContext* context, size_t size) : m_Context(context), m_MappedData(nullptr) {
+UniformBuffer::UniformBuffer(VkContext* context, size_t size) : m_Context(context), m_MappedData(nullptr) {
   LOGFN;
 
   VkBufferCreateInfo bufferInfo{};

@@ -6,11 +6,11 @@
 
 namespace glint {
 
-class VulkanContext;
+class VkContext;
 
 class CommandManager {
  public:
-  CommandManager(VulkanContext* context, uint32_t maxFramesInFlight);
+  CommandManager(VkContext* context, uint32_t maxFramesInFlight);
   ~CommandManager();
 
   // Prevent copying
@@ -45,7 +45,7 @@ class CommandManager {
   void createCommandBuffers();
 
  private:
-  VulkanContext* m_Context;
+  VkContext* m_Context;
   VkCommandPool m_CommandPool;
 
   std::vector<VkCommandBuffer> m_CommandBuffers;

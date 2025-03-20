@@ -7,13 +7,13 @@
 
 namespace glint {
 
-class VulkanContext;
+class VkContext;
 class SwapChain;
 class RenderPass;
 
 class Pipeline {
  public:
-  Pipeline(VulkanContext* context, RenderPass* renderPass, const std::string& vertShaderPath,
+  Pipeline(VkContext* context, RenderPass* renderPass, const std::string& vertShaderPath,
            const std::string& fragShaderPath);
   ~Pipeline();
 
@@ -33,7 +33,7 @@ class Pipeline {
   std::vector<char> readFile(const std::string& filename);
 
  private:
-  VulkanContext* m_Context;
+  VkContext* m_Context;
   RenderPass* m_RenderPass;
   VkPipelineLayout m_PipelineLayout;
   VkPipeline m_Pipeline;

@@ -3,11 +3,11 @@
 #include <stdexcept>
 
 #include "logger.h"
-#include "vulkan_context.h"
+#include "vk_context.h"
 
 namespace glint {
 
-CommandManager::CommandManager(VulkanContext* context, uint32_t maxFramesInFlight)
+CommandManager::CommandManager(VkContext* context, uint32_t maxFramesInFlight)
     : m_Context(context), m_maxFramesInFlight(maxFramesInFlight), m_CommandPool(VK_NULL_HANDLE) {
   LOGFN;
   createCommandPool();

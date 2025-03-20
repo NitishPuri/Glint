@@ -4,12 +4,12 @@
 
 namespace glint {
 
-class VulkanContext;
+class VkContext;
 class SwapChain;
 
 class RenderPass {
  public:
-  RenderPass(VulkanContext* context, SwapChain* swapChain);
+  RenderPass(VkContext* context, SwapChain* swapChain);
   ~RenderPass();
 
   // Prevent copying
@@ -26,7 +26,7 @@ class RenderPass {
   void createRenderPass();
 
  private:
-  VulkanContext* m_Context;
+  VkContext* m_Context;
   SwapChain* m_SwapChain;
   VkRenderPass m_RenderPass;
 };

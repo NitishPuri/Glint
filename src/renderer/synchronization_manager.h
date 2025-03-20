@@ -6,11 +6,11 @@
 
 namespace glint {
 
-class VulkanContext;
+class VkContext;
 
 class SynchronizationManager {
  public:
-  SynchronizationManager(VulkanContext* context, uint32_t maxFramesInFlight);
+  SynchronizationManager(VkContext* context, uint32_t maxFramesInFlight);
   ~SynchronizationManager();
 
   // Prevent copying
@@ -33,7 +33,7 @@ class SynchronizationManager {
   void createSyncObjects();
 
  private:
-  VulkanContext* m_Context;
+  VkContext* m_Context;
 
   uint32_t m_MaxFramesInFlight;
 
