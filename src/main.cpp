@@ -72,7 +72,7 @@ class App {
 
     commandManager = std::make_unique<glint::CommandManager>(vulkanContext.get());
 
-    createSyncObjects();
+    syncManager = std::make_unique<glint::SynchronizationManager>(vulkanContext.get());
   }
 
   void mainLoop() {
@@ -93,11 +93,7 @@ class App {
 
   void cleanup() {
     LOGFN;
-
-    LOGCALL(vkDestroySemaphore(device, renderFinishedSemaphore, nullptr));
-    LOGCALL(vkDestroySemaphore(device, imageAvailableSemaphore, nullptr));
-    LOGCALL(vkDestroyFence(device, inFlightFence, nullptr));
-
+    syncManager.reset();
     commandManager.reset();
     pipeline.reset();
     renderPass.reset();
@@ -115,6 +111,7 @@ class App {
   std::unique_ptr<glint::RenderPass> renderPass = nullptr;
   std::unique_ptr<glint::Pipeline> pipeline = nullptr;
   std::unique_ptr<glint::CommandManager> commandManager = nullptr;
+  std::unique_ptr<glint::SynchronizationManager> syncManager = nullptr;
 
   VkDevice device;
   VkQueue graphicsQueue;
@@ -126,9 +123,9 @@ class App {
   // VkCommandPool commandPool;
   // VkCommandBuffer commandBuffer;
 
-  VkSemaphore imageAvailableSemaphore;
-  VkSemaphore renderFinishedSemaphore;
-  VkFence inFlightFence;
+  // VkSemaphore imageAvailableSemaphore;
+  // VkSemaphore renderFinishedSemaphore;
+  // VkFence inFlightFence;
 
 #pragma endregion VARIABLES
 
@@ -181,32 +178,6 @@ class App {
 
 #pragma endregion COMMAND_BUFFERS
 
-#pragma region SYNCHRONISATION
-  void createSyncObjects() {
-    LOGFN;
-    LOG("Synchronization:");
-    LOG("Semaphors: signal and wait for the image available and render finished, sync between queues");
-    LOG("Fences: wait for the frame to finish before starting the next one, sync between CPU and GPU");
-
-    VkSemaphoreCreateInfo semaphoreInfo{};
-    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    VkFenceCreateInfo fenceInfo{};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    LOG("Create fence in signaled state, so that the first frame can start immediately");
-    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-    LOG("vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphore)");
-    LOG("vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore)");
-    LOG("vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence)");
-    if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
-        vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
-        vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
-      throw std::runtime_error("failed to create synchronization objects for a frame!");
-    }
-  }
-#pragma endregion SYNCHRONISATION
-
 #pragma region DRAW_FRAMES
   void drawFrame() {
     LOGFN_ONCE;
@@ -219,14 +190,16 @@ class App {
     LOG_ONCE("Present the image to the swap chain for presentation.");
     LOG_ONCE("--------------------------------------------------------------");
 
-    LOG_ONCE("Wait for the previous frame to be finished");
-    LOGCALL_ONCE(vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX));
-    LOGCALL_ONCE(vkResetFences(device, 1, &inFlightFence));
+    // LOG_ONCE("Wait for the previous frame to be finished");
+    // LOGCALL_ONCE(vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX));
+    // LOGCALL_ONCE(vkResetFences(device, 1, &inFlightFence));
+    syncManager->waitForFence();
+    syncManager->resetFence();
 
     LOG_ONCE("Acquire an image from the swap chain");
     uint32_t imageIndex;
-    LOGCALL_ONCE(vkAcquireNextImageKHR(device, swapChain->getSwapChain(), UINT64_MAX, imageAvailableSemaphore,
-                                       VK_NULL_HANDLE, &imageIndex));
+    LOGCALL_ONCE(vkAcquireNextImageKHR(device, swapChain->getSwapChain(), UINT64_MAX,
+                                       syncManager->getImageAvailableSemaphore(), VK_NULL_HANDLE, &imageIndex));
 
     auto commandBuffer = commandManager->getCommandBuffer();
     LOGCALL_ONCE(vkResetCommandBuffer(commandBuffer, 0));
@@ -237,7 +210,7 @@ class App {
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
     LOG_ONCE("Wait for the imageAvailableSemaphore..");
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
+    VkSemaphore waitSemaphores[] = {syncManager->getImageAvailableSemaphore()};
     LOG_ONCE("Wait till the color attachment is ready for writing..");
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount = 1;
@@ -246,11 +219,12 @@ class App {
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
+    VkSemaphore signalSemaphores[] = {syncManager->getRenderFinishedSemaphore()};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
     LOG_ONCE("Submit the command buffer to the graphics queue");
+    auto inFlightFence = syncManager->getInFlightFence();
     if (LOGCALL_ONCE(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence)) != VK_SUCCESS) {
       throw std::runtime_error("failed to submit draw command buffer!");
     }

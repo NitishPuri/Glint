@@ -158,14 +158,13 @@ App::initVulkan {
     glint::CommandManager::createCommandBuffer {
     }
   }
-  App::createSyncObjects {
-    Synchronization:
-    Semaphors: signal and wait for the image available and render finished, sync between queues
-    Fences: wait for the frame to finish before starting the next one, sync between CPU and GPU
-    Create fence in signaled state, so that the first frame can start immediately
-    vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphore)
-    vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore)
-    vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence)
+  glint::SynchronizationManager::SynchronizationManager {
+    glint::SynchronizationManager::createSyncObjects {
+      Synchronization:
+      Semaphors: signal and wait for the image available and render finished, sync between queues
+      Fences: wait for the frame to finish before starting the next one, sync between CPU and GPU
+      Create fence in signaled state, so that the first frame can start immediately
+    }
   }
 }
 App::mainLoop {
@@ -179,11 +178,13 @@ App::mainLoop {
     Submit the command buffer to the graphics queue.
     Present the image to the swap chain for presentation.
     --------------------------------------------------------------
-    Wait for the previous frame to be finished
-    vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX)
-    vkResetFences(device, 1, &inFlightFence)
+    glint::SynchronizationManager::waitForFence {
+      Wait for the previous frame to be finished
+    }
+    glint::SynchronizationManager::resetFence {
+    }
     Acquire an image from the swap chain
-    vkAcquireNextImageKHR(device, swapChain->getSwapChain(), UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex)
+    vkAcquireNextImageKHR(device, swapChain->getSwapChain(), UINT64_MAX, syncManager->getImageAvailableSemaphore(), VK_NULL_HANDLE, &imageIndex)
     vkResetCommandBuffer(commandBuffer, 0)
     Record a command buffer which draws the scene onto the image.
     App::recordCommandBuffer {
@@ -220,9 +221,8 @@ App::mainLoop {
   vkDeviceWaitIdle(device)
 }
 App::cleanup {
-  vkDestroySemaphore(device, renderFinishedSemaphore, nullptr)
-  vkDestroySemaphore(device, imageAvailableSemaphore, nullptr)
-  vkDestroyFence(device, inFlightFence, nullptr)
+  glint::SynchronizationManager::~SynchronizationManager {
+  }
   glint::CommandManager::~CommandManager {
   }
   glint::Pipeline::~Pipeline {
