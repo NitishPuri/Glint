@@ -24,6 +24,7 @@ class SampleManager {
   void render(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
  private:
+  // TODO: Use create sample functions instead of unique_ptr
   std::unordered_map<std::string, std::unique_ptr<Sample>> m_Samples;
   Sample* m_ActiveSample = nullptr;
   Window* m_Window = nullptr;

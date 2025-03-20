@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "../logger.h"
+#include "renderer/renderer.h"
 #include "sample.h"
 
 namespace glint {
@@ -15,6 +16,11 @@ void SampleManager::init(Window* window, Renderer* renderer) {
 
 void SampleManager::cleanup() {
   LOGFN;
+  // Wait for GPU to finish operations
+  if (m_Renderer) {
+m_Renderer->waitIdle();
+  }
+
   if (m_ActiveSample) {
     m_ActiveSample->cleanup();
   }
