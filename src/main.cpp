@@ -61,7 +61,6 @@ class App {
   void initRenderer() {
     LOGFN;
     renderer = std::make_unique<glint::Renderer>(window.get(), MAX_FRAMES_IN_FLIGHT);
-    // renderer->init("./bin/shaders/shader.vert.spv", "./bin/shaders/shader.frag.spv");
     renderer->init();
   }
 

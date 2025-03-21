@@ -61,6 +61,8 @@ void Renderer::createPipeline(const std::string& vertShaderPath, const std::stri
 
   m_Pipeline.reset();
 
+  // TODO: Have a way to cache pipelines?
+
   m_Pipeline =
       std::make_unique<Pipeline>(m_Context.get(), m_RenderPass.get(), vertShaderPath, fragShaderPath, descriptorLayout);
 }

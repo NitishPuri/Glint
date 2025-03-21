@@ -7,23 +7,17 @@
 #include <memory>
 #include <vector>
 
+#include "vertex.h"
+
 namespace glint {
-
-struct Vertex {
-  glm::vec3 position;
-  glm::vec3 color;
-  // glm::vec2 texCoord;
-
-  static VkVertexInputBindingDescription getBindingDescription();
-  static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions();
-};
 
 class VkContext;
 class CommandManager;
 
 class Mesh {
  public:
-  Mesh(VkContext* context, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices = {});
+  Mesh(VkContext* context, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices = {},
+       VertexAttributeFlags flags = VertexAttributeFlags::POSITION_COLOR_TEXCOORD);
   ~Mesh();
 
   // Prevent copying
@@ -43,6 +37,7 @@ class Mesh {
  private:
   VkContext* m_Context;
 
+  VertexAttributeFlags m_FormatFlags;
   const std::vector<Vertex>& m_Vertices;
   const std::vector<uint32_t>& m_Indices;
 
