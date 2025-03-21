@@ -10,9 +10,9 @@
 
 namespace glint {
 
-class TexturedRotatingSample : public Sample {
+class CubeSample : public Sample {
  public:
-  TexturedRotatingSample();
+  CubeSample();
 
   void init(Window* window, Renderer* renderer) override;
   void update(float deltaTime) override;
@@ -26,7 +26,7 @@ class TexturedRotatingSample : public Sample {
   Renderer* m_Renderer = nullptr;
   std::unique_ptr<Mesh> m_Mesh;
 
-  std::unique_ptr<Texture> m_Texture;
+  // std::unique_ptr<Texture> m_Texture;
 
   // Descriptor resources
   std::unique_ptr<DescriptorSetLayout> m_DescriptorSetLayout;
@@ -37,6 +37,7 @@ class TexturedRotatingSample : public Sample {
   // Transformation state
   float m_RotationAngle = 0.0f;
   glm::vec3 m_ModelPosition = glm::vec3(0.0f);
+  glm::vec3 m_RotationAxis = glm::vec3(0.0f, 0.0f, 1.0f);
 };
 
 }  // namespace glint

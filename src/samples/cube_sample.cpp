@@ -1,6 +1,7 @@
-#include "textured_quad.h"
+#include "cube_sample.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include "logger.h"
 #include "renderer/descriptor.h"
@@ -15,9 +16,9 @@
 
 namespace glint {
 
-TexturedRotatingSample::TexturedRotatingSample() : Sample("TexturedRotatingSample") { LOGFN; }
+CubeSample::CubeSample() : Sample("CubeSample") { LOGFN; }
 
-void TexturedRotatingSample::init(Window* window, Renderer* renderer) {
+void CubeSample::init(Window* window, Renderer* renderer) {
   LOGFN;
   m_Renderer = renderer;
 
@@ -25,31 +26,31 @@ void TexturedRotatingSample::init(Window* window, Renderer* renderer) {
   LOG("Creating resources for", framesInFlight, "frames in flight");
 
   // Create a textured quad mesh
-  m_Mesh = MeshFactory::createQuad(renderer->getContext(), true);
-
-  VkUtils::setObjectName((uint64_t)m_Mesh->getVertexBuffer(), VK_OBJECT_TYPE_BUFFER, "TexturedQuad Vertex Buffer");
+  m_Mesh = MeshFactory::createCube(renderer->getContext());
 
   // Load texture
-  m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.jpg");
+  // m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.jpg");
 
   // Create descriptor set layout
   m_DescriptorSetLayout = DescriptorSetLayout::Builder(renderer->getContext())
                               .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
-                              .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+                              // .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
                               .build();
 
   // Create pipeline with textured shader
   PipelineConfig config;
   config.descriptorSetLayout = m_DescriptorSetLayout.get();
-  config.vertexShaderPath = getShaderPath("basic_tex.vert");
-  config.fragmentShaderPath = getShaderPath("basic_tex.frag");
-  config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
-  config.cullMode = VK_CULL_MODE_NONE;
+  config.vertexShaderPath = getShaderPath("shader.vert");
+  config.fragmentShaderPath = getShaderPath("shader.frag");
+  // config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
+  config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
+  // config.cullMode = VK_CULL_MODE_NONE;
   //   config.blendEnable = true;
 
   renderer->createPipeline(&config);
 
-  // Create descriptor pool with enough capacity for uniform buffers and textures
+  // Create descriptor pool with enough capacity for uniform buffers and
+  // textures
   m_DescriptorPool =
       std::make_unique<DescriptorPool>(renderer->getContext(), m_DescriptorSetLayout.get(), framesInFlight);
 
@@ -69,7 +70,7 @@ void TexturedRotatingSample::init(Window* window, Renderer* renderer) {
     m_Descriptor->updateUniformBuffer(m_UniformBuffers[i]->getBuffer(), sizeof(UniformBufferObject), 0, i);
 
     // Update texture sampler
-    m_Descriptor->updateTextureSampler(m_Texture->getImageView(), m_Texture->getSampler(), i);
+    // m_Descriptor->updateTextureSampler(m_Texture->getImageView(), m_Texture->getSampler(), i);
   }
 
   // Set initial transformation matrices
@@ -79,7 +80,7 @@ void TexturedRotatingSample::init(Window* window, Renderer* renderer) {
   // Initial transformations will be set in updateUniformBuffer
 }
 
-void TexturedRotatingSample::update(float deltaTime) {
+void CubeSample::update(float deltaTime) {
   // Update rotation angle
   m_RotationAngle += deltaTime * 45.0f;  // 45 degrees per second
 
@@ -88,6 +89,12 @@ void TexturedRotatingSample::update(float deltaTime) {
     m_RotationAngle -= 360.0f;
   }
 
+  static auto t = deltaTime;
+  t += deltaTime;
+  auto f = std::sin(t);
+  m_ModelPosition = glm::vec3(f / 2, 0.0f, 0.0f);
+  m_RotationAxis = glm::mix(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), f);
+
   // Get current frame index
   uint32_t currentFrame = m_Renderer->getCurrentFrame();
 
@@ -95,15 +102,15 @@ void TexturedRotatingSample::update(float deltaTime) {
   updateUniformBuffer(currentFrame);
 }
 
-void TexturedRotatingSample::updateUniformBuffer(uint32_t currentImage) {
+void CubeSample::updateUniformBuffer(uint32_t currentImage) {
   UniformBufferObject ubo{};
 
   // Create model matrix with rotation around z-axis
   ubo.model = glm::translate(glm::mat4(1.0f), m_ModelPosition);
-  ubo.model = glm::rotate(ubo.model, glm::radians(m_RotationAngle), glm::vec3(0.0f, 0.0f, 1.0f));
+  ubo.model = glm::rotate(ubo.model, glm::radians(m_RotationAngle), m_RotationAxis);
 
   // View matrix - slight distance from the quad
-  ubo.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 2.0f),   // Camera position
+  ubo.view = glm::lookAt(glm::vec3(2.0f, 0.2f, 2.0f),   // Camera position
                          glm::vec3(0.0f, 0.0f, 0.0f),   // Look at origin
                          glm::vec3(0.0f, 1.0f, 0.0f));  // Up vector
 
@@ -119,7 +126,7 @@ void TexturedRotatingSample::updateUniformBuffer(uint32_t currentImage) {
   m_UniformBuffers[currentImage]->update(&ubo, sizeof(ubo));
 }
 
-void TexturedRotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+void CubeSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   // Begin render pass
   auto renderPass = m_Renderer->getRenderPass();
   auto pipeline = m_Renderer->getPipeline();
@@ -143,7 +150,7 @@ void TexturedRotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imag
   renderPass->end(commandBuffer);
 }
 
-void TexturedRotatingSample::cleanup() {
+void CubeSample::cleanup() {
   LOGFN;
   // Let RAII handle the resources
 
@@ -158,7 +165,7 @@ void TexturedRotatingSample::cleanup() {
   m_UniformBuffers.clear();
 
   // Clean up texture and mesh
-  m_Texture.reset();
+  // m_Texture.reset();
   m_Mesh.reset();
 }
 
