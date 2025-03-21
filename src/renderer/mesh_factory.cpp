@@ -76,4 +76,69 @@ std::unique_ptr<Mesh> MeshFactory::createCube(VkContext* context) {
   return std::make_unique<Mesh>(context, vertices, indices);
 }
 
+std::unique_ptr<Mesh> MeshFactory::createTexturedCube(VkContext* context) {
+  LOGFN;
+
+  // For a proper textured cube, we need separate vertices for each face
+  // even if they share the same position in space
+  std::vector<Vertex> vertices = {
+      // Front face (z = 0.5)
+      {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},  // bottom-left
+      {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},   // bottom-right
+      {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},    // top-right
+      {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},   // top-left
+
+      // Back face (z = -0.5)
+      {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},  // bottom-right
+      {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},   // bottom-left
+      {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},    // top-left
+      {{-0.5f, 0.5f, -0.5f}, {0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},   // top-right
+
+      // Right face (x = 0.5)
+      {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},   // bottom-left
+      {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},  // bottom-right
+      {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},   // top-right
+      {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},    // top-left
+
+      // Left face (x = -0.5)
+      {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},  // bottom-left
+      {{-0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},   // bottom-right
+      {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},    // top-right
+      {{-0.5f, 0.5f, -0.5f}, {0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}},   // top-left
+
+      // Top face (y = 0.5)
+      {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},   // bottom-left
+      {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},    // bottom-right
+      {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},   // top-right
+      {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},  // top-left
+
+      // Bottom face (y = -0.5)
+      {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},  // bottom-left
+      {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},   // bottom-right
+      {{0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},    // top-right
+      {{-0.5f, -0.5f, 0.5f}, {0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}}    // top-left
+  };
+
+  // With 24 vertices (4 per face), we use simple quad indices for each face
+  std::vector<uint32_t> indices = {// Front face
+                                   0, 1, 2, 2, 3, 0,
+
+                                   // Back face
+                                   4, 5, 6, 6, 7, 4,
+
+                                   // Right face
+                                   8, 9, 10, 10, 11, 8,
+
+                                   // Left face
+                                   12, 13, 14, 14, 15, 12,
+
+                                   // Top face
+                                   16, 17, 18, 18, 19, 16,
+
+                                   // Bottom face
+                                   20, 21, 22, 22, 23, 20};
+
+  return std::make_unique<Mesh>(context, vertices, indices, VertexAttributeFlags::POSITION_COLOR_TEXCOORD);
+}
+
 }  // namespace glint
