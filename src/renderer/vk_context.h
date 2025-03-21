@@ -63,6 +63,8 @@ class VkContext {
   void pickPhysicalDevice();
   void createLogicalDevice();
 
+  VkSampleCountFlagBits getMaxUsableSampleCount();
+
   bool checkValidationLayerSupport();
   std::vector<const char*> getRequiredExtensions();
   bool isDeviceSuitable(VkPhysicalDevice device);
@@ -79,6 +81,8 @@ class VkContext {
   VkQueue m_GraphicsQueue;
   VkQueue m_PresentQueue;
   QueueFamilyIndices m_QueueFamilyIndices;
+
+  VkSampleCountFlagBits m_MsaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
   VkCommandPool m_CommandPool;
 

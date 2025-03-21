@@ -45,6 +45,7 @@ App::initRenderer {
           }
         }
         found suitable device  NVIDIA GeForce RTX 3060 Laptop GPU
+        Max Usable Sample Count:  8
       }
       glint::VkContext::createLogicalDevice {
         glint::VkContext::findQueueFamilies {
