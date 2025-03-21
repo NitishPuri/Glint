@@ -78,12 +78,11 @@ void Texture::createTextureImage(const std::string& filepath) {
                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_Image, m_ImageMemory);
 
   // Transition image layout and copy data
-  //   transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-  //                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-  //   copyBufferToImage(stagingBuffer.getBuffer(), m_Image, static_cast<uint32_t>(texWidth),
-  //                     static_cast<uint32_t>(texHeight));
-  //   transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-  //                         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  VkUtils::transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
+                                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+  VkUtils::copyBufferToImage(stagingBuffer, m_Image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+  VkUtils::transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void Texture::createTextureImageView() {
