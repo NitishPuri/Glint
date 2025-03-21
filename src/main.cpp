@@ -22,6 +22,7 @@
 #include "renderer/vk_context.h"
 
 //
+#include "samples/cube_sample.h"
 #include "samples/rotating_sample.h"
 #include "samples/sample.h"
 #include "samples/sample_manager.h"
@@ -73,8 +74,9 @@ class App {
     sampleManager.registerSample(std::make_unique<glint::QuadSample>());
     sampleManager.registerSample(std::make_unique<glint::RotatingSample>());
     sampleManager.registerSample(std::make_unique<glint::TexturedRotatingSample>());
+    sampleManager.registerSample(std::make_unique<glint::CubeSample>());
 
-    // sampleManager.setActiveSample("Triangle Sample");
+    sampleManager.setActiveSample("CubeSample");
   }
 
   void mainLoop() {
@@ -84,7 +86,7 @@ class App {
     auto lastFrameTime = std::chrono::high_resolution_clock::now();
 
     static int frames = 0;
-    LOGCALL(while (!window->shouldClose())) {
+    while (!(window->shouldClose() || window->isKeyPressed(GLFW_KEY_ESCAPE))) {
       window->pollEvents();
 
       // Handle sample switching
@@ -96,8 +98,8 @@ class App {
         sampleManager.setActiveSample("RotatingSample");
       } else if (window->isKeyPressed(GLFW_KEY_4)) {
         sampleManager.setActiveSample("TexturedRotatingSample");
-      } else if (window->isKeyPressed(GLFW_KEY_ESCAPE)) {
-        // window->requestClose();
+      } else if (window->isKeyPressed(GLFW_KEY_5)) {
+        sampleManager.setActiveSample("CubeSample");
       }
 
       // Calculate delta time

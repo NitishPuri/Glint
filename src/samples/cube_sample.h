@@ -26,7 +26,7 @@ class CubeSample : public Sample {
   Renderer* m_Renderer = nullptr;
   std::unique_ptr<Mesh> m_Mesh;
 
-  // std::unique_ptr<Texture> m_Texture;
+  std::unique_ptr<Texture> m_Texture;
 
   // Descriptor resources
   std::unique_ptr<DescriptorSetLayout> m_DescriptorSetLayout;

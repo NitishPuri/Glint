@@ -26,24 +26,28 @@ void CubeSample::init(Window* window, Renderer* renderer) {
   LOG("Creating resources for", framesInFlight, "frames in flight");
 
   // Create a textured quad mesh
-  m_Mesh = MeshFactory::createCube(renderer->getContext());
+  // m_Mesh = MeshFactory::createCube(renderer->getContext());
+  m_Mesh = MeshFactory::createTexturedCube(renderer->getContext());
 
   // Load texture
-  // m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.jpg");
+  m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.jpg");
 
   // Create descriptor set layout
   m_DescriptorSetLayout = DescriptorSetLayout::Builder(renderer->getContext())
                               .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
-                              // .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+                              .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
                               .build();
 
   // Create pipeline with textured shader
   PipelineConfig config;
   config.descriptorSetLayout = m_DescriptorSetLayout.get();
-  config.vertexShaderPath = getShaderPath("shader.vert");
-  config.fragmentShaderPath = getShaderPath("shader.frag");
-  // config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
-  config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
+  // config.vertexShaderPath = getShaderPath("shader.vert");
+  // config.fragmentShaderPath = getShaderPath("shader.frag");
+  // config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
+  config.vertexShaderPath = getShaderPath("basic_tex.vert");
+  config.fragmentShaderPath = getShaderPath("basic_tex.frag");
+  config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
+
   // config.cullMode = VK_CULL_MODE_NONE;
   //   config.blendEnable = true;
 
@@ -70,7 +74,7 @@ void CubeSample::init(Window* window, Renderer* renderer) {
     m_Descriptor->updateUniformBuffer(m_UniformBuffers[i]->getBuffer(), sizeof(UniformBufferObject), 0, i);
 
     // Update texture sampler
-    // m_Descriptor->updateTextureSampler(m_Texture->getImageView(), m_Texture->getSampler(), i);
+    m_Descriptor->updateTextureSampler(m_Texture->getImageView(), m_Texture->getSampler(), i);
   }
 
   // Set initial transformation matrices
@@ -165,7 +169,7 @@ void CubeSample::cleanup() {
   m_UniformBuffers.clear();
 
   // Clean up texture and mesh
-  // m_Texture.reset();
+  m_Texture.reset();
   m_Mesh.reset();
 }
 
