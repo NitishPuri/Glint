@@ -13,15 +13,10 @@
 
 namespace glint {
 
-Pipeline::Pipeline(VkContext* context, RenderPass* renderPass, const std::string& vertShaderPath,
-                   const std::string& fragShaderPath, DescriptorSetLayout* descriptorSetLayout)
-    : m_Context(context),
-      m_RenderPass(renderPass),
-      m_PipelineLayout(VK_NULL_HANDLE),
-      m_Pipeline(VK_NULL_HANDLE),
-      m_DescriptorSetLayout(descriptorSetLayout) {
+Pipeline::Pipeline(VkContext* context, RenderPass* renderPass, const PipelineConfig* config)
+    : m_Context(context), m_RenderPass(renderPass), m_PipelineLayout(VK_NULL_HANDLE), m_Pipeline(VK_NULL_HANDLE) {
   LOGFN;
-  createGraphicsPipeline(vertShaderPath, fragShaderPath);
+  createGraphicsPipeline(config ? *config : PipelineConfig());
 }
 
 Pipeline::~Pipeline() {
@@ -37,12 +32,12 @@ void Pipeline::bind(VkCommandBuffer commandBuffer) {
   LOGCALL_ONCE(vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline));
 }
 
-void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath) {
+void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   LOGFN;
 
   LOG("Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V");
-  auto vertShaderCode = readFile(vertShaderPath);
-  auto fragShaderCode = readFile(fragShaderPath);
+  auto vertShaderCode = readFile(config.vertexShaderPath);
+  auto fragShaderCode = readFile(config.fragmentShaderPath);
 
   LOGCALL(VkShaderModule vertShaderModule = createShaderModule(vertShaderCode));
   LOGCALL(VkShaderModule fragShaderModule = createShaderModule(fragShaderCode));
@@ -68,7 +63,7 @@ void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const s
   vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
   auto bindingDescription = Vertex::getBindingDescription();
-  auto attributeDescriptions = Vertex::getAttributeDescriptions();
+  auto attributeDescriptions = Vertex::getAttributeDescriptions(config.vertexFormat);
 
   vertexInputInfo.vertexBindingDescriptionCount = 1;
   vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
@@ -78,7 +73,7 @@ void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const s
   LOG("Input Assembly");
   LOGCALL(VkPipelineInputAssemblyStateCreateInfo inputAssembly{});
   inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-  inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;  //
+  inputAssembly.topology = config.topology;
   inputAssembly.primitiveRestartEnable = VK_FALSE;
 
   LOG("Dynamic States - used for viewport and scissor");
@@ -102,20 +97,15 @@ void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const s
   rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
   rasterizer.depthClampEnable = VK_FALSE;
   rasterizer.rasterizerDiscardEnable = VK_FALSE;
-  LOG("Using anything else requires enabling GPU features.");
   LOGCALL(rasterizer.polygonMode = VK_POLYGON_MODE_FILL);  // VK_POLYGON_MODE_LINE, VK_POLYGON_MODE_POINT
   LOGCALL(rasterizer.lineWidth = 1.0f);
-  // rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;  // VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_FRONT_AND_BACK
-  rasterizer.cullMode = VK_CULL_MODE_NONE;  // VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_FRONT_AND_BACK
+  rasterizer.cullMode = config.cullMode;
+  rasterizer.frontFace = config.frontFace;
 
-  // Use counter-clockwise winding order for ALL pipelines
-  // This works with both transformed and untransformed geometry with proper setup
-  rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-  // rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-  LOG("Using counter-clockwise winding for all geometry");
+  // LOG("Using counter-clockwise winding for all geometry");
 
   LOGCALL(rasterizer.depthBiasEnable = VK_FALSE);
-  LOG("Depth Bias, for shadow mapping.");
+  // LOG("Depth Bias, for shadow mapping.");
   rasterizer.depthBiasConstantFactor = 0.0f;  // Optional
   rasterizer.depthBiasClamp = 0.0f;           // Optional
   rasterizer.depthBiasSlopeFactor = 0.0f;     // Optional
@@ -169,10 +159,10 @@ void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const s
   LOG("uniform values, push constants, etc.");
   LOGCALL(VkPipelineLayoutCreateInfo pipelineLayoutInfo{});
 
-  if (m_DescriptorSetLayout) {
+  if (config.descriptorSetLayout) {
     LOG("Including descriptor set layout in pipeline layout");
 
-    VkDescriptorSetLayout layout = m_DescriptorSetLayout->getLayout();
+    VkDescriptorSetLayout layout = config.descriptorSetLayout->getLayout();
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &layout;
   } else {

@@ -55,16 +55,13 @@ void Renderer::init() {
   LOG("Renderer initialized with", m_MaxFramesInFlight, "frames in flight and", imageCount, "swap chain images");
 }
 
-void Renderer::createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath,
-                              DescriptorSetLayout* descriptorLayout) {
+void Renderer::createPipeline(const PipelineConfig* config) {
   LOGFN;
 
   m_Pipeline.reset();
 
   // TODO: Have a way to cache pipelines?
-
-  m_Pipeline =
-      std::make_unique<Pipeline>(m_Context.get(), m_RenderPass.get(), vertShaderPath, fragShaderPath, descriptorLayout);
+  m_Pipeline = std::make_unique<Pipeline>(m_Context.get(), m_RenderPass.get(), config);
 }
 
 void Renderer::handleResize() {

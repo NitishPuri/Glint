@@ -13,6 +13,7 @@ class VkContext;
 class SwapChain;
 class RenderPass;
 class Pipeline;
+struct PipelineConfig;
 class CommandManager;
 class SynchronizationManager;
 class DescriptorSetLayout;
@@ -31,8 +32,7 @@ class Renderer {
   void waitIdle();
 
   // Create pipeline with descriptor set layout
-  void createPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath,
-                      DescriptorSetLayout* descriptorLayout = nullptr);
+  void createPipeline(const PipelineConfig* config = nullptr);
 
   // Getters
   VkContext* getContext() const { return m_Context.get(); }
