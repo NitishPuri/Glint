@@ -25,6 +25,7 @@
 #include "samples/rotating_sample.h"
 #include "samples/sample.h"
 #include "samples/sample_manager.h"
+#include "samples/textured_quad.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -71,6 +72,7 @@ class App {
     sampleManager.registerSample(std::make_unique<glint::TriangleSample>());
     sampleManager.registerSample(std::make_unique<glint::QuadSample>());
     sampleManager.registerSample(std::make_unique<glint::RotatingSample>());
+    sampleManager.registerSample(std::make_unique<glint::TexturedRotatingSample>());
 
     // sampleManager.setActiveSample("Triangle Sample");
   }
@@ -92,6 +94,10 @@ class App {
         sampleManager.setActiveSample("Quad Sample");
       } else if (window->isKeyPressed(GLFW_KEY_3)) {
         sampleManager.setActiveSample("RotatingSample");
+      } else if (window->isKeyPressed(GLFW_KEY_4)) {
+        sampleManager.setActiveSample("TexturedRotatingSample");
+      } else if (window->isKeyPressed(GLFW_KEY_ESCAPE)) {
+        // window->requestClose();
       }
 
       // Calculate delta time

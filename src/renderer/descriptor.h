@@ -94,6 +94,8 @@ class Descriptor {
   // void updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset = 0, uint32_t setIndex = 0);
   void updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset = 0, uint32_t setIndex = 0);
 
+  void updateTextureSampler(VkImageView imageView, VkSampler sampler, uint32_t setIndex = 0);
+
   void bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex = 0);
 
   // VkDescriptorSet getDescriptorSet() const { return m_DescriptorSet; }

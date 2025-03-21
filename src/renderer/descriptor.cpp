@@ -196,11 +196,31 @@ void Descriptor::updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDevic
   vkUpdateDescriptorSets(m_Context->getDevice(), 1, &descriptorWrite, 0, nullptr);
 }
 
-// void Descriptor::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex) {
-//   LOGFN_ONCE;
-//   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, setIndex, 1,
-//                           &m_DescriptorSets[setIndex], 0, nullptr);
-// }
+void Descriptor::updateTextureSampler(VkImageView imageView, VkSampler sampler, uint32_t setIndex) {
+  LOGFN_ONCE;
+  if (setIndex >= m_DescriptorSets.size()) {
+    throw std::runtime_error("Descriptor set index out of bounds!");
+  }
+
+  // Define the descriptor image info
+  VkDescriptorImageInfo imageInfo{};
+  imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  imageInfo.imageView = imageView;
+  imageInfo.sampler = sampler;
+
+  // Define how to update the descriptor set
+  VkWriteDescriptorSet descriptorWrite{};
+  descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  descriptorWrite.dstSet = m_DescriptorSets[setIndex];
+  descriptorWrite.dstBinding = 1;  // Binding point in the shader
+  descriptorWrite.dstArrayElement = 0;
+  descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  descriptorWrite.descriptorCount = 1;
+  descriptorWrite.pImageInfo = &imageInfo;
+
+  // Update the descriptor set
+  vkUpdateDescriptorSets(m_Context->getDevice(), 1, &descriptorWrite, 0, nullptr);
+}
 
 void Descriptor::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex) {
   LOGFN_ONCE;
