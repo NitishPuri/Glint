@@ -104,9 +104,9 @@ void VkUtils::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize si
   endSingleTimeCommands(commandBuffer);
 }
 
-void VkUtils::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling,
-                          VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image,
-                          VkDeviceMemory& imageMemory) {
+void VkUtils::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples,
+                          VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+                          VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
   assert(s_Context != nullptr);
 
   VkImageCreateInfo imageInfo{};
@@ -121,7 +121,7 @@ void VkUtils::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, V
   imageInfo.tiling = tiling;
   imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   imageInfo.usage = usage;
-  imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;  // No multisampling
+  imageInfo.samples = numSamples;
   imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
   if (vkCreateImage(s_Context->getDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS) {

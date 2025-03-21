@@ -17,6 +17,7 @@ SwapChain::SwapChain(VkContext* context) : m_Context(context), m_SwapChain(VK_NU
   createImageViews();
   // TODO: Make optional ?
   createDepthResources();
+  createColorResources();
 }
 
 SwapChain::~SwapChain() {
@@ -27,6 +28,14 @@ SwapChain::~SwapChain() {
 void SwapChain::cleanup() {
   LOGFN;
   VkDevice device = m_Context->getDevice();
+
+  if (m_Msaa.image != VK_NULL_HANDLE) {
+    LOG("Destroying MSAA resources");
+    vkDestroyImageView(device, m_Msaa.view, nullptr);
+    vkDestroyImage(device, m_Msaa.image, nullptr);
+    vkFreeMemory(device, m_Msaa.memory, nullptr);
+    m_Msaa = {};
+  }
 
   cleanupDepthResources();
 
@@ -76,6 +85,7 @@ void SwapChain::recreateSwapchain(VkRenderPass renderPass) {
 
   // TODO: Make optional ?
   createDepthResources();
+  createColorResources();
 
   createFramebuffers(renderPass);
 }
@@ -158,7 +168,7 @@ void SwapChain::createFramebuffers(VkRenderPass renderPass) {
 
   for (size_t i = 0; i < m_ImageViews.size(); i++) {
     // VkImageView attachments[] = {m_ImageViews[i]};
-    std::array<VkImageView, 2> attachments = {m_ImageViews[i], m_DepthImageView};
+    std::array<VkImageView, 3> attachments = {m_Msaa.view, m_DepthImageView, m_ImageViews[i]};
 
     VkFramebufferCreateInfo framebufferInfo{};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -257,6 +267,18 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilit
   }
 }
 
+void SwapChain::createColorResources() {
+  VkExtent2D extent = m_Extent;
+  extent.width = std::max(1u, extent.width);
+  extent.height = std::max(1u, extent.height);
+
+  VkUtils::createImage(extent.width, extent.height, 1, m_Context->getMsaaSamples(), m_ImageFormat,
+                       VK_IMAGE_TILING_OPTIMAL,
+                       VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_Msaa.image, m_Msaa.memory);
+  m_Msaa.view = VkUtils::createImageView(m_Msaa.image, m_ImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+}
+
 VkFormat SwapChain::findSupportedFormats(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
                                          VkFormatFeatureFlags features) {
   auto physicalDevice = m_Context->getPhysicalDevice();
@@ -286,9 +308,9 @@ bool SwapChain::hasStencilComponent(VkFormat format) {
 void SwapChain::createDepthResources() {
   LOGFN;
   m_DepthFormat = findDepthFormat();
-  VkUtils::createImage(m_Extent.width, m_Extent.height, 1, m_DepthFormat, VK_IMAGE_TILING_OPTIMAL,
-                       VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage,
-                       m_DepthImageMemory);
+  VkUtils::createImage(m_Extent.width, m_Extent.height, 1, m_Context->getMsaaSamples(), m_DepthFormat,
+                       VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory);
   // Set debug names
   // TODO: Create macro.
   VkUtils::setObjectName(m_DepthImage, VK_OBJECT_TYPE_IMAGE, "Depth Image");

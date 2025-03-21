@@ -363,6 +363,42 @@ App::mainLoop {
     }
     result = vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo)
   }
+  Window resized:  2560 x 1369
+  glint::SwapChain::recreateSwapchain {
+    vkDeviceWaitIdle(device)
+    glint::SwapChain::cleanup {
+      Destroying MSAA resources
+      glint::SwapChain::cleanupDepthResources {
+      }
+      Destroying  3  framebuffers
+      Destroying  3  image views
+      vkDestroySwapchainKHR(device, m_SwapChain, nullptr)
+    }
+    glint::SwapChain::createSwapChain {
+      glint::SwapChain::querySwapChainSupport {
+      }
+      glint::SwapChain::chooseSwapSurfaceFormat {
+      }
+      glint::SwapChain::chooseSwapPresentMode {
+        Using VK_PRESENT_MODE_MAILBOX_KHR (triple buffering)
+      }
+      glint::SwapChain::chooseSwapExtent {
+      }
+      graphics and present queues are the same
+      Using exclusive sharing mode
+    }
+    glint::SwapChain::createImageViews {
+    }
+    glint::SwapChain::createDepthResources {
+      Set debug name for 10 to Depth Image
+      Set debug name for 8 to Depth Image Memory
+      Set debug name for 14 to Depth Image View
+      glint::VkUtils::transitionImageLayout {
+      }
+    }
+    glint::SwapChain::createFramebuffers {
+    }
+  }
   glint::Renderer::waitIdle {
   }
 }
@@ -407,6 +443,7 @@ glint::RenderPass::~RenderPass {
 }
 glint::SwapChain::~SwapChain {
   glint::SwapChain::cleanup {
+    Destroying MSAA resources
     glint::SwapChain::cleanupDepthResources {
     }
     Destroying  3  framebuffers

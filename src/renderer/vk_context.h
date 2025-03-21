@@ -39,7 +39,7 @@ class VkContext {
   VkCommandPool getCommandPool() const { return m_CommandPool; }
   void setCommandPool(VkCommandPool commamndPool) { m_CommandPool = commamndPool; }
 
-  // void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+  VkSampleCountFlagBits getMsaaSamples() const { return m_MsaaSamples; }
 
   struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
