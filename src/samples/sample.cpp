@@ -38,7 +38,14 @@ void BasicSample::init(Window* window, Renderer* renderer) {
   LOGFN;
 
   m_Renderer = renderer;
-  m_Renderer->createPipeline("./bin/shaders/basic.vert.spv", "./bin/shaders/shader.frag.spv");
+
+  PipelineConfig config;
+  config.vertexShaderPath = "./bin/shaders/basic.vert.spv";
+  config.fragmentShaderPath = "./bin/shaders/shader.frag.spv";
+  config.descriptorSetLayout = nullptr;
+  //   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
+
+  m_Renderer->createPipeline(&config);
 
   m_Mesh = MeshFactory::createTriangle(renderer->getContext());
 }

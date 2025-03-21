@@ -28,8 +28,14 @@ void RotatingSample::init(Window* window, Renderer* renderer) {
 
   // Create descriptor set layout
   m_DescriptorSetLayout = std::make_unique<DescriptorSetLayout>(renderer->getContext());
-  renderer->createPipeline("./bin/shaders/shader.vert.spv", "./bin/shaders/shader.frag.spv",
-                           m_DescriptorSetLayout.get());
+
+  PipelineConfig config;
+  config.descriptorSetLayout = m_DescriptorSetLayout.get();
+  config.vertexShaderPath = "./bin/shaders/shader.vert.spv";
+  config.fragmentShaderPath = "./bin/shaders/shader.frag.spv";
+  config.cullMode = VK_CULL_MODE_NONE;
+
+  renderer->createPipeline(&config);
 
   // Create descriptor pool
   m_DescriptorPool = std::make_unique<DescriptorPool>(renderer->getContext(), framesInFlight);
