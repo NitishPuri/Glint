@@ -27,7 +27,9 @@ void RotatingSample::init(Window* window, Renderer* renderer) {
   m_Mesh = MeshFactory::createTriangle(renderer->getContext());
 
   // Create descriptor set layout
-  m_DescriptorSetLayout = std::make_unique<DescriptorSetLayout>(renderer->getContext());
+  m_DescriptorSetLayout = DescriptorSetLayout::Builder(renderer->getContext())
+                              .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+                              .build();
 
   PipelineConfig config;
   config.descriptorSetLayout = m_DescriptorSetLayout.get();
@@ -38,7 +40,8 @@ void RotatingSample::init(Window* window, Renderer* renderer) {
   renderer->createPipeline(&config);
 
   // Create descriptor pool
-  m_DescriptorPool = std::make_unique<DescriptorPool>(renderer->getContext(), framesInFlight);
+  m_DescriptorPool =
+      std::make_unique<DescriptorPool>(renderer->getContext(), m_DescriptorSetLayout.get(), framesInFlight);
 
   // Create uniform buffer
   m_UniformBuffers.resize(framesInFlight);

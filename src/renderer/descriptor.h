@@ -47,6 +47,7 @@ class DescriptorSetLayout {
   DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
 
   VkDescriptorSetLayout getLayout() const { return m_Layout; }
+  const std::vector<VkDescriptorSetLayoutBinding>& getBindings() const { return m_Bindings; }
 
  private:
   void createLayout();
@@ -58,7 +59,11 @@ class DescriptorSetLayout {
 
 class DescriptorPool {
  public:
+  // TODO: Remove,
   DescriptorPool(VkContext* context, uint32_t maxSets);
+
+  DescriptorPool(VkContext* context, const DescriptorSetLayout* layout, uint32_t maxSets);
+
   ~DescriptorPool();
 
   // Prevent copying
@@ -68,6 +73,9 @@ class DescriptorPool {
   VkDescriptorPool getPool() const { return m_Pool; }
 
  private:
+  // Helper to create pool from bindings
+  void createFromBindings(const std::vector<VkDescriptorSetLayoutBinding>& bindings, uint32_t maxSets);
+
   VkContext* m_Context;
   VkDescriptorPool m_Pool = VK_NULL_HANDLE;
 };

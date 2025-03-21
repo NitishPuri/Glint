@@ -35,8 +35,7 @@ DescriptorSetLayout::~DescriptorSetLayout() {
 }
 
 DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(uint32_t binding, VkDescriptorType type,
-                                                                       VkShaderStageFlags stageFlags,
-                                                                       uint32_t count = 1) {
+                                                                       VkShaderStageFlags stageFlags, uint32_t count) {
   VkDescriptorSetLayoutBinding layoutBinding{};
   layoutBinding.binding = binding;
   layoutBinding.descriptorType = type;
@@ -72,6 +71,64 @@ DescriptorPool::DescriptorPool(VkContext* context, uint32_t maxSets) : m_Context
   }
 
   LOG("Created descriptor pool with capacity for", maxSets, "uniform buffer descriptors");
+}
+
+// Helper to create pool from bindings
+void DescriptorPool::createFromBindings(const std::vector<VkDescriptorSetLayoutBinding>& bindings, uint32_t maxSets) {
+  // Count descriptor types needed
+  std::vector<VkDescriptorPoolSize> poolSizes;
+
+  for (const auto& binding : bindings) {
+    // Check if we already have this type
+    bool found = false;
+    for (auto& poolSize : poolSizes) {
+      if (poolSize.type == binding.descriptorType) {
+        poolSize.descriptorCount += binding.descriptorCount * maxSets;
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      // Add new pool size
+      VkDescriptorPoolSize poolSize{};
+      poolSize.type = binding.descriptorType;
+      poolSize.descriptorCount = binding.descriptorCount * maxSets;
+      poolSizes.push_back(poolSize);
+    }
+  }
+
+  // If no bindings, create a default uniform buffer pool
+  if (poolSizes.empty()) {
+    VkDescriptorPoolSize poolSize{};
+    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSize.descriptorCount = maxSets;
+    poolSizes.push_back(poolSize);
+  }
+
+  // Create the descriptor pool
+  VkDescriptorPoolCreateInfo poolInfo{};
+  poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+  poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+  poolInfo.pPoolSizes = poolSizes.data();
+  poolInfo.maxSets = maxSets;
+  poolInfo.flags = 0;
+
+  if (vkCreateDescriptorPool(m_Context->getDevice(), &poolInfo, nullptr, &m_Pool) != VK_SUCCESS) {
+    throw std::runtime_error("Failed to create descriptor pool!");
+  }
+
+  LOG("Created descriptor pool with capacity for", maxSets, "descriptor sets with multiple types");
+  for (const auto& poolSize : poolSizes) {
+    LOG("  Type:", static_cast<int>(poolSize.type), "Count:", poolSize.descriptorCount);
+  }
+}
+
+// Constructor that takes a layout
+DescriptorPool::DescriptorPool(VkContext* context, const DescriptorSetLayout* layout, uint32_t maxSets)
+    : m_Context(context) {
+  LOGFN;
+  createFromBindings(layout->getBindings(), maxSets);
 }
 
 DescriptorPool::~DescriptorPool() {
