@@ -25,6 +25,8 @@ void SwapChain::cleanup() {
   LOGFN;
   VkDevice device = m_Context->getDevice();
 
+  cleanupDepthResources();
+
   LOG("Destroying ", m_Framebuffers.size(), " framebuffers");
   for (auto framebuffer : m_Framebuffers) {
     vkDestroyFramebuffer(device, framebuffer, nullptr);
@@ -38,6 +40,26 @@ void SwapChain::cleanup() {
   LOGCALL(vkDestroySwapchainKHR(device, m_SwapChain, nullptr));
 }
 
+void SwapChain::cleanupDepthResources() {
+  LOGFN;
+  VkDevice device = m_Context->getDevice();
+
+  if (m_DepthImageView != VK_NULL_HANDLE) {
+    vkDestroyImageView(m_Context->getDevice(), m_DepthImageView, nullptr);
+    m_DepthImageView = VK_NULL_HANDLE;
+  }
+
+  if (m_DepthImage != VK_NULL_HANDLE) {
+    vkDestroyImage(m_Context->getDevice(), m_DepthImage, nullptr);
+    m_DepthImage = VK_NULL_HANDLE;
+  }
+
+  if (m_DepthImageMemory != VK_NULL_HANDLE) {
+    vkFreeMemory(m_Context->getDevice(), m_DepthImageMemory, nullptr);
+    m_DepthImageMemory = VK_NULL_HANDLE;
+  }
+}
+
 void SwapChain::recreateSwapchain(VkRenderPass renderPass) {
   LOGFN;
 
@@ -48,6 +70,10 @@ void SwapChain::recreateSwapchain(VkRenderPass renderPass) {
 
   createSwapChain();
   createImageViews();
+
+  // TODO: Make optional ?
+  createDepthResources();
+
   createFramebuffers(renderPass);
 }
 
@@ -225,6 +251,52 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilit
 
     return actualExtent;
   }
+}
+
+VkFormat SwapChain::findSupportedFormats(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
+                                         VkFormatFeatureFlags features) {
+  auto physicalDevice = m_Context->getPhysicalDevice();
+  for (VkFormat format : candidates) {
+    VkFormatProperties props;
+    vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+
+    if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+      return format;
+    } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+      return format;
+    }
+  }
+
+  throw std::runtime_error("failed to find supported format!");
+}
+
+VkFormat SwapChain::findDepthFormat() {
+  return findSupportedFormats({VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+                              VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+}
+
+bool SwapChain::hasStencilComponent(VkFormat format) {
+  return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+}
+
+void SwapChain::createDepthResources() {
+  LOGFN;
+  VkFormat depthFormat = findDepthFormat();
+
+  VkUtils::createImage(m_Extent.width, m_Extent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL,
+                       VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage,
+                       m_DepthImageMemory);
+
+  m_DepthImageView = VkUtils::createImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+  VkUtils::transitionImageLayout(m_DepthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED,
+                                 VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
+  // Set debug names
+  // TODO: Create macro.
+  VkUtils::setObjectName(m_DepthImage, VK_OBJECT_TYPE_IMAGE, "Depth Image");
+  VkUtils::setObjectName(m_DepthImageMemory, VK_OBJECT_TYPE_DEVICE_MEMORY, "Depth Image Memory");
+  VkUtils::setObjectName(m_DepthImageView, VK_OBJECT_TYPE_IMAGE_VIEW, "Depth Image View");
 }
 
 }  // namespace glint

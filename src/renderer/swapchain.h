@@ -44,6 +44,14 @@ class SwapChain {
   VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
   VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
+  void createDepthResources();
+  void cleanupDepthResources();
+  VkFormat findDepthFormat();
+  bool hasStencilComponent(VkFormat format);
+
+  VkFormat findSupportedFormats(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
+                                VkFormatFeatureFlags features);
+
  private:
   VkContext* m_Context;
 
@@ -52,7 +60,14 @@ class SwapChain {
   VkFormat m_ImageFormat;
   VkExtent2D m_Extent;
   std::vector<VkImageView> m_ImageViews;
+
   std::vector<VkFramebuffer> m_Framebuffers;
+
+  // Depth resources
+  VkImage m_DepthImage = VK_NULL_HANDLE;
+  VkDeviceMemory m_DepthImageMemory = VK_NULL_HANDLE;
+  VkImageView m_DepthImageView = VK_NULL_HANDLE;
+  // VkFormat m_DepthFormat = VK_FORMAT_UNDEFINED;
 };
 
 }  // namespace glint
