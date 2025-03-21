@@ -88,12 +88,14 @@ void RenderPass::createRenderPass() {
   }
 }
 
-void RenderPass::begin(VkCommandBuffer commandBuffer, uint32_t imageIndex,
-                       const std::vector<VkClearValue>& clearValues) {
+void RenderPass::begin(VkCommandBuffer commandBuffer, uint32_t imageIndex, const VkClearColorValue& clearColor) {
   LOGFN_ONCE;
+  std::array<VkClearValue, 2> clearValues{};
+  clearValues[0].color = clearColor;
+  clearValues[1].depthStencil = {1.0f, 0};  // Default depth clear value (far plane)
 
   LOG_ONCE("Start Render Pass");
-  LOGCALL_ONCE(VkRenderPassBeginInfo renderPassInfo{});
+  VkRenderPassBeginInfo renderPassInfo{};
   renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
   renderPassInfo.renderPass = m_RenderPass;
   renderPassInfo.framebuffer = m_SwapChain->getFramebuffer(imageIndex);

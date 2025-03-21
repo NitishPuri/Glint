@@ -2,8 +2,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include <vector>
-
 namespace glint {
 
 class VkContext;
@@ -21,7 +19,7 @@ class RenderPass {
   // Getters
   VkRenderPass getRenderPass() const { return m_RenderPass; }
 
-  void begin(VkCommandBuffer commandBuffer, uint32_t imageIndex, const std::vector<VkClearValue>& clearValues);
+  void begin(VkCommandBuffer commandBuffer, uint32_t imageIndex, const VkClearColorValue& clearColor);
   void end(VkCommandBuffer commandBuffer);
 
  private:
@@ -30,7 +28,6 @@ class RenderPass {
  private:
   VkContext* m_Context;
   SwapChain* m_SwapChain;
-
   VkRenderPass m_RenderPass;
 };
 

@@ -106,8 +106,7 @@ void RotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) 
   auto currentFrame = m_Renderer->getCurrentFrame();
 
   // Begin render pass
-  VkClearValue clearColor = {{{0.0f, 0.1f, 0.2f, 1.0f}}};  // Dark blue background
-  renderPass->begin(commandBuffer, imageIndex, {clearColor});
+  renderPass->begin(commandBuffer, imageIndex, {0.0f, 0.1f, 0.2f, 1.0f});
 
   // Bind pipeline
   pipeline->bind(commandBuffer);
