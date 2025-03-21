@@ -47,8 +47,10 @@ void CubeSample::init(Window* window, Renderer* renderer) {
   config.vertexShaderPath = getShaderPath("basic_tex.vert");
   config.fragmentShaderPath = getShaderPath("basic_tex.frag");
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
+  config.depthTestEnable = true;
+  config.depthWriteEnable = true;
 
-  // config.cullMode = VK_CULL_MODE_NONE;
+  config.cullMode = VK_CULL_MODE_BACK_BIT;
   //   config.blendEnable = true;
 
   renderer->createPipeline(&config);

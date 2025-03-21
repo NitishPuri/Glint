@@ -52,6 +52,14 @@ App::initRenderer {
         vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device)
       }
     }
+    glint::CommandManager::CommandManager {
+      glint::CommandManager::createCommandPool {
+        Choose graphics family as we are using the command buffer for rendering
+      }
+      glint::CommandManager::createCommandBuffers {
+        Creating 2 command buffers
+      }
+    }
     glint::SwapChain::SwapChain {
       glint::SwapChain::createSwapChain {
         glint::SwapChain::querySwapChainSupport {
@@ -68,48 +76,20 @@ App::initRenderer {
       }
       glint::SwapChain::createImageViews {
       }
+      glint::SwapChain::createDepthResources {
+        Set debug name for 10 to Depth Image
+        Set debug name for 8 to Depth Image Memory
+        Set debug name for 14 to Depth Image View
+        glint::VkUtils::transitionImageLayout {
+        }
+      }
     }
     glint::RenderPass::RenderPass {
       glint::RenderPass::createRenderPass {
-        clear the values to a constant at the start
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR
-        store the values to memory for reading later
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE
-        not using stencil buffer
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE
-        layout transition before and after render pass
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-        which attachment to reference by its index in the attachment descriptions array
-        colorAttachmentRef.attachment = 0
-        layout the attachment will have during a subpass
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-        subpass dependencies, for layout transitions
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS
-        subpass.colorAttachmentCount = 1
-        subpass.pColorAttachments = &colorAttachmentRef
-        dependency between the subpass and the external render pass
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL
-        dependency.dstSubpass = 0
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-        dependency.srcAccessMask = 0
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
-        Render Pass
-        VkRenderPassCreateInfo renderPassInfo{}
         vkCreateRenderPass(m_Context->getDevice(), &renderPassInfo, nullptr, &m_RenderPass)
       }
     }
     glint::SwapChain::createFramebuffers {
-    }
-    glint::CommandManager::CommandManager {
-      glint::CommandManager::createCommandPool {
-        Choose graphics family as we are using the command buffer for rendering
-      }
-      glint::CommandManager::createCommandBuffers {
-        Creating 2 command buffers
-      }
     }
     glint::SynchronizationManager::SynchronizationManager {
       glint::SynchronizationManager::createSyncObjects {
@@ -137,10 +117,10 @@ App::initSamples {
           glint::Pipeline::createGraphicsPipeline {
             Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
             glint::Pipeline::readFile {
-              Loading filename: ./build/bin/shaders/basic.vert.spv fileSize: 1052 bytes
+              Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/basic.vert.spv fileSize: 1052 bytes
             }
             glint::Pipeline::readFile {
-              Loading filename: ./build/bin/shaders/shader.frag.spv fileSize: 572 bytes
+              Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/shader.frag.spv fileSize: 572 bytes
             }
             VkShaderModule vertShaderModule = createShaderModule(vertShaderCode)
             glint::Pipeline::createShaderModule {
@@ -167,6 +147,7 @@ App::initSamples {
             Multisampling, disabled for now.
             VkPipelineMultisampleStateCreateInfo multisampling{}
             Depth and Stencil testing, disabled for now, will pass on nullptr
+            VkPipelineDepthStencilStateCreateInfo depthStencil{}
             Color Blending, finalColor = newColor * newAlpha <colorBlendOp> oldColor * (1 - newAlpha)
             It is possible to have multiple color blending attachments, have logical ops, and have separate blending for each color channel.
             VkPipelineColorBlendAttachmentState colorBlendAttachment{}
@@ -191,45 +172,11 @@ App::initSamples {
       glint::MeshFactory::createTriangle {
         glint::Mesh::Mesh {
           glint::Mesh::createVertexBuffer {
-            glint::VkContext::findMemoryType {
-            }
-            glint::VkContext::findMemoryType {
-            }
             glint::Mesh::copyBuffer {
-              Command Buffer for Buffer Copy
-              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
-              Begin Command Buffer
-              vkBeginCommandBuffer(commandBuffer, &beginInfo)
-              Copy Buffer
-              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
-              End Command Buffer
-              vkEndCommandBuffer(commandBuffer)
-              Submit Command Buffer
-              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
-              vkQueueWaitIdle(graphicsQueue)
-              Free Command Buffer
-              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
             }
           }
           glint::Mesh::createIndexBuffer {
-            glint::VkContext::findMemoryType {
-            }
-            glint::VkContext::findMemoryType {
-            }
             glint::Mesh::copyBuffer {
-              Command Buffer for Buffer Copy
-              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
-              Begin Command Buffer
-              vkBeginCommandBuffer(commandBuffer, &beginInfo)
-              Copy Buffer
-              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
-              End Command Buffer
-              vkEndCommandBuffer(commandBuffer)
-              Submit Command Buffer
-              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
-              vkQueueWaitIdle(graphicsQueue)
-              Free Command Buffer
-              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
             }
           }
           Mesh created with 3 vertices and 3 indices
@@ -250,9 +197,127 @@ App::initSamples {
   glint::SampleManager::registerSample {
     Registering sample: TexturedRotatingSample
   }
+  glint::CubeSample::CubeSample {
+  }
+  glint::SampleManager::registerSample {
+    Registering sample: CubeSample
+  }
+  glint::Renderer::waitIdle {
+  }
+  Active sample set to: CubeSample
+  glint::CubeSample::init {
+    Creating resources for 2 frames in flight
+    glint::MeshFactory::createTexturedCube {
+      glint::Mesh::Mesh {
+        glint::Mesh::createVertexBuffer {
+          glint::Mesh::copyBuffer {
+          }
+        }
+        glint::Mesh::createIndexBuffer {
+          glint::Mesh::copyBuffer {
+          }
+        }
+        Mesh created with 24 vertices and 36 indices
+      }
+    }
+    glint::Texture::Texture {
+      glint::Texture::createTextureImage {
+        Loading texture from ./res/texture.jpg
+        Texture loaded: 512 x 512 pixels, 3 channels
+        Set debug name for 9 to Texture Staging Buffer
+        Set debug name for 8 to Texture Staging Buffer Memory
+        Set debug name for 10 to Texture Buffer
+        Set debug name for 8 to Texture Buffer Memory
+        glint::VkUtils::transitionImageLayout {
+        }
+        glint::VkUtils::transitionImageLayout {
+        }
+      }
+    }
+    glint::Renderer::createPipeline {
+      glint::Pipeline::~Pipeline {
+        vkDestroyPipeline(device, m_Pipeline, nullptr)
+        vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr)
+      }
+      glint::Pipeline::Pipeline {
+        glint::Pipeline::createGraphicsPipeline {
+          Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
+          glint::Pipeline::readFile {
+            Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/basic_tex.vert.spv fileSize: 1840 bytes
+          }
+          glint::Pipeline::readFile {
+            Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/basic_tex.frag.spv fileSize: 900 bytes
+          }
+          VkShaderModule vertShaderModule = createShaderModule(vertShaderCode)
+          glint::Pipeline::createShaderModule {
+          }
+          VkShaderModule fragShaderModule = createShaderModule(fragShaderCode)
+          glint::Pipeline::createShaderModule {
+          }
+          Vertex Input
+          VkPipelineVertexInputStateCreateInfo vertexInputInfo{}
+          glint::Vertex::getBindingDescription {
+          }
+          glint::Vertex::getAttributeDescriptions {
+          }
+          Input Assembly
+          VkPipelineInputAssemblyStateCreateInfo inputAssembly{}
+          Dynamic States - used for viewport and scissor
+          Viewport State, dynamic states are used for viewport and scissor
+          VkPipelineViewportStateCreateInfo viewportState{}
+          Rasterizer
+          VkPipelineRasterizationStateCreateInfo rasterizer{}
+          rasterizer.polygonMode = VK_POLYGON_MODE_FILL
+          rasterizer.lineWidth = 1.0f
+          rasterizer.depthBiasEnable = VK_FALSE
+          Multisampling, disabled for now.
+          VkPipelineMultisampleStateCreateInfo multisampling{}
+          Depth and Stencil testing, disabled for now, will pass on nullptr
+          VkPipelineDepthStencilStateCreateInfo depthStencil{}
+          Color Blending, finalColor = newColor * newAlpha <colorBlendOp> oldColor * (1 - newAlpha)
+          It is possible to have multiple color blending attachments, have logical ops, and have separate blending for each color channel.
+          VkPipelineColorBlendAttachmentState colorBlendAttachment{}
+          Global color blending settings
+          VkPipelineColorBlendStateCreateInfo colorBlending{}
+          Pipeline Layout
+          uniform values, push constants, etc.
+          VkPipelineLayoutCreateInfo pipelineLayoutInfo{}
+          Including descriptor set layout in pipeline layout
+          vkCreatePipelineLayout(m_Context->getDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout)
+          Create Graphics Pipeline
+          Graphics Pipeline, the final pipeline object that will be used in rendering
+          Here we are combining : shaders, fixed function stages(vertex info, input assembly, viewport syate, rasterizer, multisampleing, depthStencil and color blending), pipeline layout and render pass
+          VkGraphicsPipelineCreateInfo pipelineInfo{}
+          vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline)
+          Cleanup shader modules
+          vkDestroyShaderModule(m_Context->getDevice(), fragShaderModule, nullptr)
+          vkDestroyShaderModule(m_Context->getDevice(), vertShaderModule, nullptr)
+        }
+      }
+    }
+    glint::DescriptorPool::DescriptorPool {
+      Created descriptor pool with capacity for 2 descriptor sets with multiple types
+        Type: 6 Count: 2
+        Type: 1 Count: 2
+    }
+    glint::UniformBuffer::UniformBuffer {
+      Created uniform buffer of size 192 bytes
+    }
+    glint::UniformBuffer::UniformBuffer {
+      Created uniform buffer of size 192 bytes
+    }
+    glint::Descriptor::Descriptor {
+      Allocated 2 descriptor sets
+    }
+    glint::Descriptor::updateUniformBuffer {
+    }
+    glint::Descriptor::updateTextureSampler {
+    }
+  }
 }
 App::mainLoop {
-  while (!window->shouldClose())
+  glint::UniformBuffer::update {
+  }
   glint::Renderer::drawFrame {
     --------------------------------------------------------------
     Outline of a frame..
@@ -271,12 +336,13 @@ App::mainLoop {
     }
     glint::RenderPass::begin {
       Start Render Pass
-      VkRenderPassBeginInfo renderPassInfo{}
       vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE)
     }
     glint::Pipeline::bind {
       Bind Pipeline
       vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline)
+    }
+    glint::Descriptor::bind {
     }
     glint::Mesh::bind {
     }
@@ -291,6 +357,111 @@ App::mainLoop {
     glint::SynchronizationManager::resetFence {
     }
     result = vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo)
+  }
+  glint::Renderer::waitIdle {
+  }
+  glint::CubeSample::cleanup {
+    glint::Descriptor::~Descriptor {
+    }
+    glint::DescriptorPool::~DescriptorPool {
+    }
+    glint::DescriptorSetLayout::~DescriptorSetLayout {
+    }
+    glint::UniformBuffer::~UniformBuffer {
+    }
+    glint::UniformBuffer::~UniformBuffer {
+    }
+    glint::Texture::~Texture {
+    }
+    glint::Mesh::~Mesh {
+      vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+      vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+      vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+      vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+    }
+  }
+  Active sample set to: Triangle Sample
+  glint::BasicSample::init {
+    glint::Renderer::createPipeline {
+      glint::Pipeline::~Pipeline {
+        vkDestroyPipeline(device, m_Pipeline, nullptr)
+        vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr)
+      }
+      glint::Pipeline::Pipeline {
+        glint::Pipeline::createGraphicsPipeline {
+          Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
+          glint::Pipeline::readFile {
+            Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/basic.vert.spv fileSize: 1052 bytes
+          }
+          glint::Pipeline::readFile {
+            Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/shader.frag.spv fileSize: 572 bytes
+          }
+          VkShaderModule vertShaderModule = createShaderModule(vertShaderCode)
+          glint::Pipeline::createShaderModule {
+          }
+          VkShaderModule fragShaderModule = createShaderModule(fragShaderCode)
+          glint::Pipeline::createShaderModule {
+          }
+          Vertex Input
+          VkPipelineVertexInputStateCreateInfo vertexInputInfo{}
+          glint::Vertex::getBindingDescription {
+          }
+          glint::Vertex::getAttributeDescriptions {
+          }
+          Input Assembly
+          VkPipelineInputAssemblyStateCreateInfo inputAssembly{}
+          Dynamic States - used for viewport and scissor
+          Viewport State, dynamic states are used for viewport and scissor
+          VkPipelineViewportStateCreateInfo viewportState{}
+          Rasterizer
+          VkPipelineRasterizationStateCreateInfo rasterizer{}
+          rasterizer.polygonMode = VK_POLYGON_MODE_FILL
+          rasterizer.lineWidth = 1.0f
+          rasterizer.depthBiasEnable = VK_FALSE
+          Multisampling, disabled for now.
+          VkPipelineMultisampleStateCreateInfo multisampling{}
+          Depth and Stencil testing, disabled for now, will pass on nullptr
+          VkPipelineDepthStencilStateCreateInfo depthStencil{}
+          Color Blending, finalColor = newColor * newAlpha <colorBlendOp> oldColor * (1 - newAlpha)
+          It is possible to have multiple color blending attachments, have logical ops, and have separate blending for each color channel.
+          VkPipelineColorBlendAttachmentState colorBlendAttachment{}
+          Global color blending settings
+          VkPipelineColorBlendStateCreateInfo colorBlending{}
+          Pipeline Layout
+          uniform values, push constants, etc.
+          VkPipelineLayoutCreateInfo pipelineLayoutInfo{}
+          No descriptor set layout for pipeline layout
+          vkCreatePipelineLayout(m_Context->getDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout)
+          Create Graphics Pipeline
+          Graphics Pipeline, the final pipeline object that will be used in rendering
+          Here we are combining : shaders, fixed function stages(vertex info, input assembly, viewport syate, rasterizer, multisampleing, depthStencil and color blending), pipeline layout and render pass
+          VkGraphicsPipelineCreateInfo pipelineInfo{}
+          vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline)
+          Cleanup shader modules
+          vkDestroyShaderModule(m_Context->getDevice(), fragShaderModule, nullptr)
+          vkDestroyShaderModule(m_Context->getDevice(), vertShaderModule, nullptr)
+        }
+      }
+    }
+    glint::MeshFactory::createTriangle {
+      glint::Mesh::Mesh {
+        glint::Mesh::createVertexBuffer {
+          glint::Mesh::copyBuffer {
+          }
+        }
+        glint::Mesh::createIndexBuffer {
+          glint::Mesh::copyBuffer {
+          }
+        }
+        Mesh created with 3 vertices and 3 indices
+      }
+    }
+    glint::Mesh::~Mesh {
+      vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+      vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+      vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+      vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+    }
   }
   glint::Renderer::waitIdle {
   }
@@ -318,6 +489,8 @@ glint::RenderPass::~RenderPass {
 }
 glint::SwapChain::~SwapChain {
   glint::SwapChain::cleanup {
+    glint::SwapChain::cleanupDepthResources {
+    }
     Destroying  3  framebuffers
     Destroying  3  image views
     vkDestroySwapchainKHR(device, m_SwapChain, nullptr)

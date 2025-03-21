@@ -30,9 +30,9 @@ struct PipelineConfig {
   VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
   // Depth settings
-  // bool depthTestEnable = false;
-  // bool depthWriteEnable = false;
-  // VkCompareOp depthCompareOp = VK_COMPARE_OP_LESS;
+  bool depthTestEnable = false;
+  bool depthWriteEnable = false;
+  VkCompareOp depthCompareOp = VK_COMPARE_OP_LESS;
 
   // Rasterization settings
   VkCullModeFlags cullMode = VK_CULL_MODE_BACK_BIT;

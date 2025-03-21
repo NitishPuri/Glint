@@ -6,7 +6,6 @@
 
 #include "descriptor.h"
 #include "logger.h"
-#include "mesh.h"
 #include "render_pass.h"
 #include "swapchain.h"
 #include "vk_context.h"
@@ -123,10 +122,17 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
 
   // Depth and Stencil testing
   LOG("Depth and Stencil testing, disabled for now, will pass on nullptr");
-  // LOGCALL(VkPipelineDepthStencilStateCreateInfo depthStencil{});
-  // depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-  // depthStencil.depthTestEnable = VK_FALSE;
-  // depthStencil.depthWriteEnable = VK_FALSE;
+  LOGCALL(VkPipelineDepthStencilStateCreateInfo depthStencil{});
+  depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+  depthStencil.depthTestEnable = config.depthTestEnable;
+  depthStencil.depthWriteEnable = config.depthWriteEnable;
+  depthStencil.depthCompareOp = config.depthCompareOp;
+  depthStencil.depthBoundsTestEnable = VK_FALSE;
+  depthStencil.minDepthBounds = 0.0f;  // Optional
+  depthStencil.maxDepthBounds = 1.0f;  // Optional
+  depthStencil.stencilTestEnable = VK_FALSE;
+  depthStencil.front = {};  // Optional
+  depthStencil.back = {};   // Optional
 
   // Color Blending
   LOG("Color Blending, finalColor = newColor * newAlpha <colorBlendOp> oldColor * (1 - newAlpha)");
@@ -194,7 +200,7 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   pipelineInfo.pViewportState = &viewportState;
   pipelineInfo.pRasterizationState = &rasterizer;
   pipelineInfo.pMultisampleState = &multisampling;
-  pipelineInfo.pDepthStencilState = nullptr;  // Optional
+  pipelineInfo.pDepthStencilState = &depthStencil;
   pipelineInfo.pColorBlendState = &colorBlending;
   pipelineInfo.pDynamicState = &dynamicState;
   pipelineInfo.layout = m_PipelineLayout;
