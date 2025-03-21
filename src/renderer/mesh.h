@@ -27,6 +27,8 @@ class Mesh {
   void bind(VkCommandBuffer commandBuffer);
   void draw(VkCommandBuffer commandBuffer);
 
+  VkBuffer getVertexBuffer() const { return m_VertexBuffer; }
+
  private:
   // void createVertexBuffer(const std::vector<Vertex>& vertices);
   void createVertexBuffer();

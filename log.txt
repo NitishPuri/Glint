@@ -128,112 +128,111 @@ App::initSamples {
   }
   glint::SampleManager::registerSample {
     Registering sample: Triangle Sample
-    glint::SampleManager::setActiveSample {
-      Active sample set to: Triangle Sample
-      glint::BasicSample::init {
-        glint::Renderer::createPipeline {
-          glint::Pipeline::Pipeline {
-            glint::Pipeline::createGraphicsPipeline {
-              Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
-              glint::Pipeline::readFile {
-                Loading filename: ./build/bin/shaders/basic.vert.spv fileSize: 1052 bytes
-              }
-              glint::Pipeline::readFile {
-                Loading filename: ./build/bin/shaders/shader.frag.spv fileSize: 572 bytes
-              }
-              VkShaderModule vertShaderModule = createShaderModule(vertShaderCode)
-              glint::Pipeline::createShaderModule {
-              }
-              VkShaderModule fragShaderModule = createShaderModule(fragShaderCode)
-              glint::Pipeline::createShaderModule {
-              }
-              Vertex Input
-              VkPipelineVertexInputStateCreateInfo vertexInputInfo{}
-              glint::Vertex::getBindingDescription {
-              }
-              glint::Vertex::getAttributeDescriptions {
-              }
-              Input Assembly
-              VkPipelineInputAssemblyStateCreateInfo inputAssembly{}
-              Dynamic States - used for viewport and scissor
-              Viewport State, dynamic states are used for viewport and scissor
-              VkPipelineViewportStateCreateInfo viewportState{}
-              Rasterizer
-              VkPipelineRasterizationStateCreateInfo rasterizer{}
-              rasterizer.polygonMode = VK_POLYGON_MODE_FILL
-              rasterizer.lineWidth = 1.0f
-              rasterizer.depthBiasEnable = VK_FALSE
-              Multisampling, disabled for now.
-              VkPipelineMultisampleStateCreateInfo multisampling{}
-              Depth and Stencil testing, disabled for now, will pass on nullptr
-              Color Blending, finalColor = newColor * newAlpha <colorBlendOp> oldColor * (1 - newAlpha)
-              It is possible to have multiple color blending attachments, have logical ops, and have separate blending for each color channel.
-              VkPipelineColorBlendAttachmentState colorBlendAttachment{}
-              Global color blending settings
-              VkPipelineColorBlendStateCreateInfo colorBlending{}
-              Pipeline Layout
-              uniform values, push constants, etc.
-              VkPipelineLayoutCreateInfo pipelineLayoutInfo{}
-              No descriptor set layout for pipeline layout
-              vkCreatePipelineLayout(m_Context->getDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout)
-              Create Graphics Pipeline
-              Graphics Pipeline, the final pipeline object that will be used in rendering
-              Here we are combining : shaders, fixed function stages(vertex info, input assembly, viewport syate, rasterizer, multisampleing, depthStencil and color blending), pipeline layout and render pass
-              VkGraphicsPipelineCreateInfo pipelineInfo{}
-              vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline)
-              [VALIDATION ERROR] validation layer:  Validation Performance Warning: [ WARNING-Shader-OutputNotConsumed ] Object 0: handle = 0xdd3a8a0000000015, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0xc81ad50e | vkCreateGraphicsPipelines(): pCreateInfos[0].pVertexInputState Vertex attribute at location 2 not consumed by vertex shader.
-              Cleanup shader modules
-              vkDestroyShaderModule(m_Context->getDevice(), fragShaderModule, nullptr)
-              vkDestroyShaderModule(m_Context->getDevice(), vertShaderModule, nullptr)
+    glint::Renderer::waitIdle {
+    }
+    Active sample set to: Triangle Sample
+    glint::BasicSample::init {
+      glint::Renderer::createPipeline {
+        glint::Pipeline::Pipeline {
+          glint::Pipeline::createGraphicsPipeline {
+            Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
+            glint::Pipeline::readFile {
+              Loading filename: ./build/bin/shaders/basic.vert.spv fileSize: 1052 bytes
             }
+            glint::Pipeline::readFile {
+              Loading filename: ./build/bin/shaders/shader.frag.spv fileSize: 572 bytes
+            }
+            VkShaderModule vertShaderModule = createShaderModule(vertShaderCode)
+            glint::Pipeline::createShaderModule {
+            }
+            VkShaderModule fragShaderModule = createShaderModule(fragShaderCode)
+            glint::Pipeline::createShaderModule {
+            }
+            Vertex Input
+            VkPipelineVertexInputStateCreateInfo vertexInputInfo{}
+            glint::Vertex::getBindingDescription {
+            }
+            glint::Vertex::getAttributeDescriptions {
+            }
+            Input Assembly
+            VkPipelineInputAssemblyStateCreateInfo inputAssembly{}
+            Dynamic States - used for viewport and scissor
+            Viewport State, dynamic states are used for viewport and scissor
+            VkPipelineViewportStateCreateInfo viewportState{}
+            Rasterizer
+            VkPipelineRasterizationStateCreateInfo rasterizer{}
+            rasterizer.polygonMode = VK_POLYGON_MODE_FILL
+            rasterizer.lineWidth = 1.0f
+            rasterizer.depthBiasEnable = VK_FALSE
+            Multisampling, disabled for now.
+            VkPipelineMultisampleStateCreateInfo multisampling{}
+            Depth and Stencil testing, disabled for now, will pass on nullptr
+            Color Blending, finalColor = newColor * newAlpha <colorBlendOp> oldColor * (1 - newAlpha)
+            It is possible to have multiple color blending attachments, have logical ops, and have separate blending for each color channel.
+            VkPipelineColorBlendAttachmentState colorBlendAttachment{}
+            Global color blending settings
+            VkPipelineColorBlendStateCreateInfo colorBlending{}
+            Pipeline Layout
+            uniform values, push constants, etc.
+            VkPipelineLayoutCreateInfo pipelineLayoutInfo{}
+            No descriptor set layout for pipeline layout
+            vkCreatePipelineLayout(m_Context->getDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout)
+            Create Graphics Pipeline
+            Graphics Pipeline, the final pipeline object that will be used in rendering
+            Here we are combining : shaders, fixed function stages(vertex info, input assembly, viewport syate, rasterizer, multisampleing, depthStencil and color blending), pipeline layout and render pass
+            VkGraphicsPipelineCreateInfo pipelineInfo{}
+            vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline)
+            Cleanup shader modules
+            vkDestroyShaderModule(m_Context->getDevice(), fragShaderModule, nullptr)
+            vkDestroyShaderModule(m_Context->getDevice(), vertShaderModule, nullptr)
           }
         }
-        glint::MeshFactory::createTriangle {
-          glint::Mesh::Mesh {
-            glint::Mesh::createVertexBuffer {
-              glint::VkContext::findMemoryType {
-              }
-              glint::VkContext::findMemoryType {
-              }
-              glint::Mesh::copyBuffer {
-                Command Buffer for Buffer Copy
-                vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
-                Begin Command Buffer
-                vkBeginCommandBuffer(commandBuffer, &beginInfo)
-                Copy Buffer
-                vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
-                End Command Buffer
-                vkEndCommandBuffer(commandBuffer)
-                Submit Command Buffer
-                vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
-                vkQueueWaitIdle(graphicsQueue)
-                Free Command Buffer
-                vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
-              }
+      }
+      glint::MeshFactory::createTriangle {
+        glint::Mesh::Mesh {
+          glint::Mesh::createVertexBuffer {
+            glint::VkContext::findMemoryType {
             }
-            glint::Mesh::createIndexBuffer {
-              glint::VkContext::findMemoryType {
-              }
-              glint::VkContext::findMemoryType {
-              }
-              glint::Mesh::copyBuffer {
-                Command Buffer for Buffer Copy
-                vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
-                Begin Command Buffer
-                vkBeginCommandBuffer(commandBuffer, &beginInfo)
-                Copy Buffer
-                vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
-                End Command Buffer
-                vkEndCommandBuffer(commandBuffer)
-                Submit Command Buffer
-                vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
-                vkQueueWaitIdle(graphicsQueue)
-                Free Command Buffer
-                vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
-              }
+            glint::VkContext::findMemoryType {
             }
-            Mesh created with 3 vertices and 3 indices
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
           }
+          glint::Mesh::createIndexBuffer {
+            glint::VkContext::findMemoryType {
+            }
+            glint::VkContext::findMemoryType {
+            }
+            glint::Mesh::copyBuffer {
+              Command Buffer for Buffer Copy
+              vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer)
+              Begin Command Buffer
+              vkBeginCommandBuffer(commandBuffer, &beginInfo)
+              Copy Buffer
+              vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion)
+              End Command Buffer
+              vkEndCommandBuffer(commandBuffer)
+              Submit Command Buffer
+              vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+              vkQueueWaitIdle(graphicsQueue)
+              Free Command Buffer
+              vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer)
+            }
+          }
+          Mesh created with 3 vertices and 3 indices
         }
       }
     }

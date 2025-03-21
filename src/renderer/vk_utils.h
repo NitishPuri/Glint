@@ -14,6 +14,13 @@ class VkUtils {
   static void init(VkContext* context);
   static void cleanup();
 
+  static void setObjectName(uint64_t object, VkObjectType objectType, const char* name);
+
+  template <typename T>
+  static void setObjectName(T handle, VkObjectType objectType, const char* name) {
+    setObjectName((uint64_t)(uint64_t)handle, objectType, name);
+  }
+
   // Buffer operations
   static void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                            VkBuffer& buffer, VkDeviceMemory& bufferMemory);

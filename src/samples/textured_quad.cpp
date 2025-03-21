@@ -11,6 +11,7 @@
 #include "renderer/swapchain.h"
 #include "renderer/texture.h"
 #include "renderer/ubo_data.h"
+#include "renderer/vk_utils.h"
 // #include "renderer/uniform_buffer.h"
 // #include "window.h"
 
@@ -27,6 +28,8 @@ void TexturedRotatingSample::init(Window* window, Renderer* renderer) {
 
   // Create a textured quad mesh
   m_Mesh = MeshFactory::createQuad(renderer->getContext(), true);
+
+  VkUtils::setObjectName((uint64_t)m_Mesh->getVertexBuffer(), VK_OBJECT_TYPE_BUFFER, "TexturedQuad Vertex Buffer");
 
   // Load texture
   m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.jpg");
@@ -145,6 +148,20 @@ void TexturedRotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imag
 void TexturedRotatingSample::cleanup() {
   LOGFN;
   // Let RAII handle the resources
+
+  m_Descriptor.reset();
+  m_DescriptorPool.reset();
+  m_DescriptorSetLayout.reset();
+
+  // Clean up uniform buffers
+  for (auto& ubo : m_UniformBuffers) {
+    ubo.reset();
+  }
+  m_UniformBuffers.clear();
+
+  // Clean up texture and mesh
+  m_Texture.reset();
+  m_Mesh.reset();
 }
 
 }  // namespace glint

@@ -35,6 +35,7 @@ void RotatingSample::init(Window* window, Renderer* renderer) {
   config.descriptorSetLayout = m_DescriptorSetLayout.get();
   config.vertexShaderPath = getShaderPath("shader.vert");
   config.fragmentShaderPath = getShaderPath("shader.frag");
+  config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
   config.cullMode = VK_CULL_MODE_NONE;
 
   renderer->createPipeline(&config);

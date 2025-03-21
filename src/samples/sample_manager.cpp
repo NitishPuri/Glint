@@ -44,8 +44,6 @@ void SampleManager::registerSample(std::unique_ptr<Sample> sample) {
 }
 
 void SampleManager::setActiveSample(const std::string& name) {
-  LOGFN;
-
   // Check if the sample exists
   auto it = m_Samples.find(name);
   if (it == m_Samples.end()) {
@@ -56,6 +54,10 @@ void SampleManager::setActiveSample(const std::string& name) {
   if (m_ActiveSample && m_ActiveSample->getName() == name) {
     // LOG("Sample already active:", name);
     return;
+  }
+
+  if (m_Renderer) {
+    m_Renderer->waitIdle();
   }
 
   // Clean up previous sample if any

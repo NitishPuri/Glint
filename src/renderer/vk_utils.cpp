@@ -11,6 +11,28 @@ void VkUtils::init(VkContext* context) { s_Context = context; }
 
 void VkUtils::cleanup() { s_Context = nullptr; }
 
+void VkUtils::setObjectName(uint64_t objectHandle, VkObjectType objectType, const char* name) {
+  auto device = s_Context->getDevice();
+  if (name == nullptr || objectHandle == 0 || device == VK_NULL_HANDLE) {
+    return;
+  }
+
+  // Using VK_EXT_debug_utils extension
+  static PFN_vkSetDebugUtilsObjectNameEXT pfnSetDebugUtilsObjectNameEXT =
+      (PFN_vkSetDebugUtilsObjectNameEXT)vkGetDeviceProcAddr(device, "vkSetDebugUtilsObjectNameEXT");
+
+  if (pfnSetDebugUtilsObjectNameEXT) {
+    VkDebugUtilsObjectNameInfoEXT nameInfo{};
+    nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+    nameInfo.objectType = objectType;
+    nameInfo.objectHandle = objectHandle;
+    nameInfo.pObjectName = name;
+
+    pfnSetDebugUtilsObjectNameEXT(device, &nameInfo);
+    LOG("Set debug name for", objectType, "to", name);
+  }
+}
+
 VkCommandBuffer VkUtils::beginSingleTimeCommands() {
   VkCommandBufferAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
