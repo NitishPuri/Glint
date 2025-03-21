@@ -11,28 +11,20 @@ namespace glint {
 ///////////////////////////////////////////////////////////////////////////
 // DescriptorSetLayout
 
-DescriptorSetLayout::DescriptorSetLayout(VkContext* context) : m_Context(context) {
-  LOGFN;
+DescriptorSetLayout::DescriptorSetLayout(VkContext* context, const std::vector<VkDescriptorSetLayoutBinding>& bindings)
+    : m_Context(context), m_Bindings(bindings) {
+  createLayout();
+}
 
-  // Create a descriptor set layout binding for a uniform buffer
-  VkDescriptorSetLayoutBinding uboLayoutBinding{};
-  uboLayoutBinding.binding = 0;  // Binding point in the shader
-  uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  uboLayoutBinding.descriptorCount = 1;                      // Number of descriptors
-  uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;  // Which shader stages will use this
-  uboLayoutBinding.pImmutableSamplers = nullptr;             // Optional for image sampling
-
-  // Create the descriptor set layout
+void DescriptorSetLayout::createLayout() {
   VkDescriptorSetLayoutCreateInfo layoutInfo{};
   layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-  layoutInfo.bindingCount = 1;
-  layoutInfo.pBindings = &uboLayoutBinding;
+  layoutInfo.bindingCount = static_cast<uint32_t>(m_Bindings.size());
+  layoutInfo.pBindings = m_Bindings.data();
 
   if (vkCreateDescriptorSetLayout(m_Context->getDevice(), &layoutInfo, nullptr, &m_Layout) != VK_SUCCESS) {
     throw std::runtime_error("Failed to create descriptor set layout!");
   }
-
-  LOG("Created descriptor set layout with UBO binding");
 }
 
 DescriptorSetLayout::~DescriptorSetLayout() {
@@ -40,6 +32,20 @@ DescriptorSetLayout::~DescriptorSetLayout() {
   if (m_Layout != VK_NULL_HANDLE) {
     vkDestroyDescriptorSetLayout(m_Context->getDevice(), m_Layout, nullptr);
   }
+}
+
+DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(uint32_t binding, VkDescriptorType type,
+                                                                       VkShaderStageFlags stageFlags,
+                                                                       uint32_t count = 1) {
+  VkDescriptorSetLayoutBinding layoutBinding{};
+  layoutBinding.binding = binding;
+  layoutBinding.descriptorType = type;
+  layoutBinding.descriptorCount = count;
+  layoutBinding.stageFlags = stageFlags;
+  layoutBinding.pImmutableSamplers = nullptr;
+
+  m_Bindings.push_back(layoutBinding);
+  return *this;
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -11,7 +11,35 @@ class VkContext;
 
 class DescriptorSetLayout {
  public:
-  DescriptorSetLayout(VkContext* context);
+  // Builder class for descriptor set layout
+  class Builder {
+   public:
+    Builder(VkContext* context) : m_Context(context) {}
+
+    // Add a binding to the descriptor set layout
+    Builder& addBinding(uint32_t binding, VkDescriptorType type, VkShaderStageFlags stageFlags, uint32_t count = 1);
+
+    // Add uniform buffer binding convenience method
+    Builder& addUniformBuffer(uint32_t binding, VkShaderStageFlags stageFlags) {
+      return addBinding(binding, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stageFlags);
+    }
+
+    // Add texture sampler binding convenience method
+    Builder& addTextureSampler(uint32_t binding, VkShaderStageFlags stageFlags, uint32_t count = 1) {
+      return addBinding(binding, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stageFlags, count);
+    }
+
+    // Build and return the descriptor set layout
+    std::unique_ptr<DescriptorSetLayout> build() {
+      return std::make_unique<DescriptorSetLayout>(m_Context, m_Bindings);
+    }
+
+   private:
+    VkContext* m_Context;
+    std::vector<VkDescriptorSetLayoutBinding> m_Bindings;
+  };
+
+  DescriptorSetLayout(VkContext* context, const std::vector<VkDescriptorSetLayoutBinding>& bindings);
   ~DescriptorSetLayout();
 
   // Prevent copying
@@ -21,8 +49,11 @@ class DescriptorSetLayout {
   VkDescriptorSetLayout getLayout() const { return m_Layout; }
 
  private:
+  void createLayout();
+
   VkContext* m_Context;
   VkDescriptorSetLayout m_Layout = VK_NULL_HANDLE;
+  std::vector<VkDescriptorSetLayoutBinding> m_Bindings;
 };
 
 class DescriptorPool {
