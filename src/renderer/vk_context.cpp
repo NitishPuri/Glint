@@ -198,6 +198,7 @@ void VkContext::createLogicalDevice() {
   }
 
   VkPhysicalDeviceFeatures deviceFeatures{};
+  deviceFeatures.samplerAnisotropy = VK_TRUE;
 
   VkDeviceCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -267,20 +268,20 @@ bool VkContext::isDeviceSuitable(VkPhysicalDevice device) {
 
   bool swapChainAdequate = false;
   if (extensionsSupported) {
-    // TODO: Check for swap chain support
     // SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
-    // swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
-
     uint32_t formatCount = 0;
     vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, nullptr);
-
     uint32_t presentModeCount = 0;
     vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, nullptr);
 
+    // swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     swapChainAdequate = formatCount > 0 && presentModeCount > 0;
   }
 
-  return indices.isComplete() && extensionsSupported && swapChainAdequate;
+  VkPhysicalDeviceFeatures supportedFatures;
+  vkGetPhysicalDeviceFeatures(device, &supportedFatures);
+
+  return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFatures.samplerAnisotropy;
 }
 
 bool VkContext::checkDeviceExtensionSupport(VkPhysicalDevice device) {

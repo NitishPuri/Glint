@@ -6,6 +6,7 @@
 #include "core/window.h"
 #include "logger.h"
 #include "vk_context.h"
+#include "vk_utils.h"
 
 namespace glint {
 
@@ -118,28 +119,7 @@ void SwapChain::createImageViews() {
   m_ImageViews.resize(m_Images.size());
 
   for (size_t i = 0; i < m_Images.size(); i++) {
-    VkImageViewCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    createInfo.image = m_Images[i];
-    createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    createInfo.format = m_ImageFormat;
-
-    // Default color mapping
-    createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-    // The image will be used as a color attachment
-    createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    createInfo.subresourceRange.baseMipLevel = 0;
-    createInfo.subresourceRange.levelCount = 1;
-    createInfo.subresourceRange.baseArrayLayer = 0;
-    createInfo.subresourceRange.layerCount = 1;
-
-    if (vkCreateImageView(m_Context->getDevice(), &createInfo, nullptr, &m_ImageViews[i]) != VK_SUCCESS) {
-      throw std::runtime_error("Failed to create image views!");
-    }
+    m_ImageViews[i] = VkUtils::createImageView(m_Images[i], m_ImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
   }
 }
 

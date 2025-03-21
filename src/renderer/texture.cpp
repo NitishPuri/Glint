@@ -86,20 +86,7 @@ void Texture::createTextureImage(const std::string& filepath) {
 }
 
 void Texture::createTextureImageView() {
-  VkImageViewCreateInfo viewInfo{};
-  viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-  viewInfo.image = m_Image;
-  viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-  viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
-  viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-  viewInfo.subresourceRange.baseMipLevel = 0;
-  viewInfo.subresourceRange.levelCount = 1;
-  viewInfo.subresourceRange.baseArrayLayer = 0;
-  viewInfo.subresourceRange.layerCount = 1;
-
-  if (vkCreateImageView(m_Context->getDevice(), &viewInfo, nullptr, &m_ImageView) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to create texture image view!");
-  }
+  m_ImageView = VkUtils::createImageView(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 void Texture::createTextureSampler() {
