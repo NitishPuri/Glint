@@ -41,12 +41,12 @@ class VkUtils {
   static VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,
                                      uint32_t mipLevels);
 
- private:
-  static VkContext* s_Context;
-
   // Helper for command buffer management
   static VkCommandBuffer beginSingleTimeCommands();
   static void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+ private:
+  static VkContext* s_Context;
 };
 
 }  // namespace glint

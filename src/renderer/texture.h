@@ -26,10 +26,14 @@ class Texture {
   void createTextureImageView();
   void createTextureSampler();
 
+  void generateMipmaps();
+
  private:
   VkContext* m_Context;
 
   uint32_t m_mipLevels = 1;
+  uint32_t m_Width = 0;
+  uint32_t m_Height = 0;
 
   // TODO: Wrap Buffer and Buffer Memory together?
   VkImage m_Image = VK_NULL_HANDLE;
