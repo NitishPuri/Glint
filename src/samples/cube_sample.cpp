@@ -136,8 +136,10 @@ void CubeSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   auto pipeline = m_Renderer->getPipeline();
   uint32_t currentFrame = m_Renderer->getCurrentFrame();
 
-  VkClearValue clearColor = {{{0.0f, 0.1f, 0.2f, 1.0f}}};  // Dark blue background
-  renderPass->begin(commandBuffer, imageIndex, clearColor);
+  std::vector<VkClearValue> clearValues(2);
+  clearValues[0].color = {0.0f, 0.1f, 0.2f, 1.0f};
+  clearValues[1].depthStencil = {1.0f, 0};
+  renderPass->begin(commandBuffer, imageIndex, clearValues);
 
   // Bind pipeline and descriptor sets
   pipeline->bind(commandBuffer);

@@ -60,7 +60,7 @@ void BasicSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   auto pipeline = m_Renderer->getPipeline();
 
   VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-  renderPass->begin(commandBuffer, imageIndex, clearColor);
+  renderPass->begin(commandBuffer, imageIndex, {clearColor});
   pipeline->bind(commandBuffer);
 
   m_Mesh->bind(commandBuffer);

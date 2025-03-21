@@ -30,6 +30,8 @@ class SwapChain {
   void cleanup();
   void recreateSwapchain(VkRenderPass renderPass);
 
+  VkFormat getDepthFormat() const { return m_DepthFormat; }
+
  private:
   struct SwapChainSupportDetails {
     VkSurfaceCapabilitiesKHR capabilities;
@@ -67,7 +69,7 @@ class SwapChain {
   VkImage m_DepthImage = VK_NULL_HANDLE;
   VkDeviceMemory m_DepthImageMemory = VK_NULL_HANDLE;
   VkImageView m_DepthImageView = VK_NULL_HANDLE;
-  // VkFormat m_DepthFormat = VK_FORMAT_UNDEFINED;
+  VkFormat m_DepthFormat = VK_FORMAT_UNDEFINED;
 };
 
 }  // namespace glint

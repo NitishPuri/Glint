@@ -126,7 +126,7 @@ void TexturedRotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imag
   uint32_t currentFrame = m_Renderer->getCurrentFrame();
 
   VkClearValue clearColor = {{{0.0f, 0.1f, 0.2f, 1.0f}}};  // Dark blue background
-  renderPass->begin(commandBuffer, imageIndex, clearColor);
+  renderPass->begin(commandBuffer, imageIndex, {clearColor});
 
   // Bind pipeline and descriptor sets
   pipeline->bind(commandBuffer);

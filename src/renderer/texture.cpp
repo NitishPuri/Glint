@@ -44,6 +44,7 @@ Texture::~Texture() {
 }
 
 void Texture::createTextureImage(const std::string& filepath) {
+  LOGFN;
   LOG("Loading texture from", filepath);
 
   // Load image with STB
@@ -63,9 +64,8 @@ void Texture::createTextureImage(const std::string& filepath) {
   VkUtils::createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
                         stagingBufferMemory);
-  //   VkUtils::setObjectName((uint64_t)stagingBuffer, VK_OBJECT_TYPE_BUFFER, "Texture Staging Buffer");
-  //   VkUtils::setObjectName((uint64_t)stagingBufferMemory, VK_OBJECT_TYPE_DEVICE_MEMORY, "Texture Staging Buffer
-  //   Memory");
+  VkUtils::setObjectName((uint64_t)stagingBuffer, VK_OBJECT_TYPE_BUFFER, "Texture Staging Buffer");
+  VkUtils::setObjectName((uint64_t)stagingBufferMemory, VK_OBJECT_TYPE_DEVICE_MEMORY, "Texture Staging Buffer Memory");
 
   // Copy data to staging buffer
   void* data;
@@ -79,15 +79,15 @@ void Texture::createTextureImage(const std::string& filepath) {
   VkUtils::createImage(static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), VK_FORMAT_R8G8B8A8_SRGB,
                        VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_Image, m_ImageMemory);
-  VkUtils::setObjectName((uint64_t)m_Image, VK_OBJECT_TYPE_BUFFER, "Texture Buffer");
+  VkUtils::setObjectName((uint64_t)m_Image, VK_OBJECT_TYPE_IMAGE, "Texture Buffer");
   VkUtils::setObjectName((uint64_t)m_ImageMemory, VK_OBJECT_TYPE_DEVICE_MEMORY, "Texture Buffer Memory");
 
   // Transition image layout and copy data
   VkUtils::transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-                                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+                                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
   VkUtils::copyBufferToImage(stagingBuffer, m_Image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
   VkUtils::transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
 
   // cleanup
   vkDestroyBuffer(m_Context->getDevice(), stagingBuffer, nullptr);

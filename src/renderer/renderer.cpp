@@ -31,6 +31,10 @@ void Renderer::init() {
 
   VkUtils::init(m_Context.get());
 
+  // Create Command Manager
+  m_CommandManager = std::make_unique<CommandManager>(m_Context.get(), m_MaxFramesInFlight);
+  m_Context->setCommandPool(m_CommandManager->getCommandPool());  // TODO: Remove this
+
   // Create SwapChain
   m_SwapChain = std::make_unique<SwapChain>(m_Context.get());
 
@@ -39,10 +43,6 @@ void Renderer::init() {
 
   // Create Framebuffers
   m_SwapChain->createFramebuffers(m_RenderPass->getRenderPass());
-
-  // Create Command Manager
-  m_CommandManager = std::make_unique<CommandManager>(m_Context.get(), m_MaxFramesInFlight);
-  m_Context->setCommandPool(m_CommandManager->getCommandPool());  // TODO: Remove this
 
   // Create Synchronization Manager
   m_SyncManager = std::make_unique<SynchronizationManager>(m_Context.get(), m_MaxFramesInFlight);

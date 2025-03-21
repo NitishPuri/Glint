@@ -1,6 +1,7 @@
 #include "swapchain.h"
 
 #include <algorithm>
+#include <array>
 #include <stdexcept>
 
 #include "core/window.h"
@@ -14,6 +15,8 @@ SwapChain::SwapChain(VkContext* context) : m_Context(context), m_SwapChain(VK_NU
   LOGFN;
   createSwapChain();
   createImageViews();
+  // TODO: Make optional ?
+  createDepthResources();
 }
 
 SwapChain::~SwapChain() {
@@ -154,13 +157,14 @@ void SwapChain::createFramebuffers(VkRenderPass renderPass) {
   m_Framebuffers.resize(m_ImageViews.size());
 
   for (size_t i = 0; i < m_ImageViews.size(); i++) {
-    VkImageView attachments[] = {m_ImageViews[i]};
+    // VkImageView attachments[] = {m_ImageViews[i]};
+    std::array<VkImageView, 2> attachments = {m_ImageViews[i], m_DepthImageView};
 
     VkFramebufferCreateInfo framebufferInfo{};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebufferInfo.renderPass = renderPass;
-    framebufferInfo.attachmentCount = 1;
-    framebufferInfo.pAttachments = attachments;
+    framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+    framebufferInfo.pAttachments = attachments.data();
     framebufferInfo.width = m_Extent.width;
     framebufferInfo.height = m_Extent.height;
     framebufferInfo.layers = 1;
@@ -281,22 +285,20 @@ bool SwapChain::hasStencilComponent(VkFormat format) {
 
 void SwapChain::createDepthResources() {
   LOGFN;
-  VkFormat depthFormat = findDepthFormat();
-
-  VkUtils::createImage(m_Extent.width, m_Extent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL,
+  m_DepthFormat = findDepthFormat();
+  VkUtils::createImage(m_Extent.width, m_Extent.height, m_DepthFormat, VK_IMAGE_TILING_OPTIMAL,
                        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage,
                        m_DepthImageMemory);
-
-  m_DepthImageView = VkUtils::createImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-
-  VkUtils::transitionImageLayout(m_DepthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED,
-                                 VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-
   // Set debug names
   // TODO: Create macro.
   VkUtils::setObjectName(m_DepthImage, VK_OBJECT_TYPE_IMAGE, "Depth Image");
   VkUtils::setObjectName(m_DepthImageMemory, VK_OBJECT_TYPE_DEVICE_MEMORY, "Depth Image Memory");
+
+  m_DepthImageView = VkUtils::createImageView(m_DepthImage, m_DepthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
   VkUtils::setObjectName(m_DepthImageView, VK_OBJECT_TYPE_IMAGE_VIEW, "Depth Image View");
+
+  VkUtils::transitionImageLayout(m_DepthImage, m_DepthFormat, VK_IMAGE_LAYOUT_UNDEFINED,
+                                 VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_DEPTH_BIT);
 }
 
 }  // namespace glint
