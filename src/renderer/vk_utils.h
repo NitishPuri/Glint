@@ -32,7 +32,8 @@ class VkUtils {
                           VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image,
                           VkDeviceMemory& imageMemory);
 
-  static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+  static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
+                                    VkImageAspectFlags aspectMask);
 
   static void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 

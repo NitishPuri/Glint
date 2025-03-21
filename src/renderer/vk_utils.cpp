@@ -1,5 +1,7 @@
 #include "vk_utils.h"
 
+#include <assert.h>
+
 #include "logger.h"
 #include "vk_context.h"
 
@@ -105,6 +107,8 @@ void VkUtils::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize si
 void VkUtils::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling,
                           VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image,
                           VkDeviceMemory& imageMemory) {
+  assert(s_Context != nullptr);
+
   VkImageCreateInfo imageInfo{};
   imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -139,8 +143,10 @@ void VkUtils::createImage(uint32_t width, uint32_t height, VkFormat format, VkIm
   vkBindImageMemory(s_Context->getDevice(), image, imageMemory, 0);
 }
 
-void VkUtils::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
+void VkUtils::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
+                                    VkImageAspectFlags aspectMask) {
   LOGFN;
+  assert(s_Context != nullptr);
 
   auto commandBuffer = beginSingleTimeCommands();
 
@@ -151,7 +157,7 @@ void VkUtils::transitionImageLayout(VkImage image, VkFormat format, VkImageLayou
   barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
   barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
   barrier.image = image;
-  barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  barrier.subresourceRange.aspectMask = aspectMask;
   barrier.subresourceRange.baseMipLevel = 0;
   barrier.subresourceRange.levelCount = 1;
   barrier.subresourceRange.baseArrayLayer = 0;
@@ -173,6 +179,12 @@ void VkUtils::transitionImageLayout(VkImage image, VkFormat format, VkImageLayou
 
     sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
     destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+    barrier.srcAccessMask = 0;
+    barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+    sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+    destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
   } else {
     throw std::invalid_argument("Unsupported layout transition!");
   }

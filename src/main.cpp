@@ -41,7 +41,6 @@ class App {
   void run() {
     initWindow();
     initRenderer();
-    // initMesh();
     initSamples();
 
     mainLoop();

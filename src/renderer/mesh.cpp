@@ -102,7 +102,6 @@ void Mesh::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
   auto commandPool = m_Context->getCommandPool();
   auto device = m_Context->getDevice();
 
-  LOG("Command Buffer for Buffer Copy");
   VkCommandBufferAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -110,37 +109,32 @@ void Mesh::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
   allocInfo.commandBufferCount = 1;
 
   VkCommandBuffer commandBuffer;
-  LOGCALL(vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer));
+  vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
 
   VkCommandBufferBeginInfo beginInfo{};
   beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-  LOG("Begin Command Buffer");
-  LOGCALL(vkBeginCommandBuffer(commandBuffer, &beginInfo));
+  vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
-  LOG("Copy Buffer");
   VkBufferCopy copyRegion{};
   copyRegion.srcOffset = 0;  // Optional
   copyRegion.dstOffset = 0;  // Optional
   copyRegion.size = size;
-  LOGCALL(vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion));
+  vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-  LOG("End Command Buffer");
-  LOGCALL(vkEndCommandBuffer(commandBuffer));
+  vkEndCommandBuffer(commandBuffer);
 
-  LOG("Submit Command Buffer");
   VkSubmitInfo submitInfo{};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = &commandBuffer;
 
   auto graphicsQueue = m_Context->getGraphicsQueue();
-  LOGCALL(vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE));
-  LOGCALL(vkQueueWaitIdle(graphicsQueue));
+  vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+  vkQueueWaitIdle(graphicsQueue);
 
-  LOG("Free Command Buffer");
-  LOGCALL(vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer));
+  vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
 
 void Mesh::bind(VkCommandBuffer commandBuffer) {

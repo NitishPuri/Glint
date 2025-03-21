@@ -334,7 +334,6 @@ VkContext::QueueFamilyIndices VkContext::findQueueFamilies(VkPhysicalDevice devi
 }
 
 uint32_t VkContext::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
-  LOGFN;
   VkPhysicalDeviceMemoryProperties memProperties;
   vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &memProperties);
 
