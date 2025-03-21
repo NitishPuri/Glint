@@ -9,6 +9,8 @@
 
 namespace glint {
 
+inline std::string getShaderPath(const std::string& name) { return "./build/bin/shaders/" + name + ".spv"; }
+
 class Window;
 class Renderer;
 

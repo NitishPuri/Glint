@@ -31,8 +31,8 @@ void RotatingSample::init(Window* window, Renderer* renderer) {
 
   PipelineConfig config;
   config.descriptorSetLayout = m_DescriptorSetLayout.get();
-  config.vertexShaderPath = "./bin/shaders/shader.vert.spv";
-  config.fragmentShaderPath = "./bin/shaders/shader.frag.spv";
+  config.vertexShaderPath = getShaderPath("shader.vert");
+  config.fragmentShaderPath = getShaderPath("shader.frag");
   config.cullMode = VK_CULL_MODE_NONE;
 
   renderer->createPipeline(&config);

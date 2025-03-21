@@ -40,8 +40,8 @@ void BasicSample::init(Window* window, Renderer* renderer) {
   m_Renderer = renderer;
 
   PipelineConfig config;
-  config.vertexShaderPath = "./bin/shaders/basic.vert.spv";
-  config.fragmentShaderPath = "./bin/shaders/shader.frag.spv";
+  config.vertexShaderPath = getShaderPath("basic.vert");
+  config.fragmentShaderPath = getShaderPath("shader.frag");
   config.descriptorSetLayout = nullptr;
   //   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
 

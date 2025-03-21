@@ -19,13 +19,19 @@ std::unique_ptr<Mesh> MeshFactory::createTriangle(VkContext* context) {
   return std::make_unique<Mesh>(context, vertices, indices);
 }
 
-std::unique_ptr<Mesh> MeshFactory::createQuad(VkContext* context) {
+std::unique_ptr<Mesh> MeshFactory::createQuad(VkContext* context, bool textured) {
   LOGFN;
 
   std::vector<Vertex> vertices = {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
                                   {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
                                   {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
                                   {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}}};
+  if (textured) {
+    vertices = {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+                {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+                {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+                {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}};
+  }
 
   std::vector<uint32_t> indices = {0, 2, 1, 3, 2, 0};
 
