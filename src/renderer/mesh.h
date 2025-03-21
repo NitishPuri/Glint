@@ -5,6 +5,7 @@
 #include <array>
 #include <glm/glm.hpp>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "vertex.h"
@@ -28,6 +29,8 @@ class Mesh {
   void draw(VkCommandBuffer commandBuffer);
 
   VkBuffer getVertexBuffer() const { return m_VertexBuffer; }
+
+  static std::unique_ptr<Mesh> loadModel(VkContext* context, const std::string modelPath);
 
  private:
   // void createVertexBuffer(const std::vector<Vertex>& vertices);

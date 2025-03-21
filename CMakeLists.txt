@@ -17,6 +17,9 @@ set(GLFW_LIB_DIR ${GLFW_PATH}/lib-vc2022)
 # STB
 set(STB_INCLUDE ${PROJECT_SOURCE_DIR}/ext/stb)
 
+# TinyObjLoader
+set(TINY_OBJ_LOADER_INCLUDE ${PROJECT_SOURCE_DIR}/ext/tinyobjloader)
+
 ################## Dependencies ##################
 
 
@@ -114,6 +117,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${GLFW_INCLUDE}
     ${Vulkan_INCLUDE_DIRS}
     ${STB_INCLUDE}
+    ${TINY_OBJ_LOADER_INCLUDE}
     ${PROJECT_SOURCE_DIR}/src
 )
 
