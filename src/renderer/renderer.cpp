@@ -58,9 +58,10 @@ void Renderer::init() {
 void Renderer::createPipeline(const PipelineConfig* config) {
   LOGFN;
 
+  // TODO: Have a way to cache pipelines?
+  vkDeviceWaitIdle(m_Context->getDevice());
   m_Pipeline.reset();
 
-  // TODO: Have a way to cache pipelines?
   m_Pipeline = std::make_unique<Pipeline>(m_Context.get(), m_RenderPass.get(), config);
 }
 

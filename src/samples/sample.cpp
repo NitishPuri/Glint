@@ -43,7 +43,7 @@ void BasicSample::init(Window* window, Renderer* renderer) {
   config.vertexShaderPath = getShaderPath("basic.vert");
   config.fragmentShaderPath = getShaderPath("shader.frag");
   config.descriptorSetLayout = nullptr;
-  //   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
+  config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
 
   m_Renderer->createPipeline(&config);
 
