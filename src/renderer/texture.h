@@ -29,6 +29,8 @@ class Texture {
  private:
   VkContext* m_Context;
 
+  uint32_t m_mipLevels = 1;
+
   // TODO: Wrap Buffer and Buffer Memory together?
   VkImage m_Image = VK_NULL_HANDLE;
   VkDeviceMemory m_ImageMemory = VK_NULL_HANDLE;

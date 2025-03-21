@@ -59,6 +59,8 @@ void Texture::createTextureImage(const std::string& filepath) {
 
   LOG("Texture loaded:", texWidth, "x", texHeight, "pixels,", texChannels, "channels");
 
+  m_mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
+
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
   VkUtils::createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -76,18 +78,19 @@ void Texture::createTextureImage(const std::string& filepath) {
   // Free the pixel data
   stbi_image_free(pixels);
 
-  VkUtils::createImage(static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), VK_FORMAT_R8G8B8A8_SRGB,
-                       VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+  VkUtils::createImage(static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), m_mipLevels,
+                       VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
+                       VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_Image, m_ImageMemory);
   VkUtils::setObjectName((uint64_t)m_Image, VK_OBJECT_TYPE_IMAGE, "Texture Buffer");
   VkUtils::setObjectName((uint64_t)m_ImageMemory, VK_OBJECT_TYPE_DEVICE_MEMORY, "Texture Buffer Memory");
 
   // Transition image layout and copy data
   VkUtils::transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED,
-                                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
+                                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT, m_mipLevels);
   VkUtils::copyBufferToImage(stagingBuffer, m_Image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
   VkUtils::transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
+                                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT, m_mipLevels);
 
   // cleanup
   vkDestroyBuffer(m_Context->getDevice(), stagingBuffer, nullptr);
@@ -95,7 +98,7 @@ void Texture::createTextureImage(const std::string& filepath) {
 }
 
 void Texture::createTextureImageView() {
-  m_ImageView = VkUtils::createImageView(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
+  m_ImageView = VkUtils::createImageView(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, m_mipLevels);
 }
 
 void Texture::createTextureSampler() {

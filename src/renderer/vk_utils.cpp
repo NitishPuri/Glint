@@ -104,7 +104,7 @@ void VkUtils::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize si
   endSingleTimeCommands(commandBuffer);
 }
 
-void VkUtils::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling,
+void VkUtils::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling,
                           VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image,
                           VkDeviceMemory& imageMemory) {
   assert(s_Context != nullptr);
@@ -115,7 +115,7 @@ void VkUtils::createImage(uint32_t width, uint32_t height, VkFormat format, VkIm
   imageInfo.extent.width = width;
   imageInfo.extent.height = height;
   imageInfo.extent.depth = 1;
-  imageInfo.mipLevels = 1;
+  imageInfo.mipLevels = mipLevels;
   imageInfo.arrayLayers = 1;
   imageInfo.format = format;
   imageInfo.tiling = tiling;
@@ -144,7 +144,7 @@ void VkUtils::createImage(uint32_t width, uint32_t height, VkFormat format, VkIm
 }
 
 void VkUtils::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
-                                    VkImageAspectFlags aspectMask) {
+                                    VkImageAspectFlags aspectMask, uint32_t mipLevels) {
   LOGFN;
   assert(s_Context != nullptr);
 
@@ -159,7 +159,7 @@ void VkUtils::transitionImageLayout(VkImage image, VkFormat format, VkImageLayou
   barrier.image = image;
   barrier.subresourceRange.aspectMask = aspectMask;
   barrier.subresourceRange.baseMipLevel = 0;
-  barrier.subresourceRange.levelCount = 1;
+  barrier.subresourceRange.levelCount = mipLevels;
   barrier.subresourceRange.baseArrayLayer = 0;
   barrier.subresourceRange.layerCount = 1;
 
@@ -213,7 +213,8 @@ void VkUtils::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, 
   endSingleTimeCommands(commandBuffer);
 }
 
-VkImageView VkUtils::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {
+VkImageView VkUtils::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,
+                                     uint32_t mipLevels) {
   VkImageViewCreateInfo viewInfo{};
   viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   viewInfo.image = image;
@@ -227,7 +228,7 @@ VkImageView VkUtils::createImageView(VkImage image, VkFormat format, VkImageAspe
 
   viewInfo.subresourceRange.aspectMask = aspectFlags;
   viewInfo.subresourceRange.baseMipLevel = 0;
-  viewInfo.subresourceRange.levelCount = 1;
+  viewInfo.subresourceRange.levelCount = mipLevels;
   viewInfo.subresourceRange.baseArrayLayer = 0;
   viewInfo.subresourceRange.layerCount = 1;
 

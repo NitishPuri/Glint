@@ -148,7 +148,7 @@ void SwapChain::createImageViews() {
   m_ImageViews.resize(m_Images.size());
 
   for (size_t i = 0; i < m_Images.size(); i++) {
-    m_ImageViews[i] = VkUtils::createImageView(m_Images[i], m_ImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+    m_ImageViews[i] = VkUtils::createImageView(m_Images[i], m_ImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
   }
 }
 
@@ -286,7 +286,7 @@ bool SwapChain::hasStencilComponent(VkFormat format) {
 void SwapChain::createDepthResources() {
   LOGFN;
   m_DepthFormat = findDepthFormat();
-  VkUtils::createImage(m_Extent.width, m_Extent.height, m_DepthFormat, VK_IMAGE_TILING_OPTIMAL,
+  VkUtils::createImage(m_Extent.width, m_Extent.height, 1, m_DepthFormat, VK_IMAGE_TILING_OPTIMAL,
                        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage,
                        m_DepthImageMemory);
   // Set debug names
@@ -294,11 +294,11 @@ void SwapChain::createDepthResources() {
   VkUtils::setObjectName(m_DepthImage, VK_OBJECT_TYPE_IMAGE, "Depth Image");
   VkUtils::setObjectName(m_DepthImageMemory, VK_OBJECT_TYPE_DEVICE_MEMORY, "Depth Image Memory");
 
-  m_DepthImageView = VkUtils::createImageView(m_DepthImage, m_DepthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+  m_DepthImageView = VkUtils::createImageView(m_DepthImage, m_DepthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
   VkUtils::setObjectName(m_DepthImageView, VK_OBJECT_TYPE_IMAGE_VIEW, "Depth Image View");
 
   VkUtils::transitionImageLayout(m_DepthImage, m_DepthFormat, VK_IMAGE_LAYOUT_UNDEFINED,
-                                 VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_DEPTH_BIT);
+                                 VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 }
 
 }  // namespace glint

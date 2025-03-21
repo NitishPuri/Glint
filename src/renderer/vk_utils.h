@@ -28,17 +28,18 @@ class VkUtils {
   static void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
   // Image operations
-  static void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling,
+  static void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling,
                           VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image,
                           VkDeviceMemory& imageMemory);
 
   static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
-                                    VkImageAspectFlags aspectMask);
+                                    VkImageAspectFlags aspectMask, uint32_t mipLevels);
 
   static void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
   // Image view creation
-  static VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+  static VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,
+                                     uint32_t mipLevels);
 
  private:
   static VkContext* s_Context;
