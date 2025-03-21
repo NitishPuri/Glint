@@ -105,7 +105,8 @@ void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const s
   LOG("Using anything else requires enabling GPU features.");
   LOGCALL(rasterizer.polygonMode = VK_POLYGON_MODE_FILL);  // VK_POLYGON_MODE_LINE, VK_POLYGON_MODE_POINT
   LOGCALL(rasterizer.lineWidth = 1.0f);
-  rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;  // VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_FRONT_AND_BACK
+  // rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;  // VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_FRONT_AND_BACK
+  rasterizer.cullMode = VK_CULL_MODE_NONE;  // VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_FRONT_AND_BACK
 
   // Use counter-clockwise winding order for ALL pipelines
   // This works with both transformed and untransformed geometry with proper setup
