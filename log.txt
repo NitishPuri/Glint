@@ -122,10 +122,10 @@ App::initSamples {
           glint::Pipeline::createGraphicsPipeline {
             Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
             glint::Pipeline::readFile {
-              Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/basic.vert.spv fileSize: 1052 bytes
+              Loading filename: ./build/bin/shaders/basic.vert.spv fileSize: 1052 bytes
             }
             glint::Pipeline::readFile {
-              Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/shader.frag.spv fileSize: 572 bytes
+              Loading filename: ./build/bin/shaders/shader.frag.spv fileSize: 572 bytes
             }
             VkShaderModule vertShaderModule = createShaderModule(vertShaderCode)
             glint::Pipeline::createShaderModule {
@@ -252,10 +252,10 @@ App::initSamples {
         glint::Pipeline::createGraphicsPipeline {
           Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
           glint::Pipeline::readFile {
-            Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/basic_tex.vert.spv fileSize: 1840 bytes
+            Loading filename: ./build/bin/shaders/basic_tex.vert.spv fileSize: 1840 bytes
           }
           glint::Pipeline::readFile {
-            Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/basic_tex.frag.spv fileSize: 900 bytes
+            Loading filename: ./build/bin/shaders/basic_tex.frag.spv fileSize: 900 bytes
           }
           VkShaderModule vertShaderModule = createShaderModule(vertShaderCode)
           glint::Pipeline::createShaderModule {
