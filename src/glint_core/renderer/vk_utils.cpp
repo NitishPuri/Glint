@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-#include "logger.h"
+#include "core/logger.h"
 #include "vk_context.h"
 
 namespace glint {

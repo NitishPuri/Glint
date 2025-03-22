@@ -4,6 +4,7 @@ add_library(glint_core STATIC
     core/window.cpp
     # core/logger.cpp
     renderer/command_manager.cpp
+    renderer/vertex.cpp
     renderer/mesh.cpp
     renderer/mesh_factory.cpp
     renderer/pipeline.cpp
@@ -12,7 +13,9 @@ add_library(glint_core STATIC
     renderer/swapchain.cpp
     renderer/synchronization_manager.cpp
     renderer/vk_context.cpp
-    # Add all your other core renderer files here
+    renderer/vk_utils.cpp
+    renderer/descriptor.cpp    
+    renderer/texture.cpp
 )
 
 target_include_directories(glint_core PUBLIC 
