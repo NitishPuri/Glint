@@ -9,8 +9,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "core/logger.h"
 #include "core/window.h"
-#include "logger.h"
 #include "renderer/command_manager.h"
 #include "renderer/mesh.h"
 #include "renderer/mesh_factory.h"
@@ -22,11 +22,12 @@
 #include "renderer/vk_context.h"
 
 //
-#include "samples/cube_sample.h"
-#include "samples/rotating_sample.h"
-#include "samples/sample.h"
-#include "samples/sample_manager.h"
-#include "samples/textured_quad.h"
+#include "cube_sample.h"
+#include "imgui_manager.h"
+#include "rotating_sample.h"
+#include "sample.h"
+#include "sample_manager.h"
+#include "textured_quad.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -41,6 +42,7 @@ class App {
   void run() {
     initWindow();
     initRenderer();
+    initImgui();
     initSamples();
 
     mainLoop();
@@ -65,6 +67,12 @@ class App {
     renderer->init();
   }
 
+  void initImgui() {
+    LOGFN;
+    imguiManager = std::make_unique<glint::ImGuiManager>();
+    imguiManager->init(window.get(), renderer.get());
+  }
+
   void initSamples() {
     LOGFN;
     sampleManager.init(window.get(), renderer.get());
@@ -83,6 +91,8 @@ class App {
 
     // For calculating delta time
     auto lastFrameTime = std::chrono::high_resolution_clock::now();
+    float fps = 0.0f;
+    float frameTime = 0.0f;
 
     static int frames = 0;
     while (!(window->shouldClose() || window->isKeyPressed(GLFW_KEY_ESCAPE))) {
@@ -106,12 +116,44 @@ class App {
       float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastFrameTime).count();
       lastFrameTime = currentTime;
 
+      // Update FPS
+      frameTime = deltaTime;
+      fps = 1.0f / deltaTime;
+
       // Update active sample
       sampleManager.update(deltaTime);
+
+      imguiManager->newFrame();
+
+      ImGui::Begin("Sample Selector");
+      if (ImGui::Button("Triangle")) {
+        sampleManager.setActiveSample("Triangle Sample");
+      }
+      if (ImGui::Button("Quad")) {
+        sampleManager.setActiveSample("Quad Sample");
+      }
+      if (ImGui::Button("Rotating")) {
+        sampleManager.setActiveSample("RotatingSample");
+      }
+      if (ImGui::Button("Textured Rotating")) {
+        sampleManager.setActiveSample("TexturedRotatingSample");
+      }
+      if (ImGui::Button("Cube")) {
+        sampleManager.setActiveSample("CubeSample");
+      }
+      ImGui::End();
+
+      ImGui::Begin("Glint Stats");
+      ImGui::Text("FPS: %.1f", fps);
+      ImGui::Text("Frame Time: %.3f ms", frameTime * 1000.0f);
+      ImGui::Text("Active Sample: %s", sampleManager.getActiveSample()->getName().c_str());
+      ImGui::End();
 
       renderer->drawFrame([this](VkCommandBuffer commandBuffer, uint32_t imageIndex) {
         // drawScene(commandBuffer, imageIndex);
         sampleManager.render(commandBuffer, imageIndex);
+
+        // imguiManager->render(commandBuffer);
       });
 
       frames++;
@@ -127,6 +169,8 @@ class App {
 
   std::unique_ptr<glint::Window> window = nullptr;
   std::unique_ptr<glint::Renderer> renderer = nullptr;
+
+  std::unique_ptr<glint::ImGuiManager> imguiManager = nullptr;
 
   glint::SampleManager sampleManager;
 

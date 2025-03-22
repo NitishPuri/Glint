@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "../logger.h"
+#include "core/logger.h"
 #include "renderer/renderer.h"
 #include "sample.h"
 

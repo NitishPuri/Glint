@@ -2,7 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "logger.h"
+#include "core/logger.h"
 #include "renderer/descriptor.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"

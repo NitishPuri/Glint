@@ -5,8 +5,8 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
 
+#include "core/logger.h"
 #include "core/window.h"
-#include "logger.h"
 #include "renderer/renderer.h"
 
 namespace glint {

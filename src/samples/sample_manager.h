@@ -19,6 +19,7 @@ class SampleManager {
 
   void registerSample(std::unique_ptr<Sample> sample);
   void setActiveSample(const std::string& name);
+  Sample* getActiveSample() const { return m_ActiveSample; }
 
   void update(float deltaTime);
   void render(VkCommandBuffer commandBuffer, uint32_t imageIndex);

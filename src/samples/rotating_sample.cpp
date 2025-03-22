@@ -3,8 +3,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "core/logger.h"
 #include "core/window.h"
-#include "logger.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
 #include "renderer/render_pass.h"

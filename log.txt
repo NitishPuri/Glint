@@ -104,6 +104,10 @@ App::initRenderer {
     Renderer initialized with 2 frames in flight and 3 swap chain images
   }
 }
+App::initImgui {
+  glint::ImGuiManager::init {
+  }
+}
 App::initSamples {
   glint::SampleManager::init {
   }
@@ -427,6 +431,8 @@ glint::Mesh::~Mesh {
   vkFreeMemory(device, m_VertexBufferMemory, nullptr)
   vkDestroyBuffer(device, m_IndexBuffer, nullptr)
   vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+}
+glint::ImGuiManager::cleanup {
 }
 glint::Renderer::~Renderer {
 }

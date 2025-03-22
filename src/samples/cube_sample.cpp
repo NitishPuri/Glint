@@ -3,7 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "logger.h"
+#include "core/logger.h"
 #include "renderer/descriptor.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
@@ -13,6 +13,9 @@
 #include "renderer/texture.h"
 #include "renderer/ubo_data.h"
 #include "renderer/vk_utils.h"
+
+//
+#include "imgui_manager.h"
 
 namespace glint {
 
@@ -153,6 +156,8 @@ void CubeSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   // Bind and draw mesh
   m_Mesh->bind(commandBuffer);
   m_Mesh->draw(commandBuffer);
+
+  ImGuiManager::render(commandBuffer);
 
   // End render pass
   renderPass->end(commandBuffer);

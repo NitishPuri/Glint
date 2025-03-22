@@ -6,3 +6,4 @@ bin/
 doc/*
 res/*
 ext/glfw*
+imgui.ini
