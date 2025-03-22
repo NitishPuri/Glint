@@ -5,17 +5,25 @@
 #include <stack>
 #include <unordered_set>
 
+#ifndef GLINT_DISABLE_LOGGING
+
 namespace glint {
 
 class Logger {
  public:
-  static void logFunctionEntry(const char* functionName) { instance().logFunctionEntryImpl(functionName); }
-  static void logFunctionExit() { instance().logFunctionExitImpl(); }
+  static void logFunctionEntry(const char* functionName) {
+    if (instance().enabled_) instance().logFunctionEntryImpl(functionName);
+  }
+  static void logFunctionExit() {
+    if (instance().enabled_) instance().logFunctionExitImpl();
+  }
 
   template <typename... Args>
   static void log(Args... args) {
-    instance().logImpl(args...);
+    if (instance().enabled_) instance().logImpl(args...);
   }
+
+  static void enabled(bool enable) { instance().enabled_ = enable; }
 
  private:
   Logger() : logFile("log.txt") {
@@ -88,6 +96,7 @@ class Logger {
 
   std::stack<const char*> callStack;
   std::ofstream logFile;
+  bool enabled_ = false;
 };
 
 class FunctionLogger {
@@ -130,14 +139,6 @@ class OneTimeLogger {
 };
 }  // namespace glint
 
-#ifdef NDEBUG
-#define LOGFN
-#define LOGCALL(x) x
-#define LOG(...)
-#define LOGFN_ONCE
-#define LOG_ONCE(...)
-#define LOGCALL_ONCE(x) x
-#else
 #define LOGFN glint::FunctionLogger functionLogger(__FUNCTION__)
 #define LOGCALL(x)        \
   glint::Logger::log(#x); \
@@ -148,4 +149,11 @@ class OneTimeLogger {
 #define LOGCALL_ONCE(x) \
   otl.logOnce(#x);      \
   x
+#else
+#define LOGFN
+#define LOGCALL(x) x
+#define LOG(...)
+#define LOGFN_ONCE
+#define LOG_ONCE(...)
+#define LOGCALL_ONCE(x) x
 #endif
