@@ -7,6 +7,10 @@
 
 #include "logger.h"
 
+#ifndef BASE_DIR
+#define BASE_DIR "."
+#endif
+
 namespace glint {
 
 void Config::parseCommandLine(int argc, char** argv) {
@@ -21,6 +25,14 @@ void Config::parseCommandLine(int argc, char** argv) {
       m_EnableValidationLayers = true;
     } else if (arg == "--disable-validation" || arg == "-V") {
       m_EnableValidationLayers = false;
+    } else if (arg == "--shader-path" || arg == "-s") {
+      if (i + 1 < argc) {
+        m_ShaderPath = argv[++i];
+      }
+    } else if (arg == "--resource-path" || arg == "-r") {
+      if (i + 1 < argc) {
+        m_ResourcePath = argv[++i];
+      }
     }
   }
 }
@@ -38,12 +50,33 @@ void Config::parseEnvironment() {
     std::transform(value.begin(), value.end(), value.begin(), ::tolower);
     m_EnableValidationLayers = (value == "1" || value == "true" || value == "yes");
   }
+
+  if (const char* shaderPathEnv = std::getenv("GLINT_SHADER_PATH")) {
+    m_ShaderPath = shaderPathEnv;
+  }
+
+  if (const char* resourcePathEnv = std::getenv("GLINT_RESOURCE_PATH")) {
+    m_ResourcePath = resourcePathEnv;
+  }
 }
 
 void Config::initialize(int argc, char** argv) {
+  // Default settings
+  instance().m_ShaderPath = std::string(BASE_DIR) + "/build/bin/shaders";
+  instance().m_ResourcePath = std::string(BASE_DIR) + "/res";
+
   instance().parseEnvironment();
   instance().parseCommandLine(argc, argv);
+
   Logger::enabled(isLoggingEnabled());
+
+  if (isLoggingEnabled()) {
+    std::cout << "Configuration:" << std::endl;
+    std::cout << "  Logging: " << (isLoggingEnabled() ? "enabled" : "disabled") << std::endl;
+    std::cout << "  Validation Layers: " << (areValidationLayersEnabled() ? "enabled" : "disabled") << std::endl;
+    std::cout << "  Shader Path: " << getShaderPath() << std::endl;
+    std::cout << "  Resource Path: " << getResourcePath() << std::endl;
+  }
 }
 
 }  // namespace glint
