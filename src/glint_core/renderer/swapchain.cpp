@@ -4,8 +4,8 @@
 #include <array>
 #include <stdexcept>
 
+#include "core/logger.h"
 #include "core/window.h"
-#include "logger.h"
 #include "vk_context.h"
 #include "vk_utils.h"
 

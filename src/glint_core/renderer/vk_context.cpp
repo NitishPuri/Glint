@@ -3,8 +3,8 @@
 #include <set>
 #include <stdexcept>
 
+#include "core/logger.h"
 #include "core/window.h"
-#include "logger.h"
 
 namespace glint {
 

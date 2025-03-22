@@ -4,8 +4,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "core/logger.h"
 #include "descriptor.h"
-#include "logger.h"
 #include "render_pass.h"
 #include "swapchain.h"
 #include "vk_context.h"
@@ -115,7 +115,7 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
   multisampling.sampleShadingEnable = VK_FALSE;
   multisampling.rasterizationSamples = m_Context->getMsaaSamples();
-  multisampling.minSampleShading = 1.0f;           // ??? 
+  multisampling.minSampleShading = 1.0f;           // ???
   multisampling.pSampleMask = nullptr;             // Optional
   multisampling.alphaToCoverageEnable = VK_FALSE;  // Optional
   multisampling.alphaToOneEnable = VK_FALSE;       // Optional
