@@ -101,13 +101,8 @@ void RotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) 
   LOGFN_ONCE;
 
   // Get components from renderer
-  auto renderPass = m_Renderer->getRenderPass();
   auto pipeline = m_Renderer->getPipeline();
-  auto swapChain = m_Renderer->getSwapChain();
   auto currentFrame = m_Renderer->getCurrentFrame();
-
-  // Begin render pass
-  renderPass->begin(commandBuffer, imageIndex, {0.0f, 0.1f, 0.2f, 1.0f});
 
   // Bind pipeline
   pipeline->bind(commandBuffer);
@@ -122,9 +117,6 @@ void RotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) 
 
   // Draw mesh
   m_Mesh->draw(commandBuffer);
-
-  // End render pass
-  renderPass->end(commandBuffer);
 }
 
 void RotatingSample::cleanup() {

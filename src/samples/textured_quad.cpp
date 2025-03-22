@@ -122,11 +122,8 @@ void TexturedRotatingSample::updateUniformBuffer(uint32_t currentImage) {
 
 void TexturedRotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   // Begin render pass
-  auto renderPass = m_Renderer->getRenderPass();
   auto pipeline = m_Renderer->getPipeline();
   uint32_t currentFrame = m_Renderer->getCurrentFrame();
-
-  renderPass->begin(commandBuffer, imageIndex, {0.0f, 0.1f, 0.2f, 1.0f});
 
   // Bind pipeline and descriptor sets
   pipeline->bind(commandBuffer);
@@ -138,9 +135,6 @@ void TexturedRotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imag
   // Bind and draw mesh
   m_Mesh->bind(commandBuffer);
   m_Mesh->draw(commandBuffer);
-
-  // End render pass
-  renderPass->end(commandBuffer);
 }
 
 void TexturedRotatingSample::cleanup() {

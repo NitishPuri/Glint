@@ -14,8 +14,6 @@
 #include "renderer/texture.h"
 #include "renderer/ubo_data.h"
 #include "renderer/vk_utils.h"
-//
-#include "imgui_manager.h"
 
 namespace glint {
 
@@ -28,13 +26,11 @@ void CubeSample::init(Window* window, Renderer* renderer) {
   uint32_t framesInFlight = renderer->getFramesInFlight();
   LOG("Creating resources for", framesInFlight, "frames in flight");
 
-  // m_Mesh = MeshFactory::createCube(renderer->getContext());
+  m_Mesh = MeshFactory::createTexturedCube(renderer->getContext());
+  m_Texture = std::make_unique<Texture>(renderer->getContext(), Config::getResourceFile("texture.jpg"));
 
-  // m_Mesh = MeshFactory::createTexturedCube(renderer->getContext());
-  // m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.jpg");
-
-  m_Mesh = Mesh::loadModel(renderer->getContext(), Config::getResourceFile("viking_room.obj"));
-  m_Texture = std::make_unique<Texture>(renderer->getContext(), Config::getResourceFile("viking_room.png"));
+  // m_Mesh = Mesh::loadModel(renderer->getContext(), Config::getResourceFile("viking_room.obj"));
+  // m_Texture = std::make_unique<Texture>(renderer->getContext(), Config::getResourceFile("viking_room.png"));
 
   // Create descriptor set layout
   m_DescriptorSetLayout = DescriptorSetLayout::Builder(renderer->getContext())
@@ -45,17 +41,11 @@ void CubeSample::init(Window* window, Renderer* renderer) {
   // Create pipeline with textured shader
   PipelineConfig config;
   config.descriptorSetLayout = m_DescriptorSetLayout.get();
-
-  // config.vertexShaderPath = getShaderPath("shader.vert");
-  // config.fragmentShaderPath = getShaderPath("shader.frag");
-  // config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
-
   config.vertexShaderPath = Config::getShaderFile("basic_tex.vert");
   config.fragmentShaderPath = Config::getShaderFile("basic_tex.frag");
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
   config.depthTestEnable = true;
   config.depthWriteEnable = true;
-
   config.cullMode = VK_CULL_MODE_BACK_BIT;
   //   config.blendEnable = true;
 
@@ -139,28 +129,20 @@ void CubeSample::updateUniformBuffer(uint32_t currentImage) {
 }
 
 void CubeSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-  // Begin render pass
-  auto renderPass = m_Renderer->getRenderPass();
   auto pipeline = m_Renderer->getPipeline();
   uint32_t currentFrame = m_Renderer->getCurrentFrame();
-
-  renderPass->begin(commandBuffer, imageIndex, {0.0f, 0.1f, 0.2f, 1.0f});
 
   // Bind pipeline and descriptor sets
   pipeline->bind(commandBuffer);
   m_Descriptor->bind(commandBuffer, pipeline->getPipelineLayout(), currentFrame);
 
+  m_Mesh->bind(commandBuffer);
+
   // Set viewport and scissor
   setupDefaultVieportAndScissor(commandBuffer, m_Renderer);
 
   // Bind and draw mesh
-  m_Mesh->bind(commandBuffer);
   m_Mesh->draw(commandBuffer);
-
-  ImGuiManager::render(commandBuffer);
-
-  // End render pass
-  renderPass->end(commandBuffer);
 }
 
 void CubeSample::cleanup() {

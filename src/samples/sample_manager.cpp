@@ -3,6 +3,8 @@
 #include <stdexcept>
 
 #include "core/logger.h"
+#include "imgui_manager.h"
+#include "renderer/render_pass.h"
 #include "renderer/renderer.h"
 #include "sample.h"
 
@@ -82,9 +84,19 @@ void SampleManager::update(float deltaTime) {
 }
 
 void SampleManager::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+  auto renderPass = m_Renderer->getRenderPass();
+  // auto pipeline = m_Renderer->getPipeline();
+
+  // Begin render pass (moved from Sample)
+  renderPass->begin(commandBuffer, imageIndex, {0.1f, 0.1f, 0.2f, 1.0f});
+
   if (m_ActiveSample) {
     m_ActiveSample->render(commandBuffer, imageIndex);
   }
+
+  ImGuiManager::render(commandBuffer);
+
+  renderPass->end(commandBuffer);
 }
 
 }  // namespace glint

@@ -123,7 +123,7 @@ class App {
       // Update active sample
       sampleManager.update(deltaTime);
 
-      imguiManager->newFrame();
+      glint::ImGuiManager::newFrame();
 
       ImGui::Begin("Sample Selector");
       if (ImGui::Button("Triangle")) {
@@ -150,10 +150,7 @@ class App {
       ImGui::End();
 
       renderer->drawFrame([this](VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-        // drawScene(commandBuffer, imageIndex);
         sampleManager.render(commandBuffer, imageIndex);
-
-        // imguiManager->render(commandBuffer);
       });
 
       frames++;

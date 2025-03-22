@@ -6,6 +6,7 @@
 #include "core/config.h"
 #include "core/logger.h"
 #include "core/window.h"
+#include "imgui_manager.h"
 #include "renderer/descriptor.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
@@ -49,6 +50,9 @@ class App {
   void initRenderer() {
     renderer = std::make_unique<Renderer>(window.get(), MAX_FRAMES_IN_FLIGHT);
     renderer->init();
+
+    imguiManager = std::make_unique<ImGuiManager>();
+    imguiManager->init(window.get(), renderer.get());
 
     // Create descriptor set layout
     m_DescriptorSetLayout = DescriptorSetLayout::Builder(renderer->getContext())
@@ -190,6 +194,8 @@ class App {
   std::unique_ptr<Descriptor> m_Descriptor = nullptr;
   std::vector<std::unique_ptr<UniformBuffer>> m_UniformBuffers;
 
+  std::unique_ptr<glint::ImGuiManager> imguiManager = nullptr;
+
   float m_RotationAngle = 0.0f;
   glm::vec3 m_ModelPosition = glm::vec3(0.0f);
   glm::vec3 m_RotationAxis = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -200,12 +206,19 @@ class App {
     auto pipeline = renderer->getPipeline();
     auto swapChain = renderer->getSwapChain();
 
+    glint::ImGuiManager::newFrame();
+
     renderPass->begin(commandBuffer, imageIndex, {0.0f, 0.0f, 0.0f, 1.0f});
     pipeline->bind(commandBuffer);
 
     m_Descriptor->bind(commandBuffer, pipeline->getPipelineLayout(), renderer->getCurrentFrame());
 
     mesh->bind(commandBuffer);
+
+    ImGui::Begin("Glint Stats");
+    ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+    ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+    ImGui::End();
 
     auto swapChainExtent = swapChain->getExtent();
     VkViewport viewport{};
@@ -223,6 +236,8 @@ class App {
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
     mesh->draw(commandBuffer);
+
+    glint::ImGuiManager::render(commandBuffer);
 
     renderPass->end(commandBuffer);
   }

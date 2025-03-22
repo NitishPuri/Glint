@@ -56,18 +56,12 @@ void BasicSample::update(float deltaTime) {}
 void BasicSample::cleanup() {}
 
 void BasicSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-  // TODO: Refactor this into a method in base sample
-  auto renderPass = m_Renderer->getRenderPass();
   auto pipeline = m_Renderer->getPipeline();
-
-  renderPass->begin(commandBuffer, imageIndex, {0.0f, 0.0f, 0.0f, 1.0f});
   pipeline->bind(commandBuffer);
 
   m_Mesh->bind(commandBuffer);
   setupDefaultVieportAndScissor(commandBuffer, m_Renderer);
   m_Mesh->draw(commandBuffer);
-
-  renderPass->end(commandBuffer);
 }
 
 ////////////////////////////////////////
