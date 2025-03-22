@@ -16,6 +16,10 @@ target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/stb)
 add_library(tinyobjloader INTERFACE)
 target_include_directories(tinyobjloader INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader)
 
+# arcball camera - headers only
+add_library(arcball_camera INTERFACE)
+target_include_directories(arcball_camera INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/arcball_camera)
+
 
 # Imgui - compiled as a static library
 add_library(imgui STATIC
