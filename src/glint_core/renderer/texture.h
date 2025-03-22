@@ -20,6 +20,7 @@ class Texture {
 
   VkImageView getImageView() const { return m_ImageView; }
   VkSampler getSampler() const { return m_Sampler; }
+  bool isValid() const { return m_Image != VK_NULL_HANDLE; }
 
  private:
   void createTextureImage(const std::string& filepath);

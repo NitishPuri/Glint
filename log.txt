@@ -160,10 +160,6 @@ glint::Renderer::createPipeline {
       VkPipelineLayoutCreateInfo pipelineLayoutInfo{}
       Including descriptor set layout in pipeline layout
       vkCreatePipelineLayout(m_Context->getDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout)
-      Create Graphics Pipeline
-      Graphics Pipeline, the final pipeline object that will be used in rendering
-      Here we are combining : shaders, fixed function stages(vertex info, input assembly, viewport syate, rasterizer, multisampleing, depthStencil and color blending), pipeline layout and render pass
-      VkGraphicsPipelineCreateInfo pipelineInfo{}
       vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline)
       Cleanup shader modules
       vkDestroyShaderModule(m_Context->getDevice(), fragShaderModule, nullptr)
@@ -243,42 +239,6 @@ glint::Renderer::drawFrame {
   glint::SynchronizationManager::resetFence {
   }
   result = vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo)
-}
-Window resized:  2560 x 1369
-glint::SwapChain::recreateSwapchain {
-  vkDeviceWaitIdle(device)
-  glint::SwapChain::cleanup {
-    Destroying MSAA resources
-    glint::SwapChain::cleanupDepthResources {
-    }
-    Destroying  3  framebuffers
-    Destroying  3  image views
-    vkDestroySwapchainKHR(device, m_SwapChain, nullptr)
-  }
-  glint::SwapChain::createSwapChain {
-    glint::SwapChain::querySwapChainSupport {
-    }
-    glint::SwapChain::chooseSwapSurfaceFormat {
-    }
-    glint::SwapChain::chooseSwapPresentMode {
-      Using VK_PRESENT_MODE_MAILBOX_KHR (triple buffering)
-    }
-    glint::SwapChain::chooseSwapExtent {
-    }
-    graphics and present queues are the same
-    Using exclusive sharing mode
-  }
-  glint::SwapChain::createImageViews {
-  }
-  glint::SwapChain::createDepthResources {
-    Set debug name for 10 to Depth Image
-    Set debug name for 8 to Depth Image Memory
-    Set debug name for 14 to Depth Image View
-    glint::VkUtils::transitionImageLayout {
-    }
-  }
-  glint::SwapChain::createFramebuffers {
-  }
 }
 glint::Renderer::waitIdle {
 }

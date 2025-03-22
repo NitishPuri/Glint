@@ -169,6 +169,15 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
     LOG("Including descriptor set layout in pipeline layout");
 
     VkDescriptorSetLayout layout = config.descriptorSetLayout->getLayout();
+    // Weird bug! If the layout is not validated,
+    // the pipeline layout will be created with a null handle in release mode
+    // always validate your handles!
+    if (layout == VK_NULL_HANDLE) {
+      LOG("Warning: Descriptor set layout handle is null");
+      pipelineLayoutInfo.setLayoutCount = 0;
+      pipelineLayoutInfo.pSetLayouts = nullptr;
+      // throw std::runtime_error("Descriptor set layout is null");
+    }
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &layout;
   } else {
@@ -187,11 +196,7 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
     throw std::runtime_error("failed to create pipeline layout!");
   }
 
-  LOG("Create Graphics Pipeline");
-  LOG("Graphics Pipeline, the final pipeline object that will be used in rendering");
-  LOG("Here we are combining : shaders, fixed function stages(vertex info, input assembly, viewport syate, "
-      "rasterizer, multisampleing, depthStencil and color blending), pipeline layout and render pass");
-  LOGCALL(VkGraphicsPipelineCreateInfo pipelineInfo{});
+  VkGraphicsPipelineCreateInfo pipelineInfo{};
   pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
   pipelineInfo.stageCount = 2;
   pipelineInfo.pStages = shaderStages;

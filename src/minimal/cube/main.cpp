@@ -57,8 +57,16 @@ class App {
                                 .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
                                 .build();
 
+    // Verify the descriptor set layout is valid
+    if (!m_DescriptorSetLayout || !m_DescriptorSetLayout->getLayout()) {
+      throw std::runtime_error("Failed to create descriptor set layout");
+    }
+
     // Create texture before descriptor updates
     m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.jpg");
+    if (!m_Texture || !m_Texture->isValid()) {
+      throw std::runtime_error("Failed to load texture");
+    }
 
     PipelineConfig config;
     config.vertexShaderPath = getShaderPath("basic_tex.vert");
@@ -178,9 +186,9 @@ class App {
   std::unique_ptr<Mesh> mesh = nullptr;
   std::unique_ptr<Texture> m_Texture = nullptr;
 
-  std::unique_ptr<DescriptorSetLayout> m_DescriptorSetLayout;
-  std::unique_ptr<DescriptorPool> m_DescriptorPool;
-  std::unique_ptr<Descriptor> m_Descriptor;
+  std::unique_ptr<DescriptorSetLayout> m_DescriptorSetLayout = nullptr;
+  std::unique_ptr<DescriptorPool> m_DescriptorPool = nullptr;
+  std::unique_ptr<Descriptor> m_Descriptor = nullptr;
   std::vector<std::unique_ptr<UniformBuffer>> m_UniformBuffers;
 
   float m_RotationAngle = 0.0f;
