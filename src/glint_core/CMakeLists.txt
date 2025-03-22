@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.25)
 
 add_library(glint_core STATIC
     core/window.cpp
-    core/utils.cpp
     core/config.cpp
     renderer/command_manager.cpp
     renderer/vertex.cpp
@@ -37,8 +36,8 @@ target_link_libraries(glint_core PUBLIC
 
 # TODO: Use path shader bin path relative to bin path 
 # and move the bins to a single folder eassier to package
-target_compile_definitions(glint_core PRIVATE 
-    SHADER_BIN_DIR="${CMAKE_BINARY_DIR}/bin/shaders/"
+target_compile_definitions(glint_core PRIVATE
+    BASE_DIR="${CMAKE_SOURCE_DIR}" 
     GLM_FORCE_DEPTH_ZERO_TO_ONE
     GLM_FORCE_RADIANS
     # GLM_FORCE_DEFAULT_ALIGNED_GENTYPES

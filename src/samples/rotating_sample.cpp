@@ -3,8 +3,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "core/config.h"
 #include "core/logger.h"
-#include "core/utils.h"
 #include "core/window.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
@@ -34,8 +34,8 @@ void RotatingSample::init(Window* window, Renderer* renderer) {
 
   PipelineConfig config;
   config.descriptorSetLayout = m_DescriptorSetLayout.get();
-  config.vertexShaderPath = getShaderPath("shader.vert");
-  config.fragmentShaderPath = getShaderPath("shader.frag");
+  config.vertexShaderPath = Config::getShaderFile("shader.vert");
+  config.fragmentShaderPath = Config::getShaderFile("shader.frag");
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
   config.cullMode = VK_CULL_MODE_NONE;
 

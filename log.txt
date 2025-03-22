@@ -7,25 +7,15 @@ glint::Renderer::init {
   }
   glint::VkContext::init {
     glint::VkContext::createInstance {
-      glint::VkContext::checkValidationLayerSupport {
-        found validation layer:  VK_LAYER_KHRONOS_validation
-      }
       glint::VkContext::getRequiredExtensions {
-        Required Extensions:  3
+        Required Extensions:  2
            VK_KHR_surface
            VK_KHR_win32_surface
-           VK_EXT_debug_utils
       }
-      validation layers are enabled
-      glint::VkContext::populateDebugMessengerCreateInfo {
-      }
+      no validation layers.
       vkCreateInstance(&createInfo, nullptr, &m_Instance)
     }
     glint::VkContext::setupDebugMessenger {
-      glint::VkContext::populateDebugMessengerCreateInfo {
-      }
-      glint::CreateDebugUtilsMessengerEXT {
-      }
     }
     glint::VkContext::createSurface {
       glint::Window::createSurface {
@@ -74,9 +64,6 @@ glint::Renderer::init {
     glint::SwapChain::createImageViews {
     }
     glint::SwapChain::createDepthResources {
-      Set debug name for 10 to Depth Image
-      Set debug name for 8 to Depth Image Memory
-      Set debug name for 14 to Depth Image View
       glint::VkUtils::transitionImageLayout {
       }
     }
@@ -101,12 +88,8 @@ glint::Renderer::init {
 }
 glint::Texture::Texture {
   glint::Texture::createTextureImage {
-    Loading texture from ./res/texture.jpg
+    Loading texture from E:/tree/graphics/Glint_vk/res\texture.jpg
     Texture loaded: 512 x 512 pixels, 3 channels
-    Set debug name for 9 to Texture Staging Buffer
-    Set debug name for 8 to Texture Staging Buffer Memory
-    Set debug name for 10 to Texture Buffer
-    Set debug name for 8 to Texture Buffer Memory
     glint::VkUtils::transitionImageLayout {
     }
     glint::Texture::generateMipmaps {
@@ -119,10 +102,10 @@ glint::Renderer::createPipeline {
     glint::Pipeline::createGraphicsPipeline {
       Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V
       glint::Pipeline::readFile {
-        Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/basic_tex.vert.spv fileSize: 1840 bytes
+        Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders\basic_tex.vert.spv fileSize: 1840 bytes
       }
       glint::Pipeline::readFile {
-        Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders/basic_tex.frag.spv fileSize: 900 bytes
+        Loading filename: E:/tree/graphics/Glint_vk/build/bin/shaders\basic_tex.frag.spv fileSize: 900 bytes
       }
       VkShaderModule vertShaderModule = createShaderModule(vertShaderCode)
       glint::Pipeline::createShaderModule {
@@ -285,8 +268,6 @@ glint::SwapChain::~SwapChain {
 }
 glint::VkContext::~VkContext {
   glint::VkContext::cleanup {
-    glint::DestroyDebugUtilsMessengerEXT {
-    }
   }
 }
 glint::Window::~Window {

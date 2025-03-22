@@ -3,8 +3,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include "core/config.h"
 #include "core/logger.h"
-#include "core/utils.h"
 #include "renderer/descriptor.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
@@ -33,8 +33,8 @@ void CubeSample::init(Window* window, Renderer* renderer) {
   // m_Mesh = MeshFactory::createTexturedCube(renderer->getContext());
   // m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.jpg");
 
-  m_Mesh = Mesh::loadModel(renderer->getContext(), "./res/viking_room.obj");
-  m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/viking_room.png");
+  m_Mesh = Mesh::loadModel(renderer->getContext(), Config::getResourceFile("viking_room.obj"));
+  m_Texture = std::make_unique<Texture>(renderer->getContext(), Config::getResourceFile("viking_room.png"));
 
   // Create descriptor set layout
   m_DescriptorSetLayout = DescriptorSetLayout::Builder(renderer->getContext())
@@ -50,8 +50,8 @@ void CubeSample::init(Window* window, Renderer* renderer) {
   // config.fragmentShaderPath = getShaderPath("shader.frag");
   // config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
 
-  config.vertexShaderPath = getShaderPath("basic_tex.vert");
-  config.fragmentShaderPath = getShaderPath("basic_tex.frag");
+  config.vertexShaderPath = Config::getShaderFile("basic_tex.vert");
+  config.fragmentShaderPath = Config::getShaderFile("basic_tex.frag");
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
   config.depthTestEnable = true;
   config.depthWriteEnable = true;

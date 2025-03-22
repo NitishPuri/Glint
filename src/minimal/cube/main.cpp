@@ -5,7 +5,6 @@
 
 #include "core/config.h"
 #include "core/logger.h"
-#include "core/utils.h"
 #include "core/window.h"
 #include "renderer/descriptor.h"
 #include "renderer/mesh_factory.h"
@@ -63,14 +62,14 @@ class App {
     }
 
     // Create texture before descriptor updates
-    m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.jpg");
+    m_Texture = std::make_unique<Texture>(renderer->getContext(), Config::getResourceFile("texture.jpg"));
     if (!m_Texture || !m_Texture->isValid()) {
       throw std::runtime_error("Failed to load texture");
     }
 
     PipelineConfig config;
-    config.vertexShaderPath = getShaderPath("basic_tex.vert");
-    config.fragmentShaderPath = getShaderPath("basic_tex.frag");
+    config.vertexShaderPath = Config::getShaderFile("basic_tex.vert");
+    config.fragmentShaderPath = Config::getShaderFile("basic_tex.frag");
     config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
     config.depthTestEnable = true;
     config.depthWriteEnable = true;

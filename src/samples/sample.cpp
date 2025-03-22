@@ -1,7 +1,7 @@
 #include "sample.h"
 
+#include "core/config.h"
 #include "core/logger.h"
-#include "core/utils.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
 #include "renderer/render_pass.h"
@@ -41,8 +41,8 @@ void BasicSample::init(Window* window, Renderer* renderer) {
   m_Renderer = renderer;
 
   PipelineConfig config;
-  config.vertexShaderPath = getShaderPath("basic.vert");
-  config.fragmentShaderPath = getShaderPath("shader.frag");
+  config.vertexShaderPath = Config::getShaderFile("basic.vert");
+  config.fragmentShaderPath = Config::getShaderFile("shader.frag");
   config.descriptorSetLayout = nullptr;
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
 

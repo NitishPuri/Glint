@@ -2,8 +2,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "core/config.h"
 #include "core/logger.h"
-#include "core/utils.h"
 #include "renderer/descriptor.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
@@ -31,7 +31,7 @@ void TexturedRotatingSample::init(Window* window, Renderer* renderer) {
   VkUtils::setObjectName((uint64_t)m_Mesh->getVertexBuffer(), VK_OBJECT_TYPE_BUFFER, "TexturedQuad Vertex Buffer");
 
   // Load texture
-  m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.jpg");
+  m_Texture = std::make_unique<Texture>(renderer->getContext(), Config::getResourceFile("texture.jpg"));
 
   // Create descriptor set layout
   m_DescriptorSetLayout = DescriptorSetLayout::Builder(renderer->getContext())
@@ -42,8 +42,8 @@ void TexturedRotatingSample::init(Window* window, Renderer* renderer) {
   // Create pipeline with textured shader
   PipelineConfig config;
   config.descriptorSetLayout = m_DescriptorSetLayout.get();
-  config.vertexShaderPath = getShaderPath("basic_tex.vert");
-  config.fragmentShaderPath = getShaderPath("basic_tex.frag");
+  config.vertexShaderPath = Config::getShaderFile("basic_tex.vert");
+  config.fragmentShaderPath = Config::getShaderFile("basic_tex.frag");
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
   config.cullMode = VK_CULL_MODE_NONE;
   //   config.blendEnable = true;

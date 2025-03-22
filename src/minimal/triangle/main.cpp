@@ -1,7 +1,6 @@
 
 #include "core/config.h"
 #include "core/logger.h"
-#include "core/utils.h"
 #include "core/window.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
@@ -42,8 +41,8 @@ class App {
     renderer->init();
 
     glint::PipelineConfig config;
-    config.vertexShaderPath = glint::getShaderPath("basic.vert");
-    config.fragmentShaderPath = glint::getShaderPath("shader.frag");
+    config.vertexShaderPath = glint::Config::getShaderFile("basic.vert");
+    config.fragmentShaderPath = glint::Config::getShaderFile("shader.frag");
     config.descriptorSetLayout = nullptr;
     config.vertexFormat = glint::VertexAttributeFlags::POSITION_COLOR;
     renderer->createPipeline(&config);
