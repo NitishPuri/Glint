@@ -7,6 +7,7 @@
 #include "core/logger.h"
 #include "core/window.h"
 #include "imgui_manager.h"
+#include "renderer/camera.h"
 #include "renderer/descriptor.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
@@ -45,6 +46,11 @@ class App {
     props.resizable = true;
 
     window = std::make_unique<Window>(props);
+
+    glfwSetScrollCallback(window->getGLFWWindow(), [](GLFWwindow* window, double xoffset, double yoffset) {
+      ImGuiIO& io = ImGui::GetIO();
+      io.MouseWheel = static_cast<float>(yoffset);
+    });
   }
 
   void initRenderer() {
@@ -113,6 +119,9 @@ class App {
   void initMesh() {
     mesh = MeshFactory::createTexturedCube(renderer->getContext());
     // m_Texture = std::make_unique<Texture>(renderer->getContext(), "./res/texture.png");
+
+    m_Camera.setPosition(0.0f, 0.0f, 2.0f);
+    m_Camera.setTarget(0.0f, 0.0f, 0.0f);
   }
 
   void mainLoop() {
@@ -120,6 +129,8 @@ class App {
 
     while (!window->shouldClose()) {
       window->pollEvents();
+
+      processInput();
 
       // Calculate delta time
       auto currentTime = std::chrono::high_resolution_clock::now();
@@ -132,6 +143,17 @@ class App {
           [this](VkCommandBuffer commandBuffer, uint32_t imageIndex) { drawScene(commandBuffer, imageIndex); });
     }
     renderer->waitIdle();
+  }
+
+  virtual void processInput() {
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Process mouse movement
+    m_Camera.setScreenDimensions(window->getWidth(), window->getHeight());
+    m_Camera.processMouseScroll(static_cast<int>(io.MouseWheel));
+    m_Camera.processMouseMovement(static_cast<int>(io.MousePosPrev.x), static_cast<int>(io.MousePosPrev.y),
+                                  static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y), io.MouseDown[1],
+                                  io.MouseDown[2]);
   }
 
   void cleanup() {
@@ -153,6 +175,8 @@ class App {
     m_ModelPosition = glm::vec3(f / 2, 0.0f, 0.0f);
     m_RotationAxis = glm::mix(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), f);
 
+    m_Camera.update(deltaTime);
+
     // Get current frame index
     uint32_t currentFrame = renderer->getCurrentFrame();
 
@@ -167,15 +191,8 @@ class App {
     ubo.model = glm::translate(glm::mat4(1.0f), m_ModelPosition);
     ubo.model = glm::rotate(ubo.model, glm::radians(m_RotationAngle), m_RotationAxis);
 
-    // View matrix - slight distance from the quad
-    ubo.view = glm::lookAt(glm::vec3(2.0f, 0.2f, 2.0f),   // Camera position
-                           glm::vec3(0.0f, 0.0f, 0.0f),   // Look at origin
-                           glm::vec3(0.0f, 1.0f, 0.0f));  // Up vector
-
-    // Projection matrix
-    VkExtent2D extent = renderer->getSwapChain()->getExtent();
-    float aspect = extent.width / (float)extent.height;
-    ubo.proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+    ubo.view = m_Camera.getViewMatrix();
+    ubo.proj = m_Camera.getProjectionMatrix();
 
     // Flip Y coordinate for Vulkan
     ubo.proj[1][1] *= -1;
@@ -188,6 +205,7 @@ class App {
   std::unique_ptr<Renderer> renderer = nullptr;
   std::unique_ptr<Mesh> mesh = nullptr;
   std::unique_ptr<Texture> m_Texture = nullptr;
+  glint::ArcballCamera m_Camera;
 
   std::unique_ptr<DescriptorSetLayout> m_DescriptorSetLayout = nullptr;
   std::unique_ptr<DescriptorPool> m_DescriptorPool = nullptr;
@@ -215,9 +233,14 @@ class App {
 
     mesh->bind(commandBuffer);
 
+    ImGuiIO& io = ImGui::GetIO();
     ImGui::Begin("Glint Stats");
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
     ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+    ImGui::Text("Position: %.2f, %.2f, %.2f", m_Camera.getPosition().x, m_Camera.getPosition().y,
+                m_Camera.getPosition().z);
+    ImGui::Text("Mouse wheel delta %.2f", io.MouseWheel);
+    ImGui::Text("Mouse position %.2f, %.2f", io.MousePos.x, io.MousePos.y);
     ImGui::End();
 
     auto swapChainExtent = swapChain->getExtent();

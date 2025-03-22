@@ -50,8 +50,8 @@ Glint_vk/
 
 ## Next Steps
 
-- Integrate Imgui
-- Camera system
+- [x] Integrate Imgui
+- [x] Camera system
 - Input handling
 - Materials
 - Basic lighting : diffuse, specular, point lights, spot lights

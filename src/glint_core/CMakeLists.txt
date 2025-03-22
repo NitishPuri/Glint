@@ -32,6 +32,7 @@ target_link_libraries(glint_core PUBLIC
     glfw 
     stb 
     tinyobjloader
+    arcball_camera
 )
 
 # TODO: Use path shader bin path relative to bin path 
