@@ -14,3 +14,5 @@ target_link_libraries(glint_samples PRIVATE
 )
 
 target_compile_features(glint_samples PRIVATE cxx_std_20)
+
+set_target_properties(glint_samples PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
