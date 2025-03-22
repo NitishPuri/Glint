@@ -15,7 +15,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
                                                     void* pUserData) {
   if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
     // Message is important enough to show
-    LOG("[VALIDATION ERROR] validation layer: ", pCallbackData->pMessage);
+    if (Config::isLoggingEnabled())
+      LOG("[VALIDATION ERROR] validation layer: ", pCallbackData->pMessage);
+    else
+      std::cout << "[VALIDATION ERROR] validation layer: " << pCallbackData->pMessage << std::endl;
   } else {
     // Message is not important enough to show
     // LOG("[VALIDATION INFO] validation layer: ", pCallbackData->pMessage);

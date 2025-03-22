@@ -1,24 +1,13 @@
 
-#include <algorithm>
-#include <cstdlib>
-#include <iostream>
-#include <memory>
-#include <optional>
-#include <set>
-#include <stdexcept>
-#include <vector>
-
+#include "core/config.h"
+#include "core/logger.h"
+#include "core/utils.h"
 #include "core/window.h"
-#include "logger.h"
-#include "renderer/command_manager.h"
-#include "renderer/mesh.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
 #include "renderer/render_pass.h"
 #include "renderer/renderer.h"
 #include "renderer/swapchain.h"
-#include "renderer/synchronization_manager.h"
-#include "renderer/vk_context.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -29,21 +18,18 @@ const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 class App {
  public:
-#pragma region APP
   void run() {
     initWindow();
     initRenderer();
     initMesh();
-
     mainLoop();
     cleanup();
   }
 
  private:
   void initWindow() {
-    LOGFN;
     glint::Window::WindowProps props;
-    props.title = "Vulkan";
+    props.title = "Glint - Triangle";
     props.width = WIDTH;
     props.height = HEIGHT;
     props.resizable = true;
@@ -52,64 +38,47 @@ class App {
   }
 
   void initRenderer() {
-    LOGFN;
     renderer = std::make_unique<glint::Renderer>(window.get(), MAX_FRAMES_IN_FLIGHT);
-    renderer->init("./bin/shaders/shader.vert.spv", "./bin/shaders/shader.frag.spv");
+    renderer->init();
+
+    glint::PipelineConfig config;
+    config.vertexShaderPath = glint::getShaderPath("basic.vert");
+    config.fragmentShaderPath = glint::getShaderPath("shader.frag");
+    config.descriptorSetLayout = nullptr;
+    config.vertexFormat = glint::VertexAttributeFlags::POSITION_COLOR;
+    renderer->createPipeline(&config);
   }
 
-  void initMesh() {
-    LOGFN;
-
-    mesh = glint::MeshFactory::createTriangle(renderer->getContext());
-  }
+  void initMesh() { mesh = glint::MeshFactory::createTriangle(renderer->getContext()); }
 
   void mainLoop() {
-    LOGFN;
-
-    static int frames = 0;
-    LOGCALL(while (!window->shouldClose())) {
+    while (!window->shouldClose()) {
       window->pollEvents();
-
       renderer->drawFrame(
           [this](VkCommandBuffer commandBuffer, uint32_t imageIndex) { drawScene(commandBuffer, imageIndex); });
-
-      frames++;
     }
-
     renderer->waitIdle();
   }
 
   void cleanup() {
-    LOGFN;
     // cleanup will happen in correct order automatically!
-    // mesh.reset();
-    // renderer.reset();
-    // window.reset();
   }
 
   std::unique_ptr<glint::Window> window = nullptr;
   std::unique_ptr<glint::Renderer> renderer = nullptr;
   std::unique_ptr<glint::Mesh> mesh = nullptr;
 
-#pragma endregion APP
-
-#pragma region SCENE
-
   void drawScene(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-    LOGFN_ONCE;
-
     // Get components from renderer
     auto renderPass = renderer->getRenderPass();
     auto pipeline = renderer->getPipeline();
     auto swapChain = renderer->getSwapChain();
 
-    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    renderPass->begin(commandBuffer, imageIndex, clearColor);
+    renderPass->begin(commandBuffer, imageIndex, {0.0f, 0.0f, 0.0f, 1.0f});
     pipeline->bind(commandBuffer);
 
     mesh->bind(commandBuffer);
 
-    LOG_ONCE("Set dynamic states");
     auto swapChainExtent = swapChain->getExtent();
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -123,18 +92,17 @@ class App {
     VkRect2D scissor{};
     scissor.offset = {0, 0};
     scissor.extent = swapChainExtent;
-    LOGCALL_ONCE(vkCmdSetScissor(commandBuffer, 0, 1, &scissor));
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
     mesh->draw(commandBuffer);
 
     renderPass->end(commandBuffer);
   }
-
-#pragma endregion SCENE
 };
 
-#pragma region MAIN
-int main() {
+int main(int argc, char** argv) {
+  glint::Config::initialize(argc, argv);
+
   App app;
   try {
     app.run();
@@ -145,4 +113,3 @@ int main() {
 
   return EXIT_SUCCESS;
 }
-#pragma endregion MAIN

@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.25)
 
 add_library(glint_core STATIC
     core/window.cpp
-    # core/logger.cpp
+    core/utils.cpp
+    core/config.cpp
     renderer/command_manager.cpp
     renderer/vertex.cpp
     renderer/mesh.cpp
@@ -25,15 +26,6 @@ target_include_directories(glint_core PUBLIC
 target_compile_features(glint_core PRIVATE cxx_std_20)
 
 
-# target_include_directories(${PROJECT_NAME} PUBLIC
-#     ${GLFW_INCLUDE}
-#     ${Vulkan_INCLUDE_DIRS}
-#     ${STB_INCLUDE}
-#     ${TINY_OBJ_LOADER_INCLUDE}
-#     ${PROJECT_SOURCE_DIR}/src
-# )
-
-
 # Find and link Vulkan
 find_package(Vulkan REQUIRED)
 target_link_libraries(glint_core PUBLIC 
@@ -43,19 +35,10 @@ target_link_libraries(glint_core PUBLIC
     tinyobjloader
 )
 
-# Link with GLFW
-# if(NOT TARGET glfw)
-#     find_package(glfw3 REQUIRED)
-#     target_link_libraries(glint_core PUBLIC glfw)
-# endif()
-
-# Add compile definitions if needed
-# target_compile_definitions(glint_core PRIVATE
-#     GLFW_INCLUDE_VULKAN
-# )
-
+# TODO: Use path shader bin path relative to bin path 
+// and move the bins to a single folder eassier to package
 target_compile_definitions(glint_core PRIVATE 
-    # SHADER_BIN_DIR="${SHADER_OUTPUT_DIR}/"
+    SHADER_BIN_DIR="${CMAKE_BINARY_DIR}/bin/shaders/"
     GLM_FORCE_DEPTH_ZERO_TO_ONE
     GLM_FORCE_RADIANS
     # GLM_FORCE_DEFAULT_ALIGNED_GENTYPES

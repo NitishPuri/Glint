@@ -1,5 +1,7 @@
 
+#include "core/config.h"
 #include "core/logger.h"
+#include "core/utils.h"
 #include "core/window.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
@@ -11,11 +13,6 @@ const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
 std::unordered_set<std::string> glint::OneTimeLogger::loggedFunctions;
-
-#ifndef SHADER_BIN_DIR
-#define SHADER_BIN_DIR "./build/bin/shaders/"
-#endif
-inline std::string getShaderPath(const std::string& name) { return SHADER_BIN_DIR + name + ".spv"; }
 
 const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -45,8 +42,8 @@ class App {
     renderer->init();
 
     glint::PipelineConfig config;
-    config.vertexShaderPath = getShaderPath("basic.vert");
-    config.fragmentShaderPath = getShaderPath("shader.frag");
+    config.vertexShaderPath = glint::getShaderPath("basic.vert");
+    config.fragmentShaderPath = glint::getShaderPath("shader.frag");
     config.descriptorSetLayout = nullptr;
     config.vertexFormat = glint::VertexAttributeFlags::POSITION_COLOR;
     renderer->createPipeline(&config);
@@ -103,7 +100,9 @@ class App {
   }
 };
 
-int main() {
+int main(int argc, char** argv) {
+  glint::Config::initialize(argc, argv);
+
   App app;
   try {
     app.run();

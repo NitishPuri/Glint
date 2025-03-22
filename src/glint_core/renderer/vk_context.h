@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "core/config.h"
 #include "core/logger.h"
 
 namespace glint {
@@ -90,10 +91,10 @@ class VkContext {
   const std::vector<const char*> m_ValidationLayers = {"VK_LAYER_KHRONOS_validation"};
   const std::vector<const char*> m_DeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-#ifdef NDEBUG
+#ifdef GLINT_DISABLE_VALIDATION
   const bool m_EnableValidationLayers = false;
 #else
-  const bool m_EnableValidationLayers = true;
+  const bool m_EnableValidationLayers = Config::areValidationLayersEnabled();
 #endif
 };
 
