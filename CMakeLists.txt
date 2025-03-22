@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 project(Glint)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 ################## Dependencies ##################
 
 # Vulkan
@@ -120,6 +117,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${TINY_OBJ_LOADER_INCLUDE}
     ${PROJECT_SOURCE_DIR}/src
 )
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 
 target_link_directories(${PROJECT_NAME} PUBLIC ${GLFW_LIB_DIR})
