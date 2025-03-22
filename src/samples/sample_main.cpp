@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include "core/config.h"
 #include "core/logger.h"
 #include "core/window.h"
 #include "renderer/command_manager.h"
@@ -38,7 +39,6 @@ const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 class App {
  public:
-#pragma region APP
   void run() {
     initWindow();
     initRenderer();
@@ -53,7 +53,7 @@ class App {
   void initWindow() {
     LOGFN;
     glint::Window::WindowProps props;
-    props.title = "Vulkan";
+    props.title = "Glint - Samples";
     props.width = WIDTH;
     props.height = HEIGHT;
     props.resizable = true;
@@ -173,17 +173,12 @@ class App {
   std::unique_ptr<glint::ImGuiManager> imguiManager = nullptr;
 
   glint::SampleManager sampleManager;
-
-#pragma endregion APP
-
-#pragma region SCENE
-
-#pragma endregion SCENE
 };
 
-#pragma region MAIN
-int main() {
-  LOG("Illiterate Vulkan!");
+int main(int argc, char** argv) {
+  glint::Config::initialize(argc, argv);
+
+  LOG("Glint Sample Browser!");
   App app;
   try {
     app.run();
@@ -194,4 +189,3 @@ int main() {
 
   return EXIT_SUCCESS;
 }
-#pragma endregion MAIN

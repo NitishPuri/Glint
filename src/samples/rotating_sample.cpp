@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "core/logger.h"
+#include "core/utils.h"
 #include "core/window.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"

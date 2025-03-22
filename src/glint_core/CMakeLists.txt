@@ -36,7 +36,7 @@ target_link_libraries(glint_core PUBLIC
 )
 
 # TODO: Use path shader bin path relative to bin path 
-// and move the bins to a single folder eassier to package
+# and move the bins to a single folder eassier to package
 target_compile_definitions(glint_core PRIVATE 
     SHADER_BIN_DIR="${CMAKE_BINARY_DIR}/bin/shaders/"
     GLM_FORCE_DEPTH_ZERO_TO_ONE

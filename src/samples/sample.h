@@ -7,13 +7,7 @@
 
 #include "renderer/mesh.h"
 
-#ifndef SHADER_BIN_DIR
-#define SHADER_BIN_DIR "./build/bin/shaders/"
-#endif
-
 namespace glint {
-
-inline std::string getShaderPath(const std::string& name) { return SHADER_BIN_DIR + name + ".spv"; }
 
 class Window;
 class Renderer;

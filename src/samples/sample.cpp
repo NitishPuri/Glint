@@ -1,6 +1,7 @@
 #include "sample.h"
 
 #include "core/logger.h"
+#include "core/utils.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
 #include "renderer/render_pass.h"
