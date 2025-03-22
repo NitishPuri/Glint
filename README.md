@@ -82,3 +82,11 @@ Glint_vk/
 - scene graph
 - ecs
 - spatial partitioninng
+
+### dependencies
+
+- Vulkan SDK
+- GLFW
+- STB
+- TinyObjloader
+- Dear ImGui
