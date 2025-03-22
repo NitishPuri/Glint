@@ -31,7 +31,7 @@ class Window {
   // Getters
   uint32_t getWidth() const { return m_Data.width; }
   uint32_t getHeight() const { return m_Data.height; }
-  GLFWwindow* getNativeWindow() const { return m_Window; }
+  GLFWwindow* getGLFWWindow() const { return m_Window; }
 
   // Create Vulkan surface
   VkSurfaceKHR createSurface(VkInstance instance);
