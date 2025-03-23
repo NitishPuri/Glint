@@ -15,7 +15,6 @@
 #include "renderer/renderer.h"
 #include "renderer/swapchain.h"
 #include "renderer/texture.h"
-#include "renderer/ubo_data.h"
 #include "renderer/vk_utils.h"
 
 const uint32_t WIDTH = 800;
@@ -24,6 +23,12 @@ const uint32_t HEIGHT = 600;
 using namespace glint;
 
 std::unordered_set<std::string> OneTimeLogger::loggedFunctions;
+
+struct UniformBufferObject {
+  alignas(16) glm::mat4 model;
+  alignas(16) glm::mat4 view;
+  alignas(16) glm::mat4 proj;
+};
 
 const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 

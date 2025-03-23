@@ -11,10 +11,14 @@
 #include "renderer/renderer.h"
 #include "renderer/swapchain.h"
 #include "renderer/texture.h"
-#include "renderer/ubo_data.h"
 #include "renderer/vk_utils.h"
 
 namespace glint {
+struct UniformBufferObject {
+  alignas(16) glm::mat4 model;
+  alignas(16) glm::mat4 view;
+  alignas(16) glm::mat4 proj;
+};
 
 CubeSample::CubeSample() : Sample("CubeSample") { LOGFN; }
 

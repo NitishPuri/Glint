@@ -1,10 +1,15 @@
 #pragma once
 
 #include "renderer/descriptor.h"
-#include "renderer/ubo_data.h"
 #include "sample.h"
 
 namespace glint {
+
+struct UniformBufferObject {
+  alignas(16) glm::mat4 model;
+  alignas(16) glm::mat4 view;
+  alignas(16) glm::mat4 proj;
+};
 
 class RotatingSample : public Sample {
  public:
