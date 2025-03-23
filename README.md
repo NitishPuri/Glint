@@ -2,59 +2,16 @@
 
 ![alt text](<doc/Glint 2025-03-19 02.09.21.excalidraw.svg>)
 
-```
-Glint_vk/
-├── src/ # Core engine source code
-│ ├── core/ # Core engine systems
-│ │ ├── application.h # Application management
-│ │ ├── application.cpp
-│ │ ├── logger.h # logging system
-│ │ ├── logger.cpp
-│ │ ├── window.h # GLFW window handling
-│ │ └── window.cpp
-│ ├── renderer/ # Vulkan renderer
-│ │ ├── vk_context.h # Vulkan instance, device, etc.
-│ │ ├── vulkan_context.cpp
-│ │ ├── swapchain.h # Swapchain management
-│ │ ├── swapchain.cpp
-│ │ ├── pipeline.h # Graphics pipeline
-│ │ ├── pipeline.cpp
-│ │ ├── command.h # Command buffers and pools
-│ │ ├── command.cpp
-│ │ ├── render_pass.h # Render passes
-│ │ ├── render_pass.cpp
-│ │ ├── synchronization.h # Fences and semaphores
-│ │ └── synchronization.cpp
-│ ├── shaders/ # Shader source code
-│ │ ├── compile.bat # Shader compilation scripts
-│ │ ├── compile.sh
-│ │ ├── shader.vert # Vertex shader
-│ │ └── shader.frag # Fragment shader
-│ └── main.cpp # Entry point
-├── samples/ # Different sample applications
-│ ├── hello_triangle/ # hello triangle
-│ ├── texture_sample/ # Future texture sample
-│ └── ...
-├── include/ # Public API headers
-│ └── glint/ # engine namespace
-├── build/ # Build artifacts
-├── bin/ # Compiled binaries
-│ └── shaders/ # Compiled shaders
-├── third_party/ # Third-party dependencies
-│ ├── glfw/
-│ └── ...
-├── assets/ # Textures, models, etc.
-├── CMakeLists.txt # CMake build system
-└── README.md # Project documentation
-```
-
 ## Next Steps
 
 - [x] Integrate Imgui
 - [x] Camera system
-- Input handling
-- Materials
+- [x] Input handling
 - Basic lighting : diffuse, specular, point lights, spot lights
+- Materials system + scene viewer
+  - gltf viewer
+  - https://github.com/syoyo/tinygltf/tree/release
+  - https://github.com/SaschaWillems/Vulkan-glTF-PBR/
 - skybox, cube maps
 - normal mapping
 - billboarding, geometry shaders
@@ -90,3 +47,11 @@ Glint_vk/
 - STB
 - TinyObjloader
 - Dear ImGui
+
+## References
+
+- https://vulkan-tutorial.com/
+- https://github.com/SaschaWillems/Vulkan
+- https://github.com/SaschaWillems/Vulkan-glTF-PBR/
+
+- [GPU Gems](https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models)
