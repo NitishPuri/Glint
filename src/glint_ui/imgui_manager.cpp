@@ -55,6 +55,13 @@ void ImGuiManager::init(Window* window, Renderer* renderer) {
   ImGui_ImplVulkan_CreateFontsTexture();
   VkUtils::endSingleTimeCommands(commandBuffer);
   // ImGui_ImplVulkan_DestroyFontUploadObjects();
+
+  // setup scroll for imgui
+  // TODO: ideally this shouldnt be reuquired, but io.MouseWheel is not working without this.
+  glfwSetScrollCallback(window->getGLFWWindow(), [](GLFWwindow* window, double xoffset, double yoffset) {
+    ImGuiIO& io = ImGui::GetIO();
+    io.MouseWheel = static_cast<float>(yoffset);
+  });
 }
 
 void ImGuiManager::newFrame() {

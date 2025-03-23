@@ -46,11 +46,6 @@ class App {
     props.resizable = true;
 
     window = std::make_unique<Window>(props);
-
-    glfwSetScrollCallback(window->getGLFWWindow(), [](GLFWwindow* window, double xoffset, double yoffset) {
-      ImGuiIO& io = ImGui::GetIO();
-      io.MouseWheel = static_cast<float>(yoffset);
-    });
   }
 
   void initRenderer() {
