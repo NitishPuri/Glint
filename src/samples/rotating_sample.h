@@ -10,13 +10,12 @@ class RotatingSample : public Sample {
  public:
   RotatingSample();
 
-  void init(Window* window, Renderer* renderer) override;
+  void initSample(Window* window, Renderer* renderer) override;
   void update(float deltaTime) override;
   void render(VkCommandBuffer commandBuffer, uint32_t imageIndex) override;
   void cleanup() override;
 
   void setMesh(std::unique_ptr<Mesh> mesh) { m_Mesh = std::move(mesh); }
-
 
  private:
   Renderer* m_Renderer = nullptr;

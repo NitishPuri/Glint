@@ -18,7 +18,7 @@ namespace glint {
 
 TexturedRotatingSample::TexturedRotatingSample() : Sample("TexturedRotatingSample") { LOGFN; }
 
-void TexturedRotatingSample::init(Window* window, Renderer* renderer) {
+void TexturedRotatingSample::initSample(Window* window, Renderer* renderer) {
   LOGFN;
   m_Renderer = renderer;
 

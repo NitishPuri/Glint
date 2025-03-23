@@ -14,7 +14,7 @@ class TexturedRotatingSample : public Sample {
  public:
   TexturedRotatingSample();
 
-  void init(Window* window, Renderer* renderer) override;
+  void initSample(Window* window, Renderer* renderer) override;
   void update(float deltaTime) override;
   void render(VkCommandBuffer commandBuffer, uint32_t imageIndex) override;
   void cleanup() override;

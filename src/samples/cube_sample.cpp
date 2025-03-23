@@ -1,7 +1,6 @@
 #include "cube_sample.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
 
 #include "core/config.h"
 #include "core/logger.h"
@@ -20,14 +19,13 @@ namespace glint {
 CubeSample::CubeSample() : Sample("CubeSample") { LOGFN; }
 
 void CubeSample::initSample(Window* window, Renderer* renderer) {
-  LOGFN;
-  m_Renderer = renderer;
-
   uint32_t framesInFlight = renderer->getFramesInFlight();
   LOG("Creating resources for", framesInFlight, "frames in flight");
 
   m_Mesh = MeshFactory::createTexturedCube(renderer->getContext());
   m_Texture = std::make_unique<Texture>(renderer->getContext(), Config::getResourceFile("texture.jpg"));
+  initCamera();
+  m_Camera->setPosition(2.0f, 0.2f, 2.0f);
 
   // m_Mesh = Mesh::loadModel(renderer->getContext(), Config::getResourceFile("viking_room.obj"));
   // m_Texture = std::make_unique<Texture>(renderer->getContext(), Config::getResourceFile("viking_room.png"));
@@ -97,6 +95,9 @@ void CubeSample::update(float deltaTime) {
   m_ModelPosition = glm::vec3(f / 2, 0.0f, 0.0f);
   m_RotationAxis = glm::mix(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), f);
 
+  processCameraInput();
+  updateCamera(deltaTime);
+
   // Get current frame index
   uint32_t currentFrame = m_Renderer->getCurrentFrame();
 
@@ -112,17 +113,8 @@ void CubeSample::updateUniformBuffer(uint32_t currentImage) {
   ubo.model = glm::rotate(ubo.model, glm::radians(m_RotationAngle), m_RotationAxis);
 
   // View matrix - slight distance from the quad
-  ubo.view = glm::lookAt(glm::vec3(2.0f, 0.2f, 2.0f),   // Camera position
-                         glm::vec3(0.0f, 0.0f, 0.0f),   // Look at origin
-                         glm::vec3(0.0f, 1.0f, 0.0f));  // Up vector
-
-  // Projection matrix
-  VkExtent2D extent = m_Renderer->getSwapChain()->getExtent();
-  float aspect = extent.width / (float)extent.height;
-  ubo.proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
-
-  // Flip Y coordinate for Vulkan
-  ubo.proj[1][1] *= -1;
+  ubo.view = m_Camera->getViewMatrix();
+  ubo.proj = m_Camera->getProjectionMatrix();
 
   // Update the uniform buffer
   m_UniformBuffers[currentImage]->update(&ubo, sizeof(ubo));

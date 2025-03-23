@@ -23,7 +23,6 @@ class CubeSample : public Sample {
   void updateUniformBuffer(uint32_t currentImage);
 
  private:
-  Renderer* m_Renderer = nullptr;
   std::unique_ptr<Mesh> m_Mesh;
 
   std::unique_ptr<Texture> m_Texture;
