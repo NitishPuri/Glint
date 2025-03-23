@@ -48,7 +48,8 @@ void CubeSample::initSample(Window* window, Renderer* renderer) {
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
   config.depthTestEnable = true;
   config.depthWriteEnable = true;
-  config.cullMode = VK_CULL_MODE_BACK_BIT;
+  // config.cullMode = VK_CULL_MODE_BACK_BIT;
+  config.cullMode = VK_CULL_MODE_NONE;
   //   config.blendEnable = true;
 
   renderer->createPipeline(&config);

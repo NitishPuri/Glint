@@ -3,10 +3,15 @@
 #include <stdexcept>
 
 #include "core/logger.h"
-#include "imgui_manager.h"
 #include "renderer/render_pass.h"
 #include "renderer/renderer.h"
+#include "ui/imgui_manager.h"
+
+// samples
+#include "cube_sample.h"
+#include "rotating_sample.h"
 #include "sample.h"
+#include "textured_quad.h"
 
 namespace glint {
 
@@ -14,6 +19,8 @@ void SampleManager::init(Window* window, Renderer* renderer) {
   LOGFN;
   m_Window = window;
   m_Renderer = renderer;
+
+  registerAllSamples();
 }
 
 void SampleManager::cleanup() {
@@ -31,6 +38,14 @@ void SampleManager::cleanup() {
   m_Samples.clear();
 }
 
+void SampleManager::registerAllSamples() {
+  registerSample(std::make_unique<glint::TriangleSample>());
+  registerSample(std::make_unique<glint::QuadSample>());
+  registerSample(std::make_unique<glint::RotatingSample>());
+  registerSample(std::make_unique<glint::TexturedRotatingSample>());
+  registerSample(std::make_unique<glint::CubeSample>());
+}
+
 void SampleManager::registerSample(std::unique_ptr<Sample> sample) {
   LOGFN;
   std::string name = sample->getName();
@@ -38,6 +53,7 @@ void SampleManager::registerSample(std::unique_ptr<Sample> sample) {
 
   // Store the sample
   m_Samples[name] = std::move(sample);
+  m_SampleNames.push_back(name);
 
   // If this is the first sample, make it active
   if (!m_ActiveSample && m_Renderer) {
@@ -88,8 +104,23 @@ void SampleManager::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   // auto pipeline = m_Renderer->getPipeline();
 
   // Begin render pass (moved from Sample)
-  renderPass->begin(commandBuffer, imageIndex, {0.1f, 0.1f, 0.2f, 1.0f});
 
+  ImGui::Begin("Sample Selector");
+  if (ImGui::BeginCombo("Samples", m_ActiveSample->getName().c_str())) {
+    for (auto& name : m_SampleNames) {
+      bool isSelected = (m_ActiveSample->getName() == name);
+      if (ImGui::Selectable(name.c_str(), isSelected)) {
+        setActiveSample(name);
+      }
+      if (isSelected) {
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndCombo();
+  }
+  ImGui::End();
+
+  renderPass->begin(commandBuffer, imageIndex, {0.1f, 0.1f, 0.2f, 1.0f});
   if (m_ActiveSample) {
     m_ActiveSample->render(commandBuffer, imageIndex);
   }

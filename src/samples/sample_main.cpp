@@ -21,14 +21,11 @@
 #include "renderer/swapchain.h"
 #include "renderer/synchronization_manager.h"
 #include "renderer/vk_context.h"
+#include "ui/imgui_manager.h"
 
 //
-#include "cube_sample.h"
-#include "imgui_manager.h"
-#include "rotating_sample.h"
 #include "sample.h"
 #include "sample_manager.h"
-#include "textured_quad.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -76,13 +73,6 @@ class App {
   void initSamples() {
     LOGFN;
     sampleManager.init(window.get(), renderer.get());
-
-    sampleManager.registerSample(std::make_unique<glint::TriangleSample>());
-    sampleManager.registerSample(std::make_unique<glint::QuadSample>());
-    sampleManager.registerSample(std::make_unique<glint::RotatingSample>());
-    sampleManager.registerSample(std::make_unique<glint::TexturedRotatingSample>());
-    sampleManager.registerSample(std::make_unique<glint::CubeSample>());
-
     sampleManager.setActiveSample("CubeSample");
   }
 
@@ -124,24 +114,6 @@ class App {
       sampleManager.update(deltaTime);
 
       glint::ImGuiManager::newFrame();
-
-      ImGui::Begin("Sample Selector");
-      if (ImGui::Button("Triangle")) {
-        sampleManager.setActiveSample("Triangle Sample");
-      }
-      if (ImGui::Button("Quad")) {
-        sampleManager.setActiveSample("Quad Sample");
-      }
-      if (ImGui::Button("Rotating")) {
-        sampleManager.setActiveSample("RotatingSample");
-      }
-      if (ImGui::Button("Textured Rotating")) {
-        sampleManager.setActiveSample("TexturedRotatingSample");
-      }
-      if (ImGui::Button("Cube")) {
-        sampleManager.setActiveSample("CubeSample");
-      }
-      ImGui::End();
 
       ImGui::Begin("Glint Stats");
       ImGui::Text("FPS: %.1f", fps);

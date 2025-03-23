@@ -40,6 +40,30 @@
 - ecs
 - spatial partitioninng
 
+### Roadmap
+- scene system, ability to support multiple objects with different material systems
+- custom material/shader system
+- procedural textures, perlin, vornoi, fractals
+- material editor
+- lighting
+- obj/gltf loading
+- post processing
+- procedural meshes
+- fractal geometry
+- mesh operations - smoothing, subdivision, boolean, extrusion, bevels
+- blender like geometry nodes
+- animation
+- keyframe, rigging/skeletal aniamtion, skinning
+- physics based animation/simualations
+- particle systems
+- smoke/fog based effects
+- serialization
+- asset management
+- scripting?
+
+
+
+
 ### dependencies
 
 - Vulkan SDK

@@ -101,7 +101,7 @@ void BasicSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
 QuadSample::QuadSample() : BasicSample("Quad Sample") {}
 
 void QuadSample::initSample(Window* window, Renderer* renderer) {
-  BasicSample::init(window, renderer);
+  BasicSample::initSample(window, renderer);
   setMesh(MeshFactory::createQuad(renderer->getContext()));
 }
 

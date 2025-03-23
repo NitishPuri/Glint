@@ -7,7 +7,6 @@
 #include "core/config.h"
 #include "core/logger.h"
 #include "core/window.h"
-#include "imgui_manager.h"
 #include "renderer/descriptor.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
@@ -16,6 +15,7 @@
 #include "renderer/swapchain.h"
 #include "renderer/texture.h"
 #include "renderer/vk_utils.h"
+#include "ui/imgui_manager.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
