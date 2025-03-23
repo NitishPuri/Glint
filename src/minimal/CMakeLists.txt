@@ -14,6 +14,7 @@ function(add_glint_app APP_NAME)
     # Set output directory
     set_target_properties(${APP_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        FOLDER "MinimalApps"
     )
 endfunction()
 

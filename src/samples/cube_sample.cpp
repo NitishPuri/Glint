@@ -19,7 +19,7 @@ namespace glint {
 
 CubeSample::CubeSample() : Sample("CubeSample") { LOGFN; }
 
-void CubeSample::init(Window* window, Renderer* renderer) {
+void CubeSample::initSample(Window* window, Renderer* renderer) {
   LOGFN;
   m_Renderer = renderer;
 

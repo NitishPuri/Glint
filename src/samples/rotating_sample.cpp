@@ -16,7 +16,7 @@ namespace glint {
 
 RotatingSample::RotatingSample() : Sample("RotatingSample") { LOGFN; }
 
-void RotatingSample::init(Window* window, Renderer* renderer) {
+void RotatingSample::initSample(Window* window, Renderer* renderer) {
   LOGFN;
   m_Renderer = renderer;
 

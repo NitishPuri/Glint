@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 
-add_library(glint_core STATIC
+set(GLINT_SOURCES 
     core/window.cpp
     core/config.cpp
+    core/camera.cpp
     renderer/command_manager.cpp
     renderer/vertex.cpp
     renderer/mesh.cpp
@@ -16,6 +17,34 @@ add_library(glint_core STATIC
     renderer/vk_utils.cpp
     renderer/descriptor.cpp    
     renderer/texture.cpp
+)
+
+set (GLINT_INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set(GLINT_HEADERS
+    core/window.h
+    core/config.h
+    core/camera.h
+    renderer/command_manager.h
+    renderer/vertex.h
+    renderer/mesh.h
+    renderer/mesh_factory.h
+    renderer/pipeline.h
+    renderer/render_pass.h
+    renderer/renderer.h
+    renderer/swapchain.h
+    renderer/synchronization_manager.h
+    renderer/vk_context.h
+    renderer/vk_utils.h
+    renderer/descriptor.h    
+    renderer/texture.h
+)
+
+add_library(glint_core STATIC
+    ${GLINT_SOURCES}
+    ${GLINT_HEADERS}
 )
 
 target_include_directories(glint_core PUBLIC 

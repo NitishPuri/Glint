@@ -3,11 +3,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include "core/camera.h"
 #include "core/config.h"
 #include "core/logger.h"
 #include "core/window.h"
 #include "imgui_manager.h"
-#include "renderer/camera.h"
 #include "renderer/descriptor.h"
 #include "renderer/mesh_factory.h"
 #include "renderer/pipeline.h"
@@ -200,7 +200,7 @@ class App {
   std::unique_ptr<Renderer> renderer = nullptr;
   std::unique_ptr<Mesh> mesh = nullptr;
   std::unique_ptr<Texture> m_Texture = nullptr;
-  glint::ArcballCamera m_Camera;
+  glint::Camera m_Camera;
 
   std::unique_ptr<DescriptorSetLayout> m_DescriptorSetLayout = nullptr;
   std::unique_ptr<DescriptorPool> m_DescriptorPool = nullptr;

@@ -14,7 +14,7 @@ class CubeSample : public Sample {
  public:
   CubeSample();
 
-  void init(Window* window, Renderer* renderer) override;
+  void initSample(Window* window, Renderer* renderer) override;
   void update(float deltaTime) override;
   void render(VkCommandBuffer commandBuffer, uint32_t imageIndex) override;
   void cleanup() override;
