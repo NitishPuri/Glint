@@ -92,11 +92,13 @@ class Descriptor {
   // void updateUniformBuffer(VkBuffer buffer, size_t size);
   // void updateUniformBuffers(std::vector<std::unique_ptr<UniformBuffer>> buffers, size_t size);
   // void updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset = 0, uint32_t setIndex = 0);
-  void updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset = 0, uint32_t setIndex = 0);
+  void updateUniformBuffer(uint32_t binding, VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset = 0,
+                           uint32_t setIndex = 0);
 
-  void updateTextureSampler(VkImageView imageView, VkSampler sampler, uint32_t setIndex = 0);
+  void updateTextureSampler(uint32_t binding, VkImageView imageView, VkSampler sampler, uint32_t setIndex = 0);
 
-  void bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex = 0);
+  void bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex = 0,
+            const uint32_t* pDynamicOffsets = nullptr);
 
   // VkDescriptorSet getDescriptorSet() const { return m_DescriptorSet; }
 
@@ -111,21 +113,32 @@ class Descriptor {
 
 class UniformBuffer {
  public:
-  UniformBuffer(VkContext* context, size_t size);
+  // TODO: Instead of passing in properties, maybe just a boolean flag to state whether its a dynamic ubo or not
+  // Will depend on whether there are more such variations on usage
+  UniformBuffer(VkContext* context, size_t size,
+                VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                                   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
   ~UniformBuffer();
 
   // Prevent copying
   UniformBuffer(const UniformBuffer&) = delete;
   UniformBuffer& operator=(const UniformBuffer&) = delete;
 
-  void update(const void* data, size_t size);
+  void update(const void* data);
   VkBuffer getBuffer() const { return m_Buffer; }
+  VkDeviceMemory getMemory() const { return m_Memory; }
+  VkDescriptorBufferInfo& descriptor() { return m_Descriptor; }
+  VkDeviceSize getSize() const { return m_BufferSize; }
 
  private:
   VkContext* m_Context;
+
   VkBuffer m_Buffer = VK_NULL_HANDLE;
   VkDeviceMemory m_Memory = VK_NULL_HANDLE;
+  VkDeviceSize m_BufferSize = 0;
+
   void* m_MappedData = nullptr;
+  VkDescriptorBufferInfo m_Descriptor{};
 };
 
 }  // namespace glint

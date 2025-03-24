@@ -22,9 +22,7 @@ void DescriptorSetLayout::createLayout() {
   layoutInfo.bindingCount = static_cast<uint32_t>(m_Bindings.size());
   layoutInfo.pBindings = m_Bindings.data();
 
-  if (vkCreateDescriptorSetLayout(m_Context->getDevice(), &layoutInfo, nullptr, &m_Layout) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to create descriptor set layout!");
-  }
+  VK_CHECK_RESULT(vkCreateDescriptorSetLayout(m_Context->getDevice(), &layoutInfo, nullptr, &m_Layout));
 }
 
 DescriptorSetLayout::~DescriptorSetLayout() {
@@ -66,9 +64,7 @@ DescriptorPool::DescriptorPool(VkContext* context, uint32_t maxSets) : m_Context
   poolInfo.maxSets = maxSets;  // Maximum number of descriptor sets that can be allocated
   poolInfo.flags = 0;  // Optional: VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT allows individual sets to be freed
 
-  if (vkCreateDescriptorPool(m_Context->getDevice(), &poolInfo, nullptr, &m_Pool) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to create descriptor pool!");
-  }
+  VK_CHECK_RESULT(vkCreateDescriptorPool(m_Context->getDevice(), &poolInfo, nullptr, &m_Pool));
 
   LOG("Created descriptor pool with capacity for", maxSets, "uniform buffer descriptors");
 }
@@ -158,9 +154,7 @@ Descriptor::Descriptor(VkContext* context, DescriptorSetLayout* layout, Descript
   allocInfo.descriptorSetCount = count;
   allocInfo.pSetLayouts = layouts.data();
 
-  if (vkAllocateDescriptorSets(m_Context->getDevice(), &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to allocate descriptor sets!");
-  }
+  VK_CHECK_RESULT(vkAllocateDescriptorSets(m_Context->getDevice(), &allocInfo, m_DescriptorSets.data()));
 
   LOG("Allocated", count, "descriptor sets");
 }
@@ -170,13 +164,15 @@ Descriptor::~Descriptor() {
   // No need to explicitly free descriptor sets - they'll be freed when the pool is destroyed
 }
 
-void Descriptor::updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset, uint32_t setIndex) {
+void Descriptor::updateUniformBuffer(uint32_t binding, VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset,
+                                     uint32_t setIndex) {
   LOGFN_ONCE;
   if (setIndex >= m_DescriptorSets.size()) {
     throw std::runtime_error("Descriptor set index out of bounds!");
   }
 
-  // Define the descriptor buffer info
+  // TODO: remove this from here, ubo can keep its descriptor buffer info for write and pass here instead
+
   VkDescriptorBufferInfo bufferInfo{};
   bufferInfo.buffer = buffer;
   bufferInfo.offset = offset;
@@ -186,7 +182,7 @@ void Descriptor::updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDevic
   VkWriteDescriptorSet descriptorWrite{};
   descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
   descriptorWrite.dstSet = m_DescriptorSets[setIndex];
-  descriptorWrite.dstBinding = 0;  // Binding point in the shader
+  descriptorWrite.dstBinding = binding;  // Binding point in the shader
   descriptorWrite.dstArrayElement = 0;
   descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
   descriptorWrite.descriptorCount = 1;
@@ -196,7 +192,7 @@ void Descriptor::updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDevic
   vkUpdateDescriptorSets(m_Context->getDevice(), 1, &descriptorWrite, 0, nullptr);
 }
 
-void Descriptor::updateTextureSampler(VkImageView imageView, VkSampler sampler, uint32_t setIndex) {
+void Descriptor::updateTextureSampler(uint32_t binding, VkImageView imageView, VkSampler sampler, uint32_t setIndex) {
   LOGFN_ONCE;
   if (setIndex >= m_DescriptorSets.size()) {
     throw std::runtime_error("Descriptor set index out of bounds!");
@@ -212,7 +208,7 @@ void Descriptor::updateTextureSampler(VkImageView imageView, VkSampler sampler, 
   VkWriteDescriptorSet descriptorWrite{};
   descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
   descriptorWrite.dstSet = m_DescriptorSets[setIndex];
-  descriptorWrite.dstBinding = 1;  // Binding point in the shader
+  descriptorWrite.dstBinding = binding;  // Binding point in the shader
   descriptorWrite.dstArrayElement = 0;
   descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
   descriptorWrite.descriptorCount = 1;
@@ -222,7 +218,8 @@ void Descriptor::updateTextureSampler(VkImageView imageView, VkSampler sampler, 
   vkUpdateDescriptorSets(m_Context->getDevice(), 1, &descriptorWrite, 0, nullptr);
 }
 
-void Descriptor::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex) {
+void Descriptor::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex,
+                      const uint32_t* pDynamicOffsets) {
   LOGFN_ONCE;
   if (setIndex >= m_DescriptorSets.size()) {
     throw std::runtime_error("Descriptor set index out of bounds!");
@@ -231,23 +228,23 @@ void Descriptor::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLa
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
                           0,  // First set
                           1,  // Set count
-                          &m_DescriptorSets[setIndex], 0, nullptr);
+                          &m_DescriptorSets[setIndex], 0, pDynamicOffsets);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // UniformBuffer
 
-UniformBuffer::UniformBuffer(VkContext* context, size_t size) : m_Context(context), m_MappedData(nullptr) {
+UniformBuffer::UniformBuffer(VkContext* context, size_t size, VkMemoryPropertyFlags properties)
+    : m_Context(context), m_MappedData(nullptr) {
   LOGFN;
 
-  VkUtils::createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Buffer, m_Memory);
+  VK_CHECK_RESULT(VkUtils::createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, properties, m_Buffer, m_Memory));
 
   // Map memory persistently for the lifetime of the buffer
-  if (vkMapMemory(m_Context->getDevice(), m_Memory, 0, size, 0, &m_MappedData) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to map uniform buffer memory!");
-  }
+  // TODO: Find out if this is good practice, or should i bind and unbind memory when updating
+  VK_CHECK_RESULT(vkMapMemory(m_Context->getDevice(), m_Memory, 0, size, 0, &m_MappedData));
 
+  m_BufferSize = size;
   LOG("Created uniform buffer of size", size, "bytes");
 }
 
@@ -266,10 +263,9 @@ UniformBuffer::~UniformBuffer() {
   }
 }
 
-void UniformBuffer::update(const void* data, size_t size) {
-  LOGFN_ONCE;
+void UniformBuffer::update(const void* data) {
   if (m_MappedData) {
-    memcpy(m_MappedData, data, size);
+    memcpy(m_MappedData, data, m_BufferSize);
   }
 }
 

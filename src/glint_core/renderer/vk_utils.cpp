@@ -67,31 +67,50 @@ void VkUtils::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
   vkFreeCommandBuffers(s_Context->getDevice(), s_Context->getCommandPool(), 1, &commandBuffer);
 }
 
-void VkUtils::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-                           VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+VkResult VkUtils::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
+                               VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+  assert(s_Context != nullptr);
+
+  auto logicalDevice = s_Context->getDevice();
+
   VkBufferCreateInfo bufferInfo{};
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   bufferInfo.size = size;
   bufferInfo.usage = usage;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  if (vkCreateBuffer(s_Context->getDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+  if (vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
     throw std::runtime_error("Failed to create buffer!");
   }
 
   VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements(s_Context->getDevice(), buffer, &memRequirements);
+  vkGetBufferMemoryRequirements(logicalDevice, buffer, &memRequirements);
 
   VkMemoryAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   allocInfo.allocationSize = memRequirements.size;
   allocInfo.memoryTypeIndex = s_Context->findMemoryType(memRequirements.memoryTypeBits, properties);
 
-  if (vkAllocateMemory(s_Context->getDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to allocate buffer memory!");
-  }
+  // If the buffer has VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT set we also need to enable the appropriate flag during
+  // allocation
+  // VkMemoryAllocateFlagsInfoKHR allocFlagsInfo{};
+  // if (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) {
+  //   allocFlagsInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO_KHR;
+  //   allocFlagsInfo.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
+  //   allocInfo.pNext = &allocFlagsInfo;
+  // }
 
-  vkBindBufferMemory(s_Context->getDevice(), buffer, bufferMemory, 0);
+  VK_CHECK_RESULT(vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &bufferMemory));
+
+  // optionally pass in the data to be mapped and copied to the buffer
+  // if (data != nullptr) {
+  //   void* mappedData;
+  //   vkMapMemory(logicalDevice, bufferMemory, 0, size, 0, &mappedData);
+  //   memcpy(mappedData, data, size);
+  //   vkUnmapMemory(logicalDevice, bufferMemory);
+  // }
+
+  return vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
 }
 
 void VkUtils::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {

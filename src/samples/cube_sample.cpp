@@ -42,7 +42,7 @@ void CubeSample::initSample(Window* window, Renderer* renderer) {
 
   // Create pipeline with textured shader
   PipelineConfig config;
-  config.descriptorSetLayout = m_DescriptorSetLayout.get();
+  config.descriptorSetLayout = m_DescriptorSetLayout->getLayout();
   config.vertexShaderPath = Config::getShaderFile("basic_tex.vert");
   config.fragmentShaderPath = Config::getShaderFile("basic_tex.frag");
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;

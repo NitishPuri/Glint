@@ -8,6 +8,12 @@ namespace glint {
 
 namespace initializers {
 
+inline VkMappedMemoryRange mappedMemoryRange() {
+  VkMappedMemoryRange mappedMemoryRange{};
+  mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+  return mappedMemoryRange;
+}
+
 inline VkDescriptorPoolSize descriptorPoolSize(VkDescriptorType type, uint32_t descriptorCount) {
   VkDescriptorPoolSize descriptorPoolSize{};
   descriptorPoolSize.type = type;
@@ -83,6 +89,31 @@ inline VkWriteDescriptorSet writeDescriptorSet(VkDescriptorSet dstSet, VkDescrip
   writeDescriptorSet.pBufferInfo = bufferInfo;
   writeDescriptorSet.descriptorCount = descriptorCount;
   return writeDescriptorSet;
+}
+
+// pipeline
+inline VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo(
+    VkPrimitiveTopology topology, VkPipelineInputAssemblyStateCreateFlags flags, VkBool32 primitiveRestartEnable) {
+  VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo{};
+  pipelineInputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+  pipelineInputAssemblyStateCreateInfo.topology = topology;
+  pipelineInputAssemblyStateCreateInfo.flags = flags;
+  pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = primitiveRestartEnable;
+  return pipelineInputAssemblyStateCreateInfo;
+}
+
+inline VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo(
+    VkPolygonMode polygonMode, VkCullModeFlags cullMode, VkFrontFace frontFace,
+    VkPipelineRasterizationStateCreateFlags flags = 0) {
+  VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo{};
+  pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+  pipelineRasterizationStateCreateInfo.polygonMode = polygonMode;
+  pipelineRasterizationStateCreateInfo.cullMode = cullMode;
+  pipelineRasterizationStateCreateInfo.frontFace = frontFace;
+  pipelineRasterizationStateCreateInfo.flags = flags;
+  pipelineRasterizationStateCreateInfo.depthClampEnable = VK_FALSE;
+  pipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
+  return pipelineRasterizationStateCreateInfo;
 }
 
 }  // namespace initializers

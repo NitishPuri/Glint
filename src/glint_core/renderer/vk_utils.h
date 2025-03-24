@@ -24,8 +24,9 @@ class VkUtils {
   }
 
   // Buffer operations
-  static void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-                           VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+  // TODO: Move into Buffer class
+  static VkResult createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
+                               VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
   static void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 

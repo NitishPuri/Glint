@@ -33,7 +33,7 @@ void RotatingSample::initSample(Window* window, Renderer* renderer) {
                               .build();
 
   PipelineConfig config;
-  config.descriptorSetLayout = m_DescriptorSetLayout.get();
+  config.descriptorSetLayout = m_DescriptorSetLayout->getLayout();
   config.vertexShaderPath = Config::getShaderFile("baseMVP.vert");
   config.fragmentShaderPath = Config::getShaderFile("base.frag");
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;

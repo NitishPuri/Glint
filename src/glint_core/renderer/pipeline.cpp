@@ -9,6 +9,7 @@
 #include "render_pass.h"
 #include "swapchain.h"
 #include "vk_context.h"
+#include "vk_utils.h"
 
 namespace glint {
 
@@ -69,11 +70,9 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
   vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
-  LOG("Input Assembly");
-  LOGCALL(VkPipelineInputAssemblyStateCreateInfo inputAssembly{});
-  inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-  inputAssembly.topology = config.topology;
-  inputAssembly.primitiveRestartEnable = VK_FALSE;
+  // Input Assembly
+  VkPipelineInputAssemblyStateCreateInfo inputAssembly =
+      initializers::pipelineInputAssemblyStateCreateInfo(config.topology, 0, VK_FALSE);
 
   LOG("Dynamic States - used for viewport and scissor");
   std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
@@ -91,23 +90,8 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   viewportState.pScissors = nullptr;  // dynamic states
 
   // Rasterizer
-  LOG("Rasterizer");
-  LOGCALL(VkPipelineRasterizationStateCreateInfo rasterizer{});
-  rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-  rasterizer.depthClampEnable = VK_FALSE;
-  rasterizer.rasterizerDiscardEnable = VK_FALSE;
-  LOGCALL(rasterizer.polygonMode = VK_POLYGON_MODE_FILL);  // VK_POLYGON_MODE_LINE, VK_POLYGON_MODE_POINT
-  LOGCALL(rasterizer.lineWidth = 1.0f);
-  rasterizer.cullMode = config.cullMode;
-  rasterizer.frontFace = config.frontFace;
-
-  // LOG("Using counter-clockwise winding for all geometry");
-
-  LOGCALL(rasterizer.depthBiasEnable = VK_FALSE);
-  // LOG("Depth Bias, for shadow mapping.");
-  rasterizer.depthBiasConstantFactor = 0.0f;  // Optional
-  rasterizer.depthBiasClamp = 0.0f;           // Optional
-  rasterizer.depthBiasSlopeFactor = 0.0f;     // Optional
+  VkPipelineRasterizationStateCreateInfo rasterizer =
+      initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, config.cullMode, config.frontFace);
 
   // Multisampling
   LOG("Multisampling, disabled for now.");
@@ -161,9 +145,8 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   colorBlending.blendConstants[2] = 0.0f;  // Optional
   colorBlending.blendConstants[3] = 0.0f;  // Optional
 
-  LOG("Pipeline Layout");
-  LOG("uniform values, push constants, etc.");
-  LOGCALL(VkPipelineLayoutCreateInfo pipelineLayoutInfo{});
+  VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+  pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
   if (config.descriptorSetLayout != VK_NULL_HANDLE) {
     LOG("Including descriptor set layout in pipeline layout");
@@ -182,19 +165,14 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
     pipelineLayoutInfo.pSetLayouts = &config.descriptorSetLayout;
   } else {
     LOG("No descriptor set layout for pipeline layout");
-
     pipelineLayoutInfo.setLayoutCount = 0;
     pipelineLayoutInfo.pSetLayouts = nullptr;
   }
 
-  pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   pipelineLayoutInfo.pushConstantRangeCount = 0;     // Optional
   pipelineLayoutInfo.pPushConstantRanges = nullptr;  // Optional
 
-  if (LOGCALL(vkCreatePipelineLayout(m_Context->getDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout)) !=
-      VK_SUCCESS) {
-    throw std::runtime_error("failed to create pipeline layout!");
-  }
+  VK_CHECK_RESULT(vkCreatePipelineLayout(m_Context->getDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
 
   VkGraphicsPipelineCreateInfo pipelineInfo{};
   pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
