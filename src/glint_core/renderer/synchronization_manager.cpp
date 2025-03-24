@@ -4,6 +4,7 @@
 
 #include "core/logger.h"
 #include "vk_context.h"
+#include "vk_tools.h"
 
 namespace glint {
 
@@ -70,7 +71,7 @@ void SynchronizationManager::waitForFence(uint32_t frameIndex) {
   }
 
   LOG_ONCE("Wait for the previous frame to be finished");
-  vkWaitForFences(m_Context->getDevice(), 1, &m_InFlightFence[frameIndex], VK_TRUE, UINT64_MAX);
+  vkWaitForFences(m_Context->getDevice(), 1, &m_InFlightFence[frameIndex], VK_TRUE, DEFAULT_FENCE_TIMEOUT);
 }
 
 void SynchronizationManager::resetFence(uint32_t frameIndex) {

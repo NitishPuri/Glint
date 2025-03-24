@@ -61,7 +61,7 @@ void Texture::createTextureImage(const std::string& filepath) {
   m_Width = texWidth;
   m_Height = texHeight;
 
-  m_mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
+  m_mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max<int>(texWidth, texHeight)))) + 1;
 
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;

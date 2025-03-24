@@ -268,9 +268,10 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilit
 }
 
 void SwapChain::createColorResources() {
+  LOGFN;
   VkExtent2D extent = m_Extent;
-  extent.width = std::max(1u, extent.width);
-  extent.height = std::max(1u, extent.height);
+  extent.width = std::max<uint32_t>(1u, extent.width);
+  extent.height = std::max<uint32_t>(1u, extent.height);
 
   VkUtils::createImage(extent.width, extent.height, 1, m_Context->getMsaaSamples(), m_ImageFormat,
                        VK_IMAGE_TILING_OPTIMAL,

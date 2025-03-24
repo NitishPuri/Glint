@@ -14,7 +14,8 @@ set(GLINT_SOURCES
     renderer/swapchain.cpp
     renderer/synchronization_manager.cpp
     renderer/vk_context.cpp
-    renderer/vk_utils.cpp
+    renderer/vk_utils.cpp    
+    renderer/vk_tools.cpp
     renderer/descriptor.cpp    
     renderer/texture.cpp
 )
@@ -38,6 +39,7 @@ set(GLINT_HEADERS
     renderer/synchronization_manager.h
     renderer/vk_context.h
     renderer/vk_utils.h
+    renderer/vk_tools.h
     renderer/descriptor.h    
     renderer/texture.h
 )

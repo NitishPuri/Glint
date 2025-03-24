@@ -85,7 +85,7 @@ class App {
     config.depthWriteEnable = true;
     // config.cullMode = VK_CULL_MODE_BACK_BIT;
     config.cullMode = VK_CULL_MODE_NONE;
-    config.descriptorSetLayout = m_DescriptorSetLayout.get();
+    config.descriptorSetLayout = m_DescriptorSetLayout->getLayout();
 
     renderer->createPipeline(&config);
 
