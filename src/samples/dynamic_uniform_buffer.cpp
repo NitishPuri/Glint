@@ -41,12 +41,6 @@ void alignedFree(void* data) {
 
 namespace glint {
 
-// struct UniformBufferObject {
-//   alignas(16) glm::mat4 model;
-//   alignas(16) glm::mat4 view;
-//   alignas(16) glm::mat4 proj;
-// };
-
 DynamicUniformBuffer::DynamicUniformBuffer() : Sample("DynamicUniformBuffer") { LOGFN; }
 
 void DynamicUniformBuffer::prepareUniformBuffers() {
@@ -97,38 +91,26 @@ void DynamicUniformBuffer::prepareUniformBuffers() {
 }
 
 void DynamicUniformBuffer::setupDescriptors() {
+  assert(m_Renderer && m_Renderer->getContext());
   auto device = m_Renderer->getContext()->getDevice();
-  // Pool
-  std::vector<VkDescriptorPoolSize> poolSizes = {
-      glint::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
-      // Dynamic uniform buffer
-      glint::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1)};
 
-  VkDescriptorPoolCreateInfo descriptorPoolInfo = glint::initializers::descriptorPoolCreateInfo(poolSizes, 2);
-  VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
+  // layout
+  m_DescriptorSetLayout = DescriptorSetLayout::Builder(m_Renderer->getContext())
+                              .addUniformBuffer(0, VK_SHADER_STAGE_VERTEX_BIT)
+                              .addBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT)
+                              .build();
+  // pool
+  m_DescriptorPool = std::make_unique<DescriptorPool>(m_Renderer->getContext(), m_DescriptorSetLayout.get(), 2);
 
-  // Layout
-  std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
-      glint::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0),
-      // Dynamic uniform buffer
-      glint::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-                                                      VK_SHADER_STAGE_VERTEX_BIT, 1)};
+  // descriptor
+  m_Descriptor =
+      std::make_unique<Descriptor>(m_Renderer->getContext(), m_DescriptorSetLayout.get(), m_DescriptorPool.get(), 1);
 
-  VkDescriptorSetLayoutCreateInfo descriptorLayout =
-      glint::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
-  VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &descriptorSetLayout));
-
-  // Set
-  VkDescriptorSetAllocateInfo allocInfo =
-      glint::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
-  VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet));
-
-  // write descriptors
-  // VkDescriptorBufferInfo viewUniformDesc{};
-  // viewUniformDesc.buffer = m_viewUBO->getBuffer();
-  // viewUniformDesc.offset = offset;
-  // viewUniformDesc.range = size;
-
+  // TODO: Here instead of usinf m_Descriptor->updateUniformBuffer, we are directly building the writeDescriptorSets
+  //  and calling vkUpdateDescriptorSets. This is because we need to update the dynamic uniform buffer with offsets
+  // This is in contrast to previous samples, and with the builder pattern we used for the descriptor set layout
+  //  Should refactor either this, or remove the builder pattern and use the same method as here for the layout
+  auto& descriptorSet = m_Descriptor->getDescriptorSets()[0];
   std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
       // Binding 0 : Projection/View matrix as uniform buffer
       glint::initializers::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0,
@@ -152,49 +134,22 @@ void DynamicUniformBuffer::initSample(Window* window, Renderer* renderer) {
   initCamera(1, 60, 0.1, 256);
   m_Camera->setPosition(0.0f, 0.0f, -30.0f);
 
-  // Create descriptor set layout
-  // m_DescriptorSetLayout = DescriptorSetLayout::Builder(renderer->getContext())
-  //                             .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
-  //                             .addBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT)
-  //                             .build();
-
-  // // Create descriptor pool with enough capacity for uniform buffers and
-  // m_DescriptorPool = std::make_unique<DescriptorPool>(renderer->getContext(), m_DescriptorSetLayout.get(), 2);
-
   prepareUniformBuffers();
   setupDescriptors();
 
   // Create pipeline
   PipelineConfig config;
-  // config.descriptorSetLayout = m_DescriptorSetLayout.get();
-  config.descriptorSetLayout = descriptorSetLayout;
+  config.descriptorSetLayout = m_DescriptorSetLayout->getLayout();
   config.vertexShaderPath = Config::getShaderFile("dynamic_uniform_buffer.vert");
   config.fragmentShaderPath = Config::getShaderFile("base.frag");
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
   config.depthTestEnable = true;
   config.depthWriteEnable = true;
-  // config.cullMode = VK_CULL_MODE_BACK_BIT;
   config.cullMode = VK_CULL_MODE_NONE;
 
   renderer->createPipeline(&config);
 
-  // Create uniform buffer for each frame in flight
-  // m_UniformBuffers.resize(framesInFlight);
-  // for (auto& ubo : m_UniformBuffers) {
-  //   ubo = std::make_unique<UniformBuffer>(renderer->getContext(), sizeof(UniformBufferObject));
-  // }
-
-  // Create descriptor
-  // m_Descriptor =
-  //     std::make_unique<Descriptor>(renderer->getContext(), m_DescriptorSetLayout.get(), m_DescriptorPool.get(), 2);
-
-  // TODO Can we move this with prepareUniformbuffers?
-  // for (uint32_t i = 0; i < framesInFlight; i++) {
-  // Update uniform buffer
-  // m_Descriptor->updateUniformBuffer(0, m_viewUBO->getBuffer(), sizeof(uboVS), 0, 0);
-  // m_Descriptor->updateUniformBuffer(m_dynamicUBO->getBuffer(), dynamicAlignment, 0, 0);
   auto bufferSize = OBJECT_INSTANCES * dynamicAlignment;
-  // m_Descriptor->updateUniformBuffer(1, m_dynamicUBO->getBuffer(), bufferSize, 1, 0);
 
   // Initial transformations will be set in updateUniformBuffer
   updateUniformBuffers();
@@ -223,71 +178,11 @@ void DynamicUniformBuffer::update(float deltaTime) {
   uint32_t currentFrame = m_Renderer->getCurrentFrame();
 
   animationTimer += deltaTime;
+
   // Update the uniform buffer with new transformation
-  // updateUniformBuffer(currentFrame);
   updateUniformBuffers();
   updateDynamicUniformBuffer();
 }
-
-// void DynamicUniformBuffer::updateUniformBuffers(uint32_t currentImage) {
-//   // UniformBufferObject ubo{};
-
-//   // View matrix - slight distance from the quad
-//   uboVS.view = m_Camera->getViewMatrix();
-//   uboVS.projection = m_Camera->getProjectionMatrix();
-
-//   // Update the uniform buffer
-//   // m_UniformBuffers[currentImage]->update(&ubo, sizeof(ubo));
-//   m_viewUBO->update(&uboVS, sizeof(uboVS));
-
-//   // Update dynamic uniform buffer
-//   // Update at max. 60 fps
-//   // animationTimer += frameTimer;
-//   if (animationTimer <= 1.0f / 60.0f) {
-//     return;
-//   }
-
-//   // Dynamic ubo with per-object model matrices indexed by offsets in the command buffer
-//   uint32_t dim = static_cast<uint32_t>(pow(OBJECT_INSTANCES, (1.0f / 3.0f)));
-//   glm::vec3 offset(5.0f);
-
-//   for (uint32_t x = 0; x < dim; x++) {
-//     for (uint32_t y = 0; y < dim; y++) {
-//       for (uint32_t z = 0; z < dim; z++) {
-//         uint32_t index = x * dim * dim + y * dim + z;
-
-//         // Aligned offset
-//         glm::mat4* modelMat = (glm::mat4*)(((uint64_t)uboDataDynamic.model + (index * dynamicAlignment)));
-
-//         // Update rotations
-//         rotations[index] += animationTimer * rotationSpeeds[index];
-
-//         // Update matrices
-//         glm::vec3 pos = glm::vec3(-((dim * offset.x) / 2.0f) + offset.x / 2.0f + x * offset.x,
-//                                   -((dim * offset.y) / 2.0f) + offset.y / 2.0f + y * offset.y,
-//                                   -((dim * offset.z) / 2.0f) + offset.z / 2.0f + z * offset.z);
-//         *modelMat = glm::translate(glm::mat4(1.0f), pos);
-//         *modelMat = glm::rotate(*modelMat, rotations[index].x, glm::vec3(1.0f, 1.0f, 0.0f));
-//         *modelMat = glm::rotate(*modelMat, rotations[index].y, glm::vec3(0.0f, 1.0f, 0.0f));
-//         *modelMat = glm::rotate(*modelMat, rotations[index].z, glm::vec3(0.0f, 0.0f, 1.0f));
-//       }
-//     }
-//   }
-
-//   animationTimer = 0.0f;
-
-//   auto bufferSize = OBJECT_INSTANCES * dynamicAlignment;
-//   m_dynamicUBO->update(uboDataDynamic.model, bufferSize);
-
-//   auto device = m_Renderer->getContext()->getDevice();
-//   // memcpy(uniformBuffers.dynamic.mapped, uboDataDynamic.model, uniformBuffers.dynamic.size);
-//   // Flush to make changes visible to the host
-//   VkMappedMemoryRange memoryRange;
-//   memoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-//   memoryRange.pNext = nullptr;
-//   memoryRange.memory = m_dynamicUBO->getMemory();
-//   memoryRange.size = vkFlushMappedMemoryRanges(device, 1, &memoryRange);
-// }
 
 void DynamicUniformBuffer::updateUniformBuffers() {
   LOGFN_ONCE;
@@ -353,60 +248,32 @@ void DynamicUniformBuffer::render(VkCommandBuffer commandBuffer, uint32_t imageI
 
   // Bind pipeline and descriptor sets
   pipeline->bind(commandBuffer);
-  // m_Descriptor->bind(commandBuffer, pipeline->getPipelineLayout(), currentFrame);
 
   m_Mesh->bind(commandBuffer);
 
   // Set viewport and scissor
   setupDefaultVieportAndScissor(commandBuffer, m_Renderer);
 
-  // m_Descriptor->bind(commandBuffer, pipeline->getPipelineLayout(), 0);
-
-  // Bind and draw mesh
-  // m_Mesh->draw(commandBuffer);
   for (uint32_t j = 0; j < OBJECT_INSTANCES; j++) {
     // One dynamic offset per dynamic descriptor to offset into the ubo containing all model matrices
     uint32_t dynamicOffset = j * static_cast<uint32_t>(dynamicAlignment);
     // Bind the descriptor set for rendering a mesh using the dynamic offset
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 0, 1,
-                            &descriptorSet, 1, &dynamicOffset);
+    // vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 0, 1,
+    //                         &descriptorSet, 1, &dynamicOffset);
 
-    // vkCmdDrawIndexed(drawCmdBuffers[i], indexCount, 1, 0, 0, 0);
+    m_Descriptor->bind(commandBuffer, pipeline->getPipelineLayout(), 0, 1, &dynamicOffset);
+
     m_Mesh->draw(commandBuffer);
   }
-
-  // uint32_t dim = static_cast<uint32_t>(pow(OBJECT_INSTANCES, (1.0f / 3.0f)));
-  // for (uint32_t x = 0; x < dim; x++) {
-  //   for (uint32_t y = 0; y < dim; y++) {
-  //     for (uint32_t z = 0; z < dim; z++) {
-  //       uint32_t index = x * dim * dim + y * dim + z;
-
-  //       // Calculate dynamic offset for this instance
-  //       uint32_t dynamicOffset = index * static_cast<uint32_t>(dynamicAlignment);
-
-  //       // Bind descriptor set with dynamic offset
-  //       // m_Descriptor->bind(commandBuffer, pipeline->getPipelineLayout(), 0, &dynamicOffset);
-
-  //       // Draw the mesh
-  //       m_Mesh->draw(commandBuffer);
-  //     }
-  //   }
-  // }
 }
 
 void DynamicUniformBuffer::cleanup() {
   LOGFN;
-  // Let RAII handle the resources
 
   // m_Descriptor.reset();
-  // m_DescriptorPool.reset();
-  // m_DescriptorSetLayout.reset();
+  m_DescriptorSetLayout.reset();
+  m_DescriptorPool.reset();
 
-  // Clean up uniform buffers
-  // for (auto& ubo : m_UniformBuffers) {
-  //   ubo.reset();
-  // }
-  // m_UniformBuffers.clear();
   m_viewUBO.reset();
   m_dynamicUBO.reset();
 

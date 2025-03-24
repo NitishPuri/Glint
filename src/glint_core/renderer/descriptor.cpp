@@ -34,12 +34,8 @@ DescriptorSetLayout::~DescriptorSetLayout() {
 
 DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(uint32_t binding, VkDescriptorType type,
                                                                        VkShaderStageFlags stageFlags, uint32_t count) {
-  VkDescriptorSetLayoutBinding layoutBinding{};
-  layoutBinding.binding = binding;
-  layoutBinding.descriptorType = type;
-  layoutBinding.descriptorCount = count;
-  layoutBinding.stageFlags = stageFlags;
-  layoutBinding.pImmutableSamplers = nullptr;
+  VkDescriptorSetLayoutBinding layoutBinding =
+      glint::initializers::descriptorSetLayoutBinding(type, stageFlags, binding, count);
 
   m_Bindings.push_back(layoutBinding);
   return *this;
@@ -110,14 +106,7 @@ void DescriptorPool::createFromBindings(const std::vector<VkDescriptorSetLayoutB
   poolInfo.maxSets = maxSets;
   poolInfo.flags = 0;
 
-  if (vkCreateDescriptorPool(m_Context->getDevice(), &poolInfo, nullptr, &m_Pool) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to create descriptor pool!");
-  }
-
-  LOG("Created descriptor pool with capacity for", maxSets, "descriptor sets with multiple types");
-  for (const auto& poolSize : poolSizes) {
-    LOG("  Type:", static_cast<int>(poolSize.type), "Count:", poolSize.descriptorCount);
-  }
+  VK_CHECK_RESULT(vkCreateDescriptorPool(m_Context->getDevice(), &poolInfo, nullptr, &m_Pool));
 }
 
 // Constructor that takes a layout
@@ -219,7 +208,7 @@ void Descriptor::updateTextureSampler(uint32_t binding, VkImageView imageView, V
 }
 
 void Descriptor::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex,
-                      const uint32_t* pDynamicOffsets) {
+                      uint32_t dynamicOffsetCount, const uint32_t* pDynamicOffsets) {
   LOGFN_ONCE;
   if (setIndex >= m_DescriptorSets.size()) {
     throw std::runtime_error("Descriptor set index out of bounds!");
@@ -228,7 +217,7 @@ void Descriptor::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLa
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
                           0,  // First set
                           1,  // Set count
-                          &m_DescriptorSets[setIndex], 0, pDynamicOffsets);
+                          &m_DescriptorSets[setIndex], dynamicOffsetCount, pDynamicOffsets);
 }
 
 ///////////////////////////////////////////////////////////////////////////

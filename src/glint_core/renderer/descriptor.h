@@ -89,18 +89,16 @@ class Descriptor {
   Descriptor(const Descriptor&) = delete;
   Descriptor& operator=(const Descriptor&) = delete;
 
-  // void updateUniformBuffer(VkBuffer buffer, size_t size);
-  // void updateUniformBuffers(std::vector<std::unique_ptr<UniformBuffer>> buffers, size_t size);
-  // void updateUniformBuffer(VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset = 0, uint32_t setIndex = 0);
   void updateUniformBuffer(uint32_t binding, VkBuffer buffer, VkDeviceSize size, VkDeviceSize offset = 0,
                            uint32_t setIndex = 0);
 
   void updateTextureSampler(uint32_t binding, VkImageView imageView, VkSampler sampler, uint32_t setIndex = 0);
 
+  // void bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex);
   void bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t setIndex = 0,
-            const uint32_t* pDynamicOffsets = nullptr);
+            uint32_t dynamicOffsetCount = 0, const uint32_t* pDynamicOffsets = nullptr);
 
-  // VkDescriptorSet getDescriptorSet() const { return m_DescriptorSet; }
+  const std::vector<VkDescriptorSet>& getDescriptorSets() const { return m_DescriptorSets; }
 
  private:
   VkContext* m_Context;
