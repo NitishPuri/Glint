@@ -1,7 +1,11 @@
 
 file (GLOB_RECURSE SHADERS
-    *.vert
-    *.frag
+    base.vert
+    base.frag
+    baseMVP.vert
+    basic_tex.vert
+    basic_tex.frag
+    dynamic_uniform_buffer.vert
 )
 
 # Create shader output directory
