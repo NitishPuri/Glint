@@ -198,7 +198,7 @@ class App {
     ubo.proj[1][1] *= -1;
 
     // Update the uniform buffer
-    m_UniformBuffers[currentImage]->update(&ubo, sizeof(ubo));
+    m_UniformBuffers[currentImage]->update(&ubo);
   }
 
   std::unique_ptr<Window> window = nullptr;

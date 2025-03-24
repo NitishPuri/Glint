@@ -35,12 +35,12 @@ void Pipeline::bind(VkCommandBuffer commandBuffer) {
 void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   LOGFN;
 
-  LOG("Loading shaders, can either load pre-compiled shaders, or compile at runtime to SPIR-V");
   auto vertShaderCode = readFile(config.vertexShaderPath);
   auto fragShaderCode = readFile(config.fragmentShaderPath);
 
-  LOGCALL(VkShaderModule vertShaderModule = createShaderModule(vertShaderCode));
-  LOGCALL(VkShaderModule fragShaderModule = createShaderModule(fragShaderCode));
+  // shaders
+  VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+  VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
   VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
   vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -58,8 +58,7 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
 
   VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
-  LOG("Vertex Input");
-  LOGCALL(VkPipelineVertexInputStateCreateInfo vertexInputInfo{});
+  VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
   vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
   auto bindingDescription = Vertex::getBindingDescription();
@@ -74,28 +73,26 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   VkPipelineInputAssemblyStateCreateInfo inputAssembly =
       initializers::pipelineInputAssemblyStateCreateInfo(config.topology, 0, VK_FALSE);
 
-  LOG("Dynamic States - used for viewport and scissor");
+  // Rasterizer
+  VkPipelineRasterizationStateCreateInfo rasterizer =
+      initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, config.cullMode, config.frontFace);
+
   std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
   VkPipelineDynamicStateCreateInfo dynamicState{};
   dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
   dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
   dynamicState.pDynamicStates = dynamicStates.data();
 
-  LOG("Viewport State, dynamic states are used for viewport and scissor");
-  LOGCALL(VkPipelineViewportStateCreateInfo viewportState{});
+  VkPipelineViewportStateCreateInfo viewportState{};
   viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
   viewportState.viewportCount = 1;
   viewportState.pViewports = nullptr;  // dynamic states
   viewportState.scissorCount = 1;
   viewportState.pScissors = nullptr;  // dynamic states
 
-  // Rasterizer
-  VkPipelineRasterizationStateCreateInfo rasterizer =
-      initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, config.cullMode, config.frontFace);
-
   // Multisampling
-  LOG("Multisampling, disabled for now.");
-  LOGCALL(VkPipelineMultisampleStateCreateInfo multisampling{});
+  // TODO : Make configurable through pipeline config.
+  VkPipelineMultisampleStateCreateInfo multisampling{};
   multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
   multisampling.sampleShadingEnable = VK_FALSE;
   multisampling.rasterizationSamples = m_Context->getMsaaSamples();
@@ -105,45 +102,26 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   multisampling.alphaToOneEnable = VK_FALSE;       // Optional
 
   // Depth and Stencil testing
-  LOG("Depth and Stencil testing, disabled for now, will pass on nullptr");
-  LOGCALL(VkPipelineDepthStencilStateCreateInfo depthStencil{});
+  VkPipelineDepthStencilStateCreateInfo depthStencil{};
   depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
   depthStencil.depthTestEnable = config.depthTestEnable;
   depthStencil.depthWriteEnable = config.depthWriteEnable;
   depthStencil.depthCompareOp = config.depthCompareOp;
+  depthStencil.back.compareOp = VK_COMPARE_OP_ALWAYS;
   depthStencil.depthBoundsTestEnable = VK_FALSE;
-  depthStencil.minDepthBounds = 0.0f;  // Optional
-  depthStencil.maxDepthBounds = 1.0f;  // Optional
   depthStencil.stencilTestEnable = VK_FALSE;
-  depthStencil.front = {};  // Optional
-  depthStencil.back = {};   // Optional
 
   // Color Blending
-  LOG("Color Blending, finalColor = newColor * newAlpha <colorBlendOp> oldColor * (1 - newAlpha)");
-  LOG("It is possible to have multiple color blending attachments, have logical ops, and have separate blending for "
-      "each color channel.");
-  LOGCALL(VkPipelineColorBlendAttachmentState colorBlendAttachment{});
+  VkPipelineColorBlendAttachmentState colorBlendAttachment{};
   colorBlendAttachment.colorWriteMask =
       VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
   colorBlendAttachment.blendEnable = VK_FALSE;
-  colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;   // Optional
-  colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;  // Optional
-  colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;              // Optional
-  colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;   // Optional
-  colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;  // Optional
-  colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;              // Optional
 
-  LOG("Global color blending settings");
-  LOGCALL(VkPipelineColorBlendStateCreateInfo colorBlending{});
+  VkPipelineColorBlendStateCreateInfo colorBlending{};
   colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
   colorBlending.logicOpEnable = VK_FALSE;
-  colorBlending.logicOp = VK_LOGIC_OP_COPY;  // Optional
   colorBlending.attachmentCount = 1;
   colorBlending.pAttachments = &colorBlendAttachment;
-  colorBlending.blendConstants[0] = 0.0f;  // Optional
-  colorBlending.blendConstants[1] = 0.0f;  // Optional
-  colorBlending.blendConstants[2] = 0.0f;  // Optional
-  colorBlending.blendConstants[3] = 0.0f;  // Optional
 
   VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -192,10 +170,8 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;  // Optional
   pipelineInfo.basePipelineIndex = -1;               // Optional
 
-  if (LOGCALL(vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr,
-                                        &m_Pipeline)) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create graphics pipeline!");
-  }
+  VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline));
+
 
   LOG("Cleanup shader modules");
   LOGCALL(vkDestroyShaderModule(m_Context->getDevice(), fragShaderModule, nullptr));

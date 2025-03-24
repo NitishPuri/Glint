@@ -6,6 +6,7 @@
 #include "core/logger.h"
 #include "swapchain.h"
 #include "vk_context.h"
+#include "vk_utils.h"
 
 namespace glint {
 
@@ -99,18 +100,14 @@ void RenderPass::createRenderPass() {
   renderPassInfo.dependencyCount = 1;
   renderPassInfo.pDependencies = &dependency;
 
-  if (LOGCALL(vkCreateRenderPass(m_Context->getDevice(), &renderPassInfo, nullptr, &m_RenderPass)) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create render pass!");
-  }
+  VK_CHECK_RESULT(vkCreateRenderPass(m_Context->getDevice(), &renderPassInfo, nullptr, &m_RenderPass));
 }
 
 void RenderPass::begin(VkCommandBuffer commandBuffer, uint32_t imageIndex, const VkClearColorValue& clearColor) {
-  LOGFN_ONCE;
   std::array<VkClearValue, 2> clearValues{};
   clearValues[0].color = clearColor;
   clearValues[1].depthStencil = {1.0f, 0};  // Default depth clear value (far plane)
 
-  LOG_ONCE("Start Render Pass");
   VkRenderPassBeginInfo renderPassInfo{};
   renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
   renderPassInfo.renderPass = m_RenderPass;
@@ -122,13 +119,9 @@ void RenderPass::begin(VkCommandBuffer commandBuffer, uint32_t imageIndex, const
   renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
   renderPassInfo.pClearValues = clearValues.data();
 
-  LOGCALL_ONCE(vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE));
+  vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void RenderPass::end(VkCommandBuffer commandBuffer) {
-  LOGFN_ONCE;
-  LOG_ONCE("End Render Pass");
-  LOGCALL_ONCE(vkCmdEndRenderPass(commandBuffer));
-}
+void RenderPass::end(VkCommandBuffer commandBuffer) { vkCmdEndRenderPass(commandBuffer); }
 
 }  // namespace glint

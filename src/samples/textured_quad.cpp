@@ -122,7 +122,7 @@ void TexturedRotatingSample::updateUniformBuffer(uint32_t currentImage) {
   ubo.proj[1][1] *= -1;
 
   // Update the uniform buffer
-  m_UniformBuffers[currentImage]->update(&ubo, sizeof(ubo));
+  m_UniformBuffers[currentImage]->update(&ubo);
 }
 
 void TexturedRotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {

@@ -58,7 +58,8 @@ void Renderer::init() {
 void Renderer::createPipeline(const PipelineConfig* config) {
   LOGFN;
 
-  // TODO: Have a way to cache pipelines?
+  // TODO: Have a way to cache pipelines? -> in between samples
+  // TODO: Cache command buffers if needed -> in between frames
   vkDeviceWaitIdle(m_Context->getDevice());
   m_Pipeline.reset();
 

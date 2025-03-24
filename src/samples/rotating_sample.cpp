@@ -77,7 +77,7 @@ void RotatingSample::initSample(Window* window, Renderer* renderer) {
 
   // Update the uniform buffer with initial data
   for (size_t i = 0; i < framesInFlight; i++) {
-    m_UniformBuffers[i]->update(&m_UBOData, sizeof(m_UBOData));
+    m_UniformBuffers[i]->update(&m_UBOData);
   }
 }
 
@@ -94,7 +94,7 @@ void RotatingSample::update(float deltaTime) {
   uint32_t currentFrame = m_Renderer->getCurrentFrame();
 
   // Update uniform buffer with new matrices
-  m_UniformBuffers[currentFrame]->update(&m_UBOData, sizeof(m_UBOData));
+  m_UniformBuffers[currentFrame]->update(&m_UBOData);
 }
 
 void RotatingSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
