@@ -24,7 +24,7 @@ struct PipelineConfig {
   VertexAttributeFlags vertexFormat = VertexAttributeFlags::POSITION_COLOR_TEXCOORD;
 
   // Descriptors
-  DescriptorSetLayout* descriptorSetLayout = nullptr;
+  VkDescriptorSetLayout descriptorSetLayout = {VK_NULL_HANDLE};
 
   // Topology
   VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;

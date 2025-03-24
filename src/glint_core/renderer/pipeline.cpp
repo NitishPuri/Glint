@@ -165,21 +165,21 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   LOG("uniform values, push constants, etc.");
   LOGCALL(VkPipelineLayoutCreateInfo pipelineLayoutInfo{});
 
-  if (config.descriptorSetLayout) {
+  if (config.descriptorSetLayout != VK_NULL_HANDLE) {
     LOG("Including descriptor set layout in pipeline layout");
 
-    VkDescriptorSetLayout layout = config.descriptorSetLayout->getLayout();
+    // VkDescriptorSetLayout layout = config.descriptorSetLayout->getLayout();
     // Weird bug! If the layout is not validated,
     // the pipeline layout will be created with a null handle in release mode
     // always validate your handles!
-    if (layout == VK_NULL_HANDLE) {
-      LOG("Warning: Descriptor set layout handle is null");
-      pipelineLayoutInfo.setLayoutCount = 0;
-      pipelineLayoutInfo.pSetLayouts = nullptr;
-      // throw std::runtime_error("Descriptor set layout is null");
-    }
+    // if (layout == VK_NULL_HANDLE) {
+    // LOG("Warning: Descriptor set layout handle is null");
+    // pipelineLayoutInfo.setLayoutCount = 0;
+    // pipelineLayoutInfo.pSetLayouts = nullptr;
+    // throw std::runtime_error("Descriptor set layout is null");
+    // }
     pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &layout;
+    pipelineLayoutInfo.pSetLayouts = &config.descriptorSetLayout;
   } else {
     LOG("No descriptor set layout for pipeline layout");
 

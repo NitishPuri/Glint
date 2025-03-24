@@ -4,6 +4,8 @@
 
 #include <string>
 
+#include "vk_tools.h"
+
 namespace glint {
 
 class VkContext;

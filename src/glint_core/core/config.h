@@ -26,6 +26,20 @@ class Config {
 
   static void initialize(int argc, char** argv);
 
+  static const bool isOptionSet(const std::string& option) {
+    auto& options = instance().m_cliOptions;
+    return options.find(option) != options.end();
+  }
+
+  static const std::string getCustomeOption(const std::string& option, const std::string& defaultValue = "") {
+    auto& options = instance().m_cliOptions;
+    auto it = options.find(option);
+    if (it != options.end()) {
+      return it->second;
+    }
+    return defaultValue;
+  }
+
  private:
   static Config& instance() {
     static Config config;
@@ -53,6 +67,8 @@ class Config {
   bool m_EnableValidationLayers;
   std::string m_ShaderPath;
   std::string m_ResourcePath;
+
+  std::unordered_map<std::string, std::string> m_cliOptions;
 };
 
 }  // namespace glint

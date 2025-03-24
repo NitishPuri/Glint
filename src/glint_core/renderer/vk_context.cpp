@@ -3,8 +3,10 @@
 #include <set>
 #include <stdexcept>
 
+#include "core/config.h"
 #include "core/logger.h"
 #include "core/window.h"
+#include "renderer/vk_utils.h"
 
 namespace glint {
 
@@ -164,7 +166,19 @@ void VkContext::pickPhysicalDevice() {
   std::vector<VkPhysicalDevice> devices(deviceCount);
   vkEnumeratePhysicalDevices(m_Instance, &deviceCount, devices.data());
 
-  LOG("Available Devices: ", deviceCount);
+  if (Config::isLoggingEnabled() && Config::isOptionSet("list_gpus")) {
+    LOG("Available GPUs:", deviceCount);
+    for (const auto& device : devices) {
+      VkPhysicalDeviceProperties deviceProperties;
+      vkGetPhysicalDeviceProperties(device, &deviceProperties);
+      LOG("Device   : ", deviceProperties.deviceName);
+      LOG("DeviceID : ", deviceProperties.deviceID);
+      LOG("DeviceType : ", glint::tools::physicalDeviceTypeString(deviceProperties.deviceType));
+      LOG("API Version : ", (deviceProperties.apiVersion >> 22), ".", ((deviceProperties.apiVersion >> 12) & 0x3ff),
+          ".", (deviceProperties.apiVersion & 0xfff));
+      LOG("===============================");
+    }
+  }
 
   for (const auto& device : devices) {
     if (isDeviceSuitable(device)) {

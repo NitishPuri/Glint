@@ -33,6 +33,17 @@ void Config::parseCommandLine(int argc, char** argv) {
       if (i + 1 < argc) {
         m_ResourcePath = argv[++i];
       }
+    } else if (arg.substr(0, 2) == "--") {
+      // Custom options
+      std::string option = arg.substr(2);
+      std::string value = "";
+      if (i + 1 < argc) {
+        value = argv[++i];
+      }
+      m_cliOptions[option] = value;
+    } else {
+      m_cliOptions[arg] = "true";
+      // std::cerr << "Unknown option: " << arg << std::endl;
     }
   }
 }
@@ -76,6 +87,12 @@ void Config::initialize(int argc, char** argv) {
     std::cout << "  Validation Layers: " << (areValidationLayersEnabled() ? "enabled" : "disabled") << std::endl;
     std::cout << "  Shader Path: " << getShaderPath() << std::endl;
     std::cout << "  Resource Path: " << getResourcePath() << std::endl;
+    if (!instance().m_cliOptions.empty()) {
+      std::cout << "  Custom Options:" << std::endl;
+      for (const auto& [option, value] : instance().m_cliOptions) {
+        std::cout << "  " << option << ": " << value << std::endl;
+      }
+    }
   }
 }
 
