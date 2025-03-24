@@ -31,6 +31,7 @@ class VkContext {
   VkQueue getGraphicsQueue() const { return m_GraphicsQueue; }
   VkQueue getPresentQueue() const { return m_PresentQueue; }
   VkSurfaceKHR getSurface() const { return m_Surface; }
+  VkPhysicalDeviceProperties getPhysicalDeviceProperties() const;
 
   Window* getWindow() const { return m_Window; }
 

@@ -380,4 +380,10 @@ VkSampleCountFlagBits VkContext::getMaxUsableSampleCount() {
   return VK_SAMPLE_COUNT_1_BIT;
 }
 
+VkPhysicalDeviceProperties VkContext::getPhysicalDeviceProperties() const {
+  VkPhysicalDeviceProperties properties;
+  vkGetPhysicalDeviceProperties(m_PhysicalDevice, &properties);
+  return properties;
+}
+
 }  // namespace glint
