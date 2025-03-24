@@ -118,7 +118,9 @@ void SampleManager::renderSample(VkCommandBuffer commandBuffer, uint32_t imageIn
   }
   ImGui::End();
 
-  renderPass->begin(commandBuffer, imageIndex, {0.1f, 0.1f, 0.2f, 1.0f});
+  VkClearColorValue clearColor = {0.f, 0.f, 0.f, 1.0f};  // black
+  // VkClearColorValue clearColor = {0.1f, 0.1f, 0.2f, 1.0f};  // blue
+  renderPass->begin(commandBuffer, imageIndex, clearColor);
   if (m_ActiveSample) {
     m_ActiveSample->render(commandBuffer, imageIndex);
   }

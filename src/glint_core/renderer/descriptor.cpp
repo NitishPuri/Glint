@@ -244,6 +244,10 @@ UniformBuffer::UniformBuffer(VkContext* context, size_t size, VkMemoryPropertyFl
   // TODO: Find out if this is good practice, or should i bind and unbind memory when updating
   VK_CHECK_RESULT(vkMapMemory(m_Context->getDevice(), m_Memory, 0, size, 0, &m_MappedData));
 
+  m_Descriptor.buffer = m_Buffer;
+  m_Descriptor.offset = 0;
+  m_Descriptor.range = size;
+
   m_BufferSize = size;
   LOG("Created uniform buffer of size", size, "bytes");
 }
