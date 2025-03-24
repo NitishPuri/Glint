@@ -7,6 +7,7 @@
 
 #include "core/camera.h"
 #include "renderer/mesh.h"
+#include "sample_manager.h"
 
 namespace glint {
 
@@ -44,7 +45,7 @@ class Sample {
 
 class BasicSample : public Sample {
  public:
-  BasicSample(const std::string& name = "Basic Sample");
+  BasicSample(const std::string& name = "BasicSample");
 
   void initSample(Window* window, Renderer* renderer) override;
   void update(float deltaTime) override;
@@ -59,7 +60,7 @@ class BasicSample : public Sample {
 
 class TriangleSample : public BasicSample {
  public:
-  TriangleSample() : BasicSample("Triangle Sample") {}
+  TriangleSample() : BasicSample("TriangleSample") {}
 };
 
 class QuadSample : public BasicSample {
@@ -68,5 +69,4 @@ class QuadSample : public BasicSample {
 
   void initSample(Window* window, Renderer* renderer) override;
 };
-
 }  // namespace glint

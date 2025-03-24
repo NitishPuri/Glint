@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -14,26 +15,51 @@ class Renderer;
 
 class SampleManager {
  public:
-  void init(Window* window, Renderer* renderer);
-  void cleanup();
+  static SampleManager& getInstance() {
+    static SampleManager instance;
+    return instance;
+  }
 
-  void registerSample(std::unique_ptr<Sample> sample);
+  template <typename T>
+  static bool registerSample(const std::string& name) {
+    SampleManager& instance = getInstance();
+    instance.registerSample(name, []() { return std::make_unique<T>(); });
+    return true;
+  }
+
+  static std::unique_ptr<Sample> createSample(const std::string& name);
+
+  static std::vector<std::string> getSampleNames();
+
+  static void init(Window* window, Renderer* renderer);
+  static void cleanup();
+
+  // void registerSample(std::unique_ptr<Sample> sample);
   void setActiveSample(const std::string& name);
-  Sample* getActiveSample() const { return m_ActiveSample; }
+  static Sample* getActiveSample() { return getInstance().m_ActiveSample.get(); }
 
-  void update(float deltaTime);
-  void render(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+  static void update(float deltaTime);
+  static void render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+    getInstance().renderSample(commandBuffer, imageIndex);
+  }
 
  private:
-  void registerAllSamples();
+  SampleManager();
 
-  // TODO: Use create sample functions instead of unique_ptr
-  std::unordered_map<std::string, std::unique_ptr<Sample>> m_Samples;
-  Sample* m_ActiveSample = nullptr;
-  Window* m_Window = nullptr;
-  Renderer* m_Renderer = nullptr;
+  void registerSample(const std::string& name, std::function<std::unique_ptr<Sample>()> createFn);
+  void renderSample(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
-  std::vector<std::string> m_SampleNames;
+  std::unordered_map<std::string, std::function<std::unique_ptr<Sample>()>> m_SampleCreators;
+  std::vector<std::string> m_SampleNames;  // for ordering
+
+  std::unique_ptr<Sample> m_ActiveSample;
+  Window* m_Window;
+  Renderer* m_Renderer;
 };
 
 }  // namespace glint
+
+#define REGISTER_SAMPLE(SampleClass)                                                               \
+  namespace {                                                                                      \
+  bool SampleClass##_registered = glint::SampleManager::registerSample<SampleClass>(#SampleClass); \
+  }

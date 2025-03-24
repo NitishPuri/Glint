@@ -34,8 +34,8 @@ void RotatingSample::initSample(Window* window, Renderer* renderer) {
 
   PipelineConfig config;
   config.descriptorSetLayout = m_DescriptorSetLayout.get();
-  config.vertexShaderPath = Config::getShaderFile("shader.vert");
-  config.fragmentShaderPath = Config::getShaderFile("shader.frag");
+  config.vertexShaderPath = Config::getShaderFile("baseMVP.vert");
+  config.fragmentShaderPath = Config::getShaderFile("base.frag");
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
   config.cullMode = VK_CULL_MODE_NONE;
 
@@ -58,7 +58,7 @@ void RotatingSample::initSample(Window* window, Renderer* renderer) {
   // Update descriptor with uniform buffer
   //   m_Descriptor->updateUniformBuffer(0, m_UniformBuffer->getBuffer(), sizeof(UniformBufferObject));
   for (uint32_t i = 0; i < framesInFlight; i++) {
-    m_Descriptor->updateUniformBuffer(m_UniformBuffers[i]->getBuffer(), sizeof(UniformBufferObject), 0, i);
+    m_Descriptor->updateUniformBuffer(0, m_UniformBuffers[i]->getBuffer(), sizeof(UniformBufferObject), 0, i);
   }
 
   // Set initial transformation matrices
@@ -135,5 +135,7 @@ void RotatingSample::cleanup() {
   m_DescriptorSetLayout.reset();
   m_Mesh.reset();
 }
+
+REGISTER_SAMPLE(RotatingSample);
 
 }  // namespace glint

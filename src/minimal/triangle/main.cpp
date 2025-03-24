@@ -41,8 +41,8 @@ class App {
     renderer->init();
 
     glint::PipelineConfig config;
-    config.vertexShaderPath = glint::Config::getShaderFile("basic.vert");
-    config.fragmentShaderPath = glint::Config::getShaderFile("shader.frag");
+    config.vertexShaderPath = glint::Config::getShaderFile("base.vert");
+    config.fragmentShaderPath = glint::Config::getShaderFile("base.frag");
     config.descriptorSetLayout = nullptr;
     config.vertexFormat = glint::VertexAttributeFlags::POSITION_COLOR;
     renderer->createPipeline(&config);

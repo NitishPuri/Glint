@@ -9,6 +9,7 @@
 #include "renderer/render_pass.h"
 #include "renderer/renderer.h"
 #include "renderer/swapchain.h"
+#include "sample_manager.h"
 
 namespace glint {
 
@@ -67,8 +68,8 @@ void BasicSample::initSample(Window* window, Renderer* renderer) {
   m_Renderer = renderer;
 
   PipelineConfig config;
-  config.vertexShaderPath = Config::getShaderFile("basic.vert");
-  config.fragmentShaderPath = Config::getShaderFile("shader.frag");
+  config.vertexShaderPath = Config::getShaderFile("base.vert");
+  config.fragmentShaderPath = Config::getShaderFile("base.frag");
   config.descriptorSetLayout = nullptr;
   config.vertexFormat = VertexAttributeFlags::POSITION_COLOR;
 
@@ -79,7 +80,7 @@ void BasicSample::initSample(Window* window, Renderer* renderer) {
 
 void BasicSample::update(float deltaTime) {}
 
-void BasicSample::cleanup() {}
+void BasicSample::cleanup() { LOGFN; }
 
 void BasicSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   auto pipeline = m_Renderer->getPipeline();
@@ -98,11 +99,14 @@ void BasicSample::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
 ////////////////////////////////////////
 // Quad Sample
 
-QuadSample::QuadSample() : BasicSample("Quad Sample") {}
+QuadSample::QuadSample() : BasicSample("QuadSample") {}
 
 void QuadSample::initSample(Window* window, Renderer* renderer) {
   BasicSample::initSample(window, renderer);
   setMesh(MeshFactory::createQuad(renderer->getContext()));
 }
+
+REGISTER_SAMPLE(TriangleSample);
+REGISTER_SAMPLE(QuadSample);
 
 }  // namespace glint

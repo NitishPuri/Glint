@@ -50,7 +50,6 @@ void CubeSample::initSample(Window* window, Renderer* renderer) {
   config.depthWriteEnable = true;
   // config.cullMode = VK_CULL_MODE_BACK_BIT;
   config.cullMode = VK_CULL_MODE_NONE;
-  //   config.blendEnable = true;
 
   renderer->createPipeline(&config);
 
@@ -72,10 +71,10 @@ void CubeSample::initSample(Window* window, Renderer* renderer) {
   // Update descriptor with uniform buffer and texture
   for (uint32_t i = 0; i < framesInFlight; i++) {
     // Update uniform buffer
-    m_Descriptor->updateUniformBuffer(m_UniformBuffers[i]->getBuffer(), sizeof(UniformBufferObject), 0, i);
+    m_Descriptor->updateUniformBuffer(0, m_UniformBuffers[i]->getBuffer(), sizeof(UniformBufferObject), 0, i);
 
     // Update texture sampler
-    m_Descriptor->updateTextureSampler(m_Texture->getImageView(), m_Texture->getSampler(), i);
+    m_Descriptor->updateTextureSampler(1, m_Texture->getImageView(), m_Texture->getSampler(), i);
   }
 
   // Set initial transformation matrices
@@ -160,5 +159,7 @@ void CubeSample::cleanup() {
   m_Texture.reset();
   m_Mesh.reset();
 }
+
+REGISTER_SAMPLE(CubeSample);
 
 }  // namespace glint

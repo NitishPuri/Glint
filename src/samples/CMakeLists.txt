@@ -1,10 +1,22 @@
-add_executable(glint_samples
+
+set(GLINT_SAMPLE_SOURCES 
     sample_main.cpp
+    sample.h
     sample.cpp
+    sample_manager.h
     sample_manager.cpp
-    cube_sample.cpp
+    textured_quad.h
     textured_quad.cpp
+    rotating_sample.h
     rotating_sample.cpp
+    cube_sample.h
+    cube_sample.cpp
+    dynamic_uniform_buffer.h
+    dynamic_uniform_buffer.cpp
+)
+
+add_executable(glint_samples
+    ${GLINT_SAMPLE_SOURCES}
 )
 
 

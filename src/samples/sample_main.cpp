@@ -72,8 +72,8 @@ class App {
 
   void initSamples() {
     LOGFN;
-    sampleManager.init(window.get(), renderer.get());
-    sampleManager.setActiveSample("CubeSample");
+    glint::SampleManager::init(window.get(), renderer.get());
+    glint::SampleManager::getInstance().setActiveSample("CubeSample");
   }
 
   void mainLoop() {
@@ -88,19 +88,6 @@ class App {
     while (!(window->shouldClose() || window->isKeyPressed(GLFW_KEY_ESCAPE))) {
       window->pollEvents();
 
-      // Handle sample switching
-      if (window->isKeyPressed(GLFW_KEY_1)) {
-        sampleManager.setActiveSample("Triangle Sample");
-      } else if (window->isKeyPressed(GLFW_KEY_2)) {
-        sampleManager.setActiveSample("Quad Sample");
-      } else if (window->isKeyPressed(GLFW_KEY_3)) {
-        sampleManager.setActiveSample("RotatingSample");
-      } else if (window->isKeyPressed(GLFW_KEY_4)) {
-        sampleManager.setActiveSample("TexturedRotatingSample");
-      } else if (window->isKeyPressed(GLFW_KEY_5)) {
-        sampleManager.setActiveSample("CubeSample");
-      }
-
       // Calculate delta time
       auto currentTime = std::chrono::high_resolution_clock::now();
       float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastFrameTime).count();
@@ -111,18 +98,23 @@ class App {
       fps = 1.0f / deltaTime;
 
       // Update active sample
-      sampleManager.update(deltaTime);
+      glint::SampleManager::update(deltaTime);
 
       glint::ImGuiManager::newFrame();
 
       ImGui::Begin("Glint Stats");
       ImGui::Text("FPS: %.1f", fps);
       ImGui::Text("Frame Time: %.3f ms", frameTime * 1000.0f);
-      ImGui::Text("Active Sample: %s", sampleManager.getActiveSample()->getName().c_str());
+      auto activeSample = glint::SampleManager::getActiveSample();
+      if (activeSample) {
+        ImGui::Text("Active Sample: %s", activeSample->getName().c_str());
+      } else {
+        ImGui::Text("Active Sample: None");
+      }
       ImGui::End();
 
       renderer->drawFrame([this](VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-        sampleManager.render(commandBuffer, imageIndex);
+        glint::SampleManager::render(commandBuffer, imageIndex);
       });
 
       frames++;
@@ -133,6 +125,7 @@ class App {
 
   void cleanup() {
     LOGFN;
+    glint::SampleManager::cleanup();
     // cleanup will happen in correct order automatically!
   }
 
@@ -141,7 +134,7 @@ class App {
 
   std::unique_ptr<glint::ImGuiManager> imguiManager = nullptr;
 
-  glint::SampleManager sampleManager;
+  // glint::SampleManager sampleManager;
 };
 
 int main(int argc, char** argv) {

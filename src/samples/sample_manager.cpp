@@ -9,50 +9,48 @@
 
 // samples
 #include "cube_sample.h"
+#include "dynamic_uniform_buffer.h"
 #include "rotating_sample.h"
 #include "sample.h"
 #include "textured_quad.h"
 
 namespace glint {
 
+SampleManager::SampleManager() {
+  LOGFN;
+  m_ActiveSample = nullptr;
+  m_Window = nullptr;
+  m_Renderer = nullptr;
+  m_SampleNames.push_back("None");
+  m_SampleCreators["None"] = []() { return nullptr; };
+}
+
 void SampleManager::init(Window* window, Renderer* renderer) {
   LOGFN;
-  m_Window = window;
-  m_Renderer = renderer;
-
-  registerAllSamples();
+  getInstance().m_Window = window;
+  getInstance().m_Renderer = renderer;
 }
 
 void SampleManager::cleanup() {
   LOGFN;
   // Wait for GPU to finish operations
-  if (m_Renderer) {
-    m_Renderer->waitIdle();
+  auto& instance = getInstance();
+  if (instance.m_Renderer) {
+    instance.m_Renderer->waitIdle();
   }
 
-  if (m_ActiveSample) {
-    m_ActiveSample->cleanup();
+  if (instance.m_ActiveSample) {
+    LOG("Cleaning up active sample:", instance.m_ActiveSample->getName());
+    instance.m_ActiveSample->cleanup();
+    instance.m_ActiveSample.reset();
   }
-
-  // Clear all samples
-  m_Samples.clear();
 }
 
-void SampleManager::registerAllSamples() {
-  registerSample(std::make_unique<glint::TriangleSample>());
-  registerSample(std::make_unique<glint::QuadSample>());
-  registerSample(std::make_unique<glint::RotatingSample>());
-  registerSample(std::make_unique<glint::TexturedRotatingSample>());
-  registerSample(std::make_unique<glint::CubeSample>());
-}
-
-void SampleManager::registerSample(std::unique_ptr<Sample> sample) {
-  LOGFN;
-  std::string name = sample->getName();
+void SampleManager::registerSample(const std::string& name, std::function<std::unique_ptr<Sample>()> createFn) {
   LOG("Registering sample:", name);
 
   // Store the sample
-  m_Samples[name] = std::move(sample);
+  m_SampleCreators[name] = std::move(createFn);
   m_SampleNames.push_back(name);
 
   // If this is the first sample, make it active
@@ -62,15 +60,15 @@ void SampleManager::registerSample(std::unique_ptr<Sample> sample) {
 }
 
 void SampleManager::setActiveSample(const std::string& name) {
-  // Check if the sample exists
-  auto it = m_Samples.find(name);
-  if (it == m_Samples.end()) {
-    LOG("Sample not found:", name);
+  if (m_ActiveSample && m_ActiveSample->getName() == name) {
+    LOG("Sample already active:", name);
     return;
   }
 
-  if (m_ActiveSample && m_ActiveSample->getName() == name) {
-    // LOG("Sample already active:", name);
+  // find sample top create
+  auto sampleItr = m_SampleCreators.find(name);
+  if (sampleItr == m_SampleCreators.end()) {
+    LOG("Sample not found:", name);
     return;
   }
 
@@ -81,34 +79,34 @@ void SampleManager::setActiveSample(const std::string& name) {
   // Clean up previous sample if any
   if (m_ActiveSample) {
     m_ActiveSample->cleanup();
+    m_ActiveSample = nullptr;
   }
 
-  // Set the new active sample
-  m_ActiveSample = it->second.get();
+  // create new sample
+  m_ActiveSample = sampleItr->second();
   LOG("Active sample set to:", name);
 
   // Initialize the new sample
-  if (m_Window && m_Renderer) {
+  if (m_Window && m_Renderer && m_ActiveSample) {
     m_ActiveSample->init(m_Window, m_Renderer);
   }
 }
 
 void SampleManager::update(float deltaTime) {
-  if (m_ActiveSample) {
-    m_ActiveSample->update(deltaTime);
+  auto& instance = getInstance();
+  if (instance.m_ActiveSample) {
+    instance.m_ActiveSample->update(deltaTime);
   }
 }
 
-void SampleManager::render(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+void SampleManager::renderSample(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
   auto renderPass = m_Renderer->getRenderPass();
-  // auto pipeline = m_Renderer->getPipeline();
-
-  // Begin render pass (moved from Sample)
 
   ImGui::Begin("Sample Selector");
-  if (ImGui::BeginCombo("Samples", m_ActiveSample->getName().c_str())) {
+  auto activeSampeName = m_ActiveSample ? m_ActiveSample->getName() : "None";
+  if (ImGui::BeginCombo("Samples", activeSampeName.c_str())) {
     for (auto& name : m_SampleNames) {
-      bool isSelected = (m_ActiveSample->getName() == name);
+      bool isSelected = (activeSampeName == name);
       if (ImGui::Selectable(name.c_str(), isSelected)) {
         setActiveSample(name);
       }
