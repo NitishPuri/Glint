@@ -17,6 +17,8 @@ namespace glint {
 Renderer::Renderer(Window* window, uint32_t maxFramesInFlight)
     : m_Window(window), m_MaxFramesInFlight(maxFramesInFlight), m_CurrentFrame(0) {
   LOGFN;
+
+  m_enableCommandBufferCaching = Config::isOptionSet("enable_command_buffer_caching");
 }
 
 Renderer::~Renderer() {
@@ -128,22 +130,29 @@ void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCo
   // Save the image index for this frame
   m_ImageIndices[m_CurrentFrame] = imageIndex;
 
-  // Check if command buffers need recording
-  if (m_CommandBuffersDirty || !m_CommandBufferRecorded[imageIndex]) {
+  if (m_enableCommandBufferCaching) {
+    // Check if command buffers need recording
+    if (m_CommandBuffersDirty || !m_CommandBufferRecorded[imageIndex]) {
+      m_CommandManager->resetCommandBuffer(imageIndex);
+      m_CommandManager->beginSingleTimeCommands(imageIndex);
+      recordCommandsFunc(m_CommandManager->getCommandBuffer(imageIndex), imageIndex);
+      m_CommandManager->endSingleTimeCommands(imageIndex);
+
+      // m_CommandBufferRecorded[m_CurrentFrame] = true;
+      m_CommandBufferRecorded[imageIndex] = true;
+      m_CommandBuffersDirty = false;
+      for (auto recorded : m_CommandBufferRecorded) {
+        if (!recorded) {
+          m_CommandBuffersDirty = true;
+          break;
+        }
+      }
+    }
+  } else {
     m_CommandManager->resetCommandBuffer(imageIndex);
     m_CommandManager->beginSingleTimeCommands(imageIndex);
     recordCommandsFunc(m_CommandManager->getCommandBuffer(imageIndex), imageIndex);
     m_CommandManager->endSingleTimeCommands(imageIndex);
-
-    // m_CommandBufferRecorded[m_CurrentFrame] = true;
-    m_CommandBufferRecorded[imageIndex] = true;
-    m_CommandBuffersDirty = false;
-    for (auto recorded : m_CommandBufferRecorded) {
-      if (!recorded) {
-        m_CommandBuffersDirty = true;
-        break;
-      }
-    }
   }
 
   // Submit command buffer

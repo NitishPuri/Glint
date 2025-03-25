@@ -68,6 +68,8 @@ class Renderer {
   // std::vector<VkFence> m_ImagesInFlight;
   std::vector<uint32_t> m_ImageIndices;
 
+  bool m_enableCommandBufferCaching = false;
+
   // maybe move this in Cmmand manager ?
   bool m_CommandBuffersDirty = true;
   std::vector<bool> m_CommandBufferRecorded;
