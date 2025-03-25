@@ -76,8 +76,8 @@ class Logger {
       std::cout << "  ";
       logFile << "  ";
     }
-    std::cout << arg << " ";
-    logFile << arg << " ";
+    std::cout << arg;
+    logFile << arg;
     logImplRec(args...);
   }
 

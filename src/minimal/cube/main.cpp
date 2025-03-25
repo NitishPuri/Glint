@@ -219,12 +219,14 @@ class App {
   glm::vec3 m_RotationAxis = glm::vec3(0.0f, 0.0f, 1.0f);
 
   void drawScene(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+    LOGFN;
+    LOG("imageIndex: ", imageIndex);
     // Get components from renderer
     auto renderPass = renderer->getRenderPass();
     auto pipeline = renderer->getPipeline();
     auto swapChain = renderer->getSwapChain();
 
-    glint::ImGuiManager::newFrame();
+    // glint::ImGuiManager::newFrame();
 
     renderPass->begin(commandBuffer, imageIndex, {0.0f, 0.0f, 0.0f, 1.0f});
     pipeline->bind(commandBuffer);
@@ -233,15 +235,15 @@ class App {
 
     mesh->bind(commandBuffer);
 
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui::Begin("Glint Stats");
-    ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
-    ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
-    ImGui::Text("Position: %.2f, %.2f, %.2f", m_Camera.getPosition().x, m_Camera.getPosition().y,
-                m_Camera.getPosition().z);
-    ImGui::Text("Mouse wheel delta %.2f", io.MouseWheel);
-    ImGui::Text("Mouse position %.2f, %.2f", io.MousePos.x, io.MousePos.y);
-    ImGui::End();
+    // ImGuiIO& io = ImGui::GetIO();
+    // ImGui::Begin("Glint Stats");
+    // ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+    // ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+    // ImGui::Text("Position: %.2f, %.2f, %.2f", m_Camera.getPosition().x, m_Camera.getPosition().y,
+    //             m_Camera.getPosition().z);
+    // ImGui::Text("Mouse wheel delta %.2f", io.MouseWheel);
+    // ImGui::Text("Mouse position %.2f, %.2f", io.MousePos.x, io.MousePos.y);
+    // ImGui::End();
 
     auto swapChainExtent = swapChain->getExtent();
     VkViewport viewport{};
@@ -260,7 +262,7 @@ class App {
 
     mesh->draw(commandBuffer);
 
-    glint::ImGuiManager::render(commandBuffer);
+    // glint::ImGuiManager::render(commandBuffer);
 
     renderPass->end(commandBuffer);
   }

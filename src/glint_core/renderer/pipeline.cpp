@@ -27,9 +27,7 @@ Pipeline::~Pipeline() {
 }
 
 void Pipeline::bind(VkCommandBuffer commandBuffer) {
-  LOGFN_ONCE;
-  LOG_ONCE("Bind Pipeline");
-  LOGCALL_ONCE(vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline));
+  vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
 }
 
 void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
@@ -129,16 +127,6 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   if (config.descriptorSetLayout != VK_NULL_HANDLE) {
     LOG("Including descriptor set layout in pipeline layout");
 
-    // VkDescriptorSetLayout layout = config.descriptorSetLayout->getLayout();
-    // Weird bug! If the layout is not validated,
-    // the pipeline layout will be created with a null handle in release mode
-    // always validate your handles!
-    // if (layout == VK_NULL_HANDLE) {
-    // LOG("Warning: Descriptor set layout handle is null");
-    // pipelineLayoutInfo.setLayoutCount = 0;
-    // pipelineLayoutInfo.pSetLayouts = nullptr;
-    // throw std::runtime_error("Descriptor set layout is null");
-    // }
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &config.descriptorSetLayout;
   } else {
@@ -170,8 +158,8 @@ void Pipeline::createGraphicsPipeline(const PipelineConfig& config) {
   pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;  // Optional
   pipelineInfo.basePipelineIndex = -1;               // Optional
 
-  VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline));
-
+  VK_CHECK_RESULT(
+      vkCreateGraphicsPipelines(m_Context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline));
 
   LOG("Cleanup shader modules");
   LOGCALL(vkDestroyShaderModule(m_Context->getDevice(), fragShaderModule, nullptr));

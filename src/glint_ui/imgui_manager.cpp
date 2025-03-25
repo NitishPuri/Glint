@@ -73,6 +73,8 @@ void ImGuiManager::newFrame() {
 void ImGuiManager::render(VkCommandBuffer commandBuffer) {
   ImGui::Render();
   ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+
+  ImGui::EndFrame();
 }
 
 void ImGuiManager::cleanup() {

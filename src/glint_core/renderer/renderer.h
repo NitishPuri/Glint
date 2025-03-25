@@ -45,6 +45,11 @@ class Renderer {
 
   void handleResize();
 
+  void markCommandBuffersDirty() {
+    m_CommandBuffersDirty = true;
+    std::fill(m_CommandBufferRecorded.begin(), m_CommandBufferRecorded.end(), false);
+  }
+
  private:
   Window* m_Window;
   std::unique_ptr<VkContext> m_Context;
@@ -60,8 +65,12 @@ class Renderer {
   uint32_t m_MaxFramesInFlight;
   uint32_t m_CurrentFrame = 0;
 
-  //   std::vector<VkFence> m_ImagesInFlight;
+  // std::vector<VkFence> m_ImagesInFlight;
   std::vector<uint32_t> m_ImageIndices;
+
+  // maybe move this in Cmmand manager ?
+  bool m_CommandBuffersDirty = true;
+  std::vector<bool> m_CommandBufferRecorded;
 };
 
 }  // namespace glint

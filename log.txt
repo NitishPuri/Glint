@@ -1,0 +1,255 @@
+Creating window: 800 x 600  -  Glint - Triangle
+glfwCreateWindow
+glint::Renderer::Renderer {
+}
+glint::Renderer::init {
+  glint::VkContext::VkContext {
+  }
+  glint::VkContext::init {
+    glint::VkContext::createInstance {
+      glint::VkContext::checkValidationLayerSupport {
+        found validation layer: VK_LAYER_KHRONOS_validation
+      }
+      glint::VkContext::getRequiredExtensions {
+        Required Extensions: 3
+          VK_KHR_surface
+          VK_KHR_win32_surface
+          VK_EXT_debug_utils
+      }
+      validation layers are enabled
+      glint::VkContext::populateDebugMessengerCreateInfo {
+      }
+      vkCreateInstance(&createInfo, nullptr, &m_Instance)
+    }
+    glint::VkContext::setupDebugMessenger {
+      glint::VkContext::populateDebugMessengerCreateInfo {
+      }
+      glint::CreateDebugUtilsMessengerEXT {
+      }
+    }
+    glint::VkContext::createSurface {
+      glint::Window::createSurface {
+        VkResult result = glfwCreateWindowSurface(instance, m_Window, nullptr, &surface)
+      }
+    }
+    glint::VkContext::pickPhysicalDevice {
+      glint::VkContext::isDeviceSuitable {
+        glint::VkContext::findQueueFamilies {
+        }
+        glint::VkContext::checkDeviceExtensionSupport {
+        }
+      }
+      found suitable device NVIDIA GeForce RTX 3060 Laptop GPU
+      Max Usable Sample Count: 8
+    }
+    glint::VkContext::createLogicalDevice {
+      glint::VkContext::findQueueFamilies {
+      }
+      vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device)
+    }
+  }
+  glint::SwapChain::SwapChain {
+    glint::SwapChain::createSwapChain {
+      glint::SwapChain::querySwapChainSupport {
+      }
+      glint::SwapChain::chooseSwapSurfaceFormat {
+      }
+      glint::SwapChain::chooseSwapPresentMode {
+        Using VK_PRESENT_MODE_MAILBOX_KHR (triple buffering)
+      }
+      glint::SwapChain::chooseSwapExtent {
+      }
+      graphics and present queues are the same
+      Using exclusive sharing mode
+      Set debug name for1000001000 to SwapChain
+      Set debug name for10 to SwapChainImage0
+      Set debug name for10 to SwapChainImage1
+      Set debug name for10 to SwapChainImage2
+    }
+    glint::SwapChain::createImageViews {
+    }
+    glint::SwapChain::createDepthResources {
+      Set debug name for10 to Depth Image
+      Set debug name for8 to Depth Image Memory
+      Set debug name for14 to Depth Image View
+      glint::VkUtils::transitionImageLayout {
+      }
+    }
+    glint::SwapChain::createColorResources {
+      Set debug name for10 to MSAA Image
+      Set debug name for8 to MSAA Memory
+    }
+  }
+  glint::RenderPass::RenderPass {
+    glint::RenderPass::createRenderPass {
+    }
+  }
+  glint::SwapChain::createFramebuffers {
+  }
+  glint::SynchronizationManager::SynchronizationManager {
+    glint::SynchronizationManager::createSyncObjects {
+      Synchronization:
+      Semaphors: signal and wait for the image available and render finished, sync between queues
+      Fences: wait for the frame to finish before starting the next one, sync between CPU and GPU
+      Creating2 sets of synchronization objects
+      Create fence in signaled state, so that the first frame can start immediately
+    }
+  }
+  Renderer initialized with2 frames in flight and 3 swap chain images
+}
+glint::ImGuiManager::init {
+}
+glint::Texture::Texture {
+  glint::Texture::createTextureImage {
+    Loading texture fromE:/tree/graphics/Glint_vk/res\texture.jpg
+    Texture loaded:512 x 512 pixels, 3 channels
+    Set debug name for9 to Texture Staging Buffer
+    Set debug name for8 to Texture Staging Buffer Memory
+    Set debug name for10 to Texture Buffer
+    Set debug name for8 to Texture Buffer Memory
+    glint::VkUtils::transitionImageLayout {
+    }
+    glint::Texture::generateMipmaps {
+      vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier)
+    }
+  }
+}
+glint::Renderer::createPipeline {
+  glint::Pipeline::Pipeline {
+    glint::Pipeline::createGraphicsPipeline {
+      glint::Pipeline::readFile {
+        Loading filename:E:/tree/graphics/Glint_vk/build/bin/shaders\basic_tex.vert.spv fileSize: 1840 bytes
+      }
+      glint::Pipeline::readFile {
+        Loading filename:E:/tree/graphics/Glint_vk/build/bin/shaders\basic_tex.frag.spv fileSize: 900 bytes
+      }
+      glint::Pipeline::createShaderModule {
+      }
+      glint::Pipeline::createShaderModule {
+      }
+      glint::Vertex::getBindingDescription {
+      }
+      glint::Vertex::getAttributeDescriptions {
+      }
+      Including descriptor set layout in pipeline layout
+      Cleanup shader modules
+      vkDestroyShaderModule(m_Context->getDevice(), fragShaderModule, nullptr)
+      vkDestroyShaderModule(m_Context->getDevice(), vertShaderModule, nullptr)
+    }
+  }
+}
+glint::DescriptorPool::DescriptorPool {
+}
+glint::UniformBuffer::UniformBuffer {
+  Created uniform buffer of size192 bytes
+}
+glint::UniformBuffer::UniformBuffer {
+  Created uniform buffer of size192 bytes
+}
+glint::Descriptor::Descriptor {
+  Allocated2 descriptor sets
+}
+glint::Descriptor::updateUniformBuffer {
+}
+glint::Descriptor::updateTextureSampler {
+}
+glint::MeshFactory::createTexturedCube {
+  glint::Mesh::Mesh {
+    glint::Mesh::createVertexBuffer {
+      glint::Mesh::copyBuffer {
+      }
+    }
+    glint::Mesh::createIndexBuffer {
+      glint::Mesh::copyBuffer {
+      }
+    }
+    Mesh created with24 vertices and 36 indices
+  }
+}
+glint::SynchronizationManager::waitForFence {
+  Wait for the previous frame to be finished
+}
+App::drawScene {
+  imageIndex: 0
+  glint::RenderPass::begin {
+  }
+  glint::Descriptor::bind {
+  }
+  glint::Mesh::bind {
+  }
+  glint::Mesh::draw {
+  }
+  glint::RenderPass::end {
+  }
+}
+glint::SynchronizationManager::resetFence {
+}
+App::drawScene {
+  imageIndex: 1
+  glint::RenderPass::begin {
+  }
+  glint::RenderPass::end {
+  }
+}
+App::drawScene {
+  imageIndex: 2
+  glint::RenderPass::begin {
+  }
+  glint::RenderPass::end {
+  }
+}
+glint::Renderer::waitIdle {
+}
+glint::ImGuiManager::cleanup {
+}
+glint::UniformBuffer::~UniformBuffer {
+}
+glint::UniformBuffer::~UniformBuffer {
+}
+glint::Descriptor::~Descriptor {
+}
+glint::DescriptorPool::~DescriptorPool {
+}
+glint::DescriptorSetLayout::~DescriptorSetLayout {
+}
+glint::Texture::~Texture {
+}
+glint::Mesh::~Mesh {
+  vkDestroyBuffer(device, m_VertexBuffer, nullptr)
+  vkFreeMemory(device, m_VertexBufferMemory, nullptr)
+  vkDestroyBuffer(device, m_IndexBuffer, nullptr)
+  vkFreeMemory(device, m_IndexBufferMemory, nullptr)
+}
+glint::Renderer::~Renderer {
+}
+glint::SynchronizationManager::~SynchronizationManager {
+}
+glint::Pipeline::~Pipeline {
+  vkDestroyPipeline(device, m_Pipeline, nullptr)
+  vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr)
+}
+glint::RenderPass::~RenderPass {
+  vkDestroyRenderPass(m_Context->getDevice(), m_RenderPass, nullptr)
+}
+glint::SwapChain::~SwapChain {
+  glint::SwapChain::cleanup {
+    Destroying MSAA resources
+    glint::SwapChain::cleanupDepthResources {
+    }
+    Destroying 3  framebuffers
+    Destroying 3  image views
+    vkDestroySwapchainKHR(device, m_SwapChain, nullptr)
+  }
+}
+glint::VkContext::~VkContext {
+  glint::VkContext::cleanup {
+    glint::DestroyDebugUtilsMessengerEXT {
+    }
+  }
+}
+glint::Window::~Window {
+  glint::Window::shutdown {
+    glfwDestroyWindow(m_Window)
+    glfwTerminate()
+  }
+}

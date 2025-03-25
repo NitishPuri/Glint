@@ -1,5 +1,7 @@
 #include "renderer.h"
 
+#include <numeric>
+
 #include "command_manager.h"
 #include "core/logger.h"
 #include "core/window.h"
@@ -31,12 +33,26 @@ void Renderer::init() {
 
   VkUtils::init(m_Context.get());
 
+  // TODO: We have depeendencies here, command manager needs to exist before swap chain can be created
+  //  this is because swap chain is using command pool creted inside command manager for creating and transitioning
+  //  depth resources. This can be fixed by letting swap chain create and destroy its own command pool when needed.
+  // Should do this in the future, after setting up some tests and benchmarks.
+
   // Create Command Manager
-  m_CommandManager = std::make_unique<CommandManager>(m_Context.get(), m_MaxFramesInFlight);
-  m_Context->setCommandPool(m_CommandManager->getCommandPool());  // TODO: Remove this
+  m_CommandManager = std::make_unique<CommandManager>(m_Context.get());
 
   // Create SwapChain
   m_SwapChain = std::make_unique<SwapChain>(m_Context.get());
+  uint32_t imageCount = m_SwapChain->getImageCount();
+
+  // TODO: Important to map command buffers to swap chain images as we have one command buffer per swap chain image
+  // previously it was being mapped to concurrent frames in, which was incorrect.
+  // but it still worked because we were re-recording command buffers each frame and thus they got bound
+  // to current swap chain image correctly.
+  // Maybe if we want this to be more robust, we can we can mark which command buffer is bound to which swap chain image
+  // and then re-record command buffers if the swap chain image is different from the current frame.
+  m_CommandManager->setupCommandBuffers(imageCount);
+  // m_CommandManager->setupCommandBuffers(m_MaxFramesInFlight);
 
   // Create RenderPass
   m_RenderPass = std::make_unique<RenderPass>(m_Context.get(), m_SwapChain.get());
@@ -45,12 +61,16 @@ void Renderer::init() {
   m_SwapChain->createFramebuffers(m_RenderPass->getRenderPass());
 
   // Create Synchronization Manager
-  m_SyncManager = std::make_unique<SynchronizationManager>(m_Context.get(), m_MaxFramesInFlight);
+  m_SyncManager = std::make_unique<SynchronizationManager>(m_Context.get(), m_MaxFramesInFlight, imageCount);
 
   // Initialize images in flight
-  uint32_t imageCount = m_SwapChain->getImageCount();
-  //   m_ImagesInFlight.resize(imageCount, VK_NULL_HANDLE);
+  // m_ImagesInFlight.resize(m_MaxFramesInFlight, VK_NULL_HANDLE);
   m_ImageIndices.resize(m_MaxFramesInFlight);
+  std::iota(m_ImageIndices.begin(), m_ImageIndices.end(), 0);
+
+  // command buffer tracking
+  m_CommandBufferRecorded.resize(imageCount, false);
+  m_CommandBuffersDirty = true;
 
   LOG("Renderer initialized with", m_MaxFramesInFlight, "frames in flight and", imageCount, "swap chain images");
 }
@@ -64,6 +84,10 @@ void Renderer::createPipeline(const PipelineConfig* config) {
   m_Pipeline.reset();
 
   m_Pipeline = std::make_unique<Pipeline>(m_Context.get(), m_RenderPass.get(), config);
+
+  // mark command buffers dirty
+  m_CommandBuffersDirty = true;
+  std::fill(m_CommandBufferRecorded.begin(), m_CommandBufferRecorded.end(), false);
 }
 
 void Renderer::handleResize() {
@@ -77,22 +101,16 @@ void Renderer::handleResize() {
 
   // Reset any frames in flight tracking
   //   m_ImageIndices.resize(m_MaxFramesInFlight);
+
+  // mark command buffers dirty
+  m_CommandBuffersDirty = true;
+  std::fill(m_CommandBufferRecorded.begin(), m_CommandBufferRecorded.end(), false);
 }
 
 void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCommandsFunc) {
-  LOGFN_ONCE;
-
-  LOG_ONCE("--------------------------------------------------------------");
-  LOG_ONCE("Outline of a frame..");
-  LOG_ONCE("Wait for the previous frame to be finished");
-  LOG_ONCE("Acquire an image from the swap chain");
-  LOG_ONCE("Record a command buffer which draws the scene onto the image.");
-  LOG_ONCE("Submit the command buffer to the graphics queue.");
-  LOG_ONCE("Present the image to the swap chain for presentation.");
-  LOG_ONCE("--------------------------------------------------------------");
-
   // Wait for the previous frame to finish
-  m_SyncManager->waitForFence(m_CurrentFrame);
+  // m_SyncManager->waitForFence(m_CurrentFrame);
+  m_SyncManager->waitForFence(m_ImageIndices[m_CurrentFrame]);
 
   // Get next image from swap chain
   uint32_t imageIndex;
@@ -104,24 +122,29 @@ void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCo
     handleResize();
     return;
   } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-    throw std::runtime_error("failed to acquire swap chain image!");
-  }
-
-  if (result != VK_SUCCESS) {
-    throw std::runtime_error("Failed to acquire swap chain image!");
+    throw std::runtime_error("failed to acquire swap chain image!" + __LINE__);
   }
 
   // Save the image index for this frame
   m_ImageIndices[m_CurrentFrame] = imageIndex;
 
-  // Reset and record command buffer
-  m_CommandManager->resetCommandBuffer(m_CurrentFrame);
+  // Check if command buffers need recording
+  if (m_CommandBuffersDirty || !m_CommandBufferRecorded[imageIndex]) {
+    m_CommandManager->resetCommandBuffer(imageIndex);
+    m_CommandManager->beginSingleTimeCommands(imageIndex);
+    recordCommandsFunc(m_CommandManager->getCommandBuffer(imageIndex), imageIndex);
+    m_CommandManager->endSingleTimeCommands(imageIndex);
 
-  // m_CommandManager->recordCommandBuffer(m_CurrentFrame, recordCommandsFunc);
-
-  m_CommandManager->beginSingleTimeCommands(m_CurrentFrame);
-  recordCommandsFunc(m_CommandManager->getCommandBuffer(m_CurrentFrame), imageIndex);
-  m_CommandManager->endSingleTimeCommands(m_CurrentFrame);
+    // m_CommandBufferRecorded[m_CurrentFrame] = true;
+    m_CommandBufferRecorded[imageIndex] = true;
+    m_CommandBuffersDirty = false;
+    for (auto recorded : m_CommandBufferRecorded) {
+      if (!recorded) {
+        m_CommandBuffersDirty = true;
+        break;
+      }
+    }
+  }
 
   // Submit command buffer
   VkSubmitInfo submitInfo{};
@@ -135,7 +158,8 @@ void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCo
   submitInfo.pWaitDstStageMask = waitStages;
 
   // Command buffer to submit
-  VkCommandBuffer cmdBuffer = m_CommandManager->getCommandBuffer(m_CurrentFrame);
+  // VkCommandBuffer cmdBuffer = m_CommandManager->getCommandBuffer(m_CurrentFrame);
+  VkCommandBuffer cmdBuffer = m_CommandManager->getCommandBuffer(imageIndex);
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = &cmdBuffer;
 
@@ -145,11 +169,9 @@ void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCo
   submitInfo.pSignalSemaphores = signalSemaphores;
 
   // Submit to queue
-  m_SyncManager->resetFence(m_CurrentFrame);
-  if (vkQueueSubmit(m_Context->getGraphicsQueue(), 1, &submitInfo, m_SyncManager->getInFlightFence(m_CurrentFrame)) !=
-      VK_SUCCESS) {
-    throw std::runtime_error("Failed to submit draw command buffer!");
-  }
+  m_SyncManager->resetFence(m_ImageIndices[m_CurrentFrame]);
+  VK_CHECK_RESULT(vkQueueSubmit(m_Context->getGraphicsQueue(), 1, &submitInfo,
+                                m_SyncManager->getInFlightFence(m_ImageIndices[m_CurrentFrame])));
 
   // Present the image
   VkPresentInfoKHR presentInfo{};
@@ -163,7 +185,8 @@ void Renderer::drawFrame(std::function<void(VkCommandBuffer, uint32_t)> recordCo
   presentInfo.pImageIndices = &imageIndex;
   presentInfo.pResults = nullptr;  // Optional
 
-  LOGCALL_ONCE(result = vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo));
+  static int frameId = 0;
+  result = vkQueuePresentKHR(m_Context->getPresentQueue(), &presentInfo);
   if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_Window->wasResized()) {
     handleResize();
   } else if (result != VK_SUCCESS) {

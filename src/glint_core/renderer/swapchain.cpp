@@ -139,14 +139,18 @@ void SwapChain::createSwapChain() {
   // QUESTION: What is the purpose of oldSwapChain?
   createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-  if (vkCreateSwapchainKHR(m_Context->getDevice(), &createInfo, nullptr, &m_SwapChain) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to create swap chain!");
-  }
+  VK_CHECK_RESULT(vkCreateSwapchainKHR(m_Context->getDevice(), &createInfo, nullptr, &m_SwapChain));
+  VkUtils::setObjectName(m_SwapChain, VK_OBJECT_TYPE_SWAPCHAIN_KHR, "SwapChain");
 
   // Get swap chain images
   vkGetSwapchainImagesKHR(m_Context->getDevice(), m_SwapChain, &imageCount, nullptr);
   m_Images.resize(imageCount);
   vkGetSwapchainImagesKHR(m_Context->getDevice(), m_SwapChain, &imageCount, m_Images.data());
+
+  for (size_t i = 0; i < m_Images.size(); ++i) {
+    std::string name = "SwapChainImage" + std::to_string(i);
+    VkUtils::setObjectName(m_Images[i], VK_OBJECT_TYPE_IMAGE, name.c_str());
+  }
 
   // Store format and extent
   m_ImageFormat = surfaceFormat.format;
@@ -278,6 +282,9 @@ void SwapChain::createColorResources() {
                        VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_Msaa.image, m_Msaa.memory);
   m_Msaa.view = VkUtils::createImageView(m_Msaa.image, m_ImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+
+  VkUtils::setObjectName(m_Msaa.image, VK_OBJECT_TYPE_IMAGE, "MSAA Image");
+  VkUtils::setObjectName(m_Msaa.memory, VK_OBJECT_TYPE_DEVICE_MEMORY, "MSAA Memory");
 }
 
 VkFormat SwapChain::findSupportedFormats(const std::vector<VkFormat>& candidates, VkImageTiling tiling,

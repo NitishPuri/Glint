@@ -10,7 +10,7 @@ class VkContext;
 
 class SynchronizationManager {
  public:
-  SynchronizationManager(VkContext* context, uint32_t maxFramesInFlight);
+  SynchronizationManager(VkContext* context, uint32_t maxFramesInFlight, uint32_t swapImageCount);
   ~SynchronizationManager();
 
   // Prevent copying
@@ -36,6 +36,7 @@ class SynchronizationManager {
   VkContext* m_Context;
 
   uint32_t m_MaxFramesInFlight;
+  uint32_t m_SwapImageCount;
 
   std::vector<VkSemaphore> m_ImageAvailableSemaphore;
   std::vector<VkSemaphore> m_RenderFinishedSemaphore;
